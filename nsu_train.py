@@ -647,6 +647,176 @@ def build_model(num_classes):
         )
         return model
 
+    if MODEL_VARIANT in {"modality_aware_correction", "modality_aware_rerank"}:
+        sensor_proj = layers.Dense(64, activation="relu", name="sensor_project")(sensor_branch)
+        fusion_parts = [vision_branch, sensor_proj]
+        correction_modalities = [sensor_proj]
+
+        if FLEX_POSTURE_DIM > 0:
+            flex_input = layers.Input(shape=(FLEX_POSTURE_DIM,), name="flex_posture_input")
+            inputs.append(flex_input)
+            flex_branch = layers.Dense(32, activation="relu", name="flex_posture_dense_1")(flex_input)
+            flex_branch = layers.Dropout(0.2, name="flex_posture_dropout")(flex_branch)
+            flex_branch = layers.Dense(32, activation="relu", name="flex_posture_dense_2")(flex_branch)
+            flex_proj = layers.Dense(64, activation="relu", name="flex_modality_project")(flex_branch)
+            fusion_parts.append(flex_branch)
+            correction_modalities.append(flex_proj)
+
+        fused = layers.Concatenate(name="fusion_concat")(fusion_parts)
+        fused = layers.Dense(96, activation="relu", name="fusion_hidden")(fused)
+        fused = layers.Dropout(0.3, name="fusion_hidden_dropout")(fused)
+        base_logits = layers.Dense(num_classes, name="base_logits")(fused)
+        base_probs = layers.Activation("softmax", name="base_probs")(base_logits)
+
+        modality_context = layers.Concatenate(
+            name="modality_context",
+        )([vision_branch] + correction_modalities)
+        gate_logits = layers.Dense(
+            len(correction_modalities),
+            activation=None,
+            bias_initializer=tf.keras.initializers.Constant(0.0),
+            name="modality_gate_logits",
+        )(modality_context)
+        modality_weights = layers.Activation("softmax", name="modality_weights")(gate_logits)
+
+        correction_terms = []
+        sensor_delta_hidden = layers.Dense(64, activation="relu", name="sensor_delta_hidden")(sensor_proj)
+        sensor_delta = layers.Dense(num_classes, activation="tanh", name="sensor_delta")(sensor_delta_hidden)
+        sensor_weight = layers.Lambda(lambda w: w[:, 0:1], name="sensor_weight")(modality_weights)
+        correction_terms.append(layers.Multiply(name="sensor_correction_term")([sensor_delta, sensor_weight]))
+
+        if FLEX_POSTURE_DIM > 0:
+            flex_delta_hidden = layers.Dense(64, activation="relu", name="flex_delta_hidden")(correction_modalities[1])
+            flex_delta = layers.Dense(num_classes, activation="tanh", name="flex_delta")(flex_delta_hidden)
+            flex_weight = layers.Lambda(lambda w: w[:, 1:2], name="flex_weight")(modality_weights)
+            correction_terms.append(layers.Multiply(name="flex_correction_term")([flex_delta, flex_weight]))
+
+        if len(correction_terms) == 1:
+            modality_correction = correction_terms[0]
+        else:
+            modality_correction = layers.Add(name="modality_correction_sum")(correction_terms)
+
+        ambiguity_score = layers.Lambda(
+            lambda p: 1.0 - tf.reduce_max(p, axis=1, keepdims=True),
+            name="ambiguity_score",
+        )(base_probs)
+
+        if MODEL_VARIANT == "modality_aware_rerank":
+            top_k = min(3, num_classes)
+            topk_mask = layers.Lambda(
+                lambda p: tf.reduce_max(
+                    tf.one_hot(tf.math.top_k(p, k=top_k).indices, depth=num_classes),
+                    axis=1,
+                ),
+                name="topk_mask",
+            )(base_probs)
+            rerank_logits = layers.Multiply(name="rerank_logits")([modality_correction, topk_mask])
+            gated_correction = layers.Multiply(name="gated_correction")([rerank_logits, ambiguity_score])
+        else:
+            gated_correction = layers.Multiply(name="gated_correction")([modality_correction, ambiguity_score])
+
+        corrected_logits = layers.Add(name="corrected_logits")([base_logits, gated_correction])
+        output = layers.Activation("softmax", name="class_probs")(corrected_logits)
+
+        model = models.Model(
+            inputs=inputs,
+            outputs=output,
+            name=(
+                "modality_aware_rerank_flex_lstm"
+                if MODEL_VARIANT == "modality_aware_rerank" and FLEX_POSTURE_DIM > 0
+                else "modality_aware_rerank_lstm"
+                if MODEL_VARIANT == "modality_aware_rerank"
+                else "modality_aware_correction_flex_lstm"
+                if FLEX_POSTURE_DIM > 0
+                else "modality_aware_correction_lstm"
+            ),
+        )
+
+        optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
+        model.compile(
+            optimizer=optimizer,
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+        return model
+
+    if MODEL_VARIANT in {"sensor_correction", "sensor_correction_ambiguous"}:
+        sensor_proj = layers.Dense(64, activation="relu", name="sensor_project")(sensor_branch)
+        fusion_parts = [vision_branch, sensor_proj]
+
+        correction_context_parts = [vision_branch, sensor_proj]
+        if FLEX_POSTURE_DIM > 0:
+            flex_input = layers.Input(shape=(FLEX_POSTURE_DIM,), name="flex_posture_input")
+            inputs.append(flex_input)
+            flex_branch = layers.Dense(32, activation="relu", name="flex_posture_dense_1")(flex_input)
+            flex_branch = layers.Dropout(0.2, name="flex_posture_dropout")(flex_branch)
+            flex_branch = layers.Dense(32, activation="relu", name="flex_posture_dense_2")(flex_branch)
+            fusion_parts.append(flex_branch)
+            correction_context_parts.append(flex_branch)
+
+        fused = layers.Concatenate(name="fusion_concat")(fusion_parts)
+        fused = layers.Dense(96, activation="relu", name="fusion_hidden")(fused)
+        fused = layers.Dropout(0.3, name="fusion_hidden_dropout")(fused)
+
+        base_logits = layers.Dense(num_classes, name="base_logits")(fused)
+        base_probs = layers.Activation("softmax", name="base_probs")(base_logits)
+
+        correction_context = layers.Concatenate(name="correction_context")(correction_context_parts)
+        correction_gate = layers.Dense(
+            32,
+            activation="relu",
+            name="correction_gate_hidden",
+        )(correction_context)
+        correction_gate = layers.Dense(
+            num_classes,
+            activation="sigmoid",
+            bias_initializer=tf.keras.initializers.Constant(-2.0),
+            name="correction_gate",
+        )(correction_gate)
+
+        correction_delta = layers.Dense(64, activation="relu", name="correction_delta_hidden")(sensor_proj)
+        correction_delta = layers.Dense(
+            num_classes,
+            activation="tanh",
+            name="correction_delta",
+        )(correction_delta)
+
+        gated_correction = layers.Multiply(name="gated_correction_raw")([correction_delta, correction_gate])
+
+        if MODEL_VARIANT == "sensor_correction_ambiguous":
+            ambiguity_score = layers.Lambda(
+                lambda p: 1.0 - tf.reduce_max(p, axis=1, keepdims=True),
+                name="ambiguity_score",
+            )(base_probs)
+            gated_correction = layers.Multiply(name="gated_correction")([gated_correction, ambiguity_score])
+        else:
+            gated_correction = layers.Lambda(lambda x: x, name="gated_correction")(gated_correction)
+
+        corrected_logits = layers.Add(name="corrected_logits")([base_logits, gated_correction])
+        output = layers.Activation("softmax", name="class_probs")(corrected_logits)
+
+        model = models.Model(
+            inputs=inputs,
+            outputs=output,
+            name=(
+                "sensor_correction_ambiguous_flex_lstm"
+                if MODEL_VARIANT == "sensor_correction_ambiguous" and FLEX_POSTURE_DIM > 0
+                else "sensor_correction_ambiguous_lstm"
+                if MODEL_VARIANT == "sensor_correction_ambiguous"
+                else "sensor_correction_flex_lstm"
+                if FLEX_POSTURE_DIM > 0
+                else "sensor_correction_lstm"
+            ),
+        )
+
+        optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
+        model.compile(
+            optimizer=optimizer,
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+        return model
+
     sensor_proj = layers.Dense(64, activation="relu", name="sensor_project")(sensor_branch)
     fusion_context = layers.Concatenate(name="fusion_context")([vision_branch, sensor_proj])
     sensor_gate = layers.Dense(
@@ -851,6 +1021,26 @@ def main():
 
     if MODEL_VARIANT == "input_only":
         model_type = "dual_input_lstm" if FLEX_POSTURE_DIM > 0 else "dual_input_no_flex_lstm"
+    elif MODEL_VARIANT == "sensor_correction":
+        model_type = "sensor_correction_flex_lstm" if FLEX_POSTURE_DIM > 0 else "sensor_correction_lstm"
+    elif MODEL_VARIANT == "sensor_correction_ambiguous":
+        model_type = (
+            "sensor_correction_ambiguous_flex_lstm"
+            if FLEX_POSTURE_DIM > 0
+            else "sensor_correction_ambiguous_lstm"
+        )
+    elif MODEL_VARIANT == "modality_aware_correction":
+        model_type = (
+            "modality_aware_correction_flex_lstm"
+            if FLEX_POSTURE_DIM > 0
+            else "modality_aware_correction_lstm"
+        )
+    elif MODEL_VARIANT == "modality_aware_rerank":
+        model_type = (
+            "modality_aware_rerank_flex_lstm"
+            if FLEX_POSTURE_DIM > 0
+            else "modality_aware_rerank_lstm"
+        )
     else:
         model_type = "vision_guided_sensor_gate_flex_lstm" if FLEX_POSTURE_DIM > 0 else "vision_guided_sensor_gate_lstm"
 

@@ -1,0 +1,135 @@
+{
+  "model_dir": "C:\\SignProject\\experiments\\glove_fusion\\2026-04-08_sensor_correction_18w_v1",
+  "input_format": "sensor_correction_flex_lstm",
+  "overall": {
+    "test_sample_count": 90,
+    "accuracy": 0.9888888888888889,
+    "macro_f1": 0.9887766554433222,
+    "low_margin_rate_lt_0_10": 0.011111111111111112,
+    "low_margin_rate_lt_0_20": 0.011111111111111112,
+    "mean_margin": 0.9490764141082764
+  },
+  "hard_case": {
+    "sample_count": 27,
+    "accuracy": 0.9629629629629629,
+    "macro_f1": 0.8181818181818182,
+    "criteria": {
+      "zero_any_gte": 3,
+      "zero_both_gte": 1,
+      "overlap_gt": 0,
+      "ambiguous_gt": 0
+    }
+  },
+  "similar_groups": {
+    "direction_difference": {
+      "display_name": "방향 차이형",
+      "sample_count": 15,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "intra_group_confusion_rate": 0.0
+    },
+    "wrist_angle_difference": {
+      "display_name": "손목각도 차이형",
+      "sample_count": 10,
+      "accuracy": 0.9,
+      "macro_f1": 0.898989898989899,
+      "intra_group_confusion_rate": 0.1
+    },
+    "bend_path_difference": {
+      "display_name": "굽힘/경로 차이형",
+      "sample_count": 15,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "intra_group_confusion_rate": 0.0
+    },
+    "additional_motion_difference": {
+      "display_name": "추가동작 차이형",
+      "sample_count": 10,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "intra_group_confusion_rate": 0.0
+    },
+    "cross_hand_difference": {
+      "display_name": "양손교차 차이형",
+      "sample_count": 10,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "intra_group_confusion_rate": 0.0
+    },
+    "instant_handshape_difference": {
+      "display_name": "순간 손모양 차이형",
+      "sample_count": 10,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "intra_group_confusion_rate": 0.0
+    },
+    "handshape_difference": {
+      "display_name": "손모양 차이형",
+      "sample_count": 20,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "intra_group_confusion_rate": 0.0
+    }
+  },
+  "worst_group_accuracy": 0.9,
+  "split_metadata": {
+    "strategy": "group_session_stratified",
+    "group_count": 9,
+    "session_group_count": 9
+  },
+  "group_definition": {
+    "direction_difference": {
+      "display_name": "방향 차이형",
+      "actions": [
+        "more",
+        "naeil",
+        "eoje"
+      ]
+    },
+    "wrist_angle_difference": {
+      "display_name": "손목각도 차이형",
+      "actions": [
+        "teukbyeol",
+        "byeollo"
+      ]
+    },
+    "bend_path_difference": {
+      "display_name": "굽힘/경로 차이형",
+      "actions": [
+        "jamkkan",
+        "oraenman",
+        "gakkapda"
+      ]
+    },
+    "additional_motion_difference": {
+      "display_name": "추가동작 차이형",
+      "actions": [
+        "jalhada",
+        "annyeonghaseyo"
+      ]
+    },
+    "cross_hand_difference": {
+      "display_name": "양손교차 차이형",
+      "actions": [
+        "mannada",
+        "byeongyeonghada"
+      ]
+    },
+    "instant_handshape_difference": {
+      "display_name": "순간 손모양 차이형",
+      "actions": [
+        "banggeum",
+        "billida"
+      ]
+    },
+    "handshape_difference": {
+      "display_name": "손모양 차이형",
+      "actions": [
+        "gandanhada",
+        "sada",
+        "gamsahamnida",
+        "joesonghada"
+      ]
+    }
+  }
+}
