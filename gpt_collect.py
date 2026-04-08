@@ -18,6 +18,16 @@ ACTIONS = [
     "billida",
     "mannada",
     "byeongyeong",
+    "jamkkan",
+    "oraenman",
+    "gakkapda",
+    "more",
+    "naeil",
+    "eoje",
+    "teukbyeol",
+    "byeollo",
+    "jalhada",
+    "annyeonghaseyo",
 ]
 
 ACTION_DISPLAY_NAMES = {
@@ -31,8 +41,21 @@ ACTION_DISPLAY_NAMES = {
     "byeongyeong": "변경",
 }
 
+ACTION_DISPLAY_NAMES.update({
+    "jamkkan": "잠깐",
+    "oraenman": "오랜만",
+    "gakkapda": "가깝다",
+    "more": "모레",
+    "naeil": "내일",
+    "eoje": "어제",
+    "teukbyeol": "특별",
+    "byeollo": "별로",
+    "jalhada": "잘하다",
+    "annyeonghaseyo": "안녕하세요",
+})
+
 SEQ_LENGTH = 60
-DATA_PATH = os.getenv("NSU_VISION_COLLECT_DIR", "bare_hand_vision_8words_v1")
+DATA_PATH = os.getenv("NSU_VISION_COLLECT_DIR", "bare_hand_vision_18words_v1")
 COLLECT_SESSION_ID = time.strftime("%Y%m%d_%H%M%S")
 
 SWAP_HAND_LABELS = False
