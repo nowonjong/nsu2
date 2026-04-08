@@ -8,13 +8,19 @@ import numpy as np
 import mediapipe as mp
 import tensorflow as tf
 from collections import deque
+from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
 
-MODEL_PATH = "vision_results_18words_manual_test10_v1/best_lstm.keras"
-SCALER_PATH = "vision_results_18words_manual_test10_v1/vision_scaler.npz"
-CLASS_NAMES_PATH = "vision_results_18words_manual_test10_v1/class_names.json"
-CONFIG_PATH = "vision_results_18words_manual_test10_v1/config.json"
+MODEL_DIR = os.getenv(
+    "NSU_VISION_MODEL_DIR",
+    r"C:\SignProject\experiments\glove_vision\2026-04-07_glove_vision_18w_clean_v1",
+)
+MODEL_PATH = os.path.join(MODEL_DIR, "best_lstm.keras")
+SCALER_PATH = os.path.join(MODEL_DIR, "vision_scaler.npz")
+CLASS_NAMES_PATH = os.path.join(MODEL_DIR, "class_names.json")
+CONFIG_PATH = os.path.join(MODEL_DIR, "config.json")
+DEBUG_CAPTURE_DIR = os.getenv("NSU_VISION_DEBUG_CAPTURE_DIR", "experiments\\live_eval\\vision_run_debug_captures")
 
 SEQ_LEN = 60
 FEATURE_DIM = 126
@@ -52,19 +58,6 @@ KOR_MAP = {
     "mannada": "만나다",
     "byeongyeong": "변경",
 }
-
-KOR_MAP.update({
-    "jamkkan": "잠깐",
-    "oraenman": "오랜만",
-    "gakkapda": "가깝다",
-    "more": "모레",
-    "naeil": "내일",
-    "eoje": "어제",
-    "teukbyeol": "특별",
-    "byeollo": "별로",
-    "jalhada": "잘하다",
-    "annyeonghaseyo": "안녕하세요",
-})
 
 UI_FONT_PATH = r"C:\Windows\Fonts\malgun.ttf"
 _FONT_CACHE = {}
@@ -330,16 +323,60 @@ stable_conf = 0.0
 current_pred_label = ""
 current_pred_conf = 0.0
 motion_score = 0.0
+last_margin = 0.0
+gt_label_index = -1
 
 mode = "WAIT"
 countdown_start = None
 fps_prev_time = time.time()
 fps_smooth = 0.0
 
+os.makedirs(DEBUG_CAPTURE_DIR, exist_ok=True)
+
+
+def get_current_gt_label():
+    if 0 <= gt_label_index < len(ACTIONS):
+        return ACTIONS[gt_label_index]
+    return None
+
+
+def save_debug_capture(seq_array, pred_label, pred_conf, top2_label, top2_conf, margin, motion):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    stem = f"{timestamp}_{pred_label}"
+    npy_path = os.path.join(DEBUG_CAPTURE_DIR, f"{stem}.npy")
+    json_path = os.path.join(DEBUG_CAPTURE_DIR, f"{stem}.json")
+    gt_label = get_current_gt_label()
+
+    np.save(npy_path, seq_array.astype(np.float32))
+
+    meta = {
+        "timestamp": timestamp,
+        "model_dir": MODEL_DIR,
+        "model_path": MODEL_PATH,
+        "seq_len": int(seq_array.shape[0]),
+        "feature_dim": int(seq_array.shape[1]),
+        "raw_label": pred_label,
+        "raw_conf": float(pred_conf),
+        "label": pred_label,
+        "conf": float(pred_conf),
+        "top2_label": top2_label,
+        "top2_conf": float(top2_conf),
+        "margin": float(margin),
+        "motion": float(motion),
+        "gt_label": gt_label,
+        "gt_matches_prediction": (gt_label == pred_label) if gt_label is not None else None,
+        "actions": ACTIONS,
+    }
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+
+    print(f"[DebugCapture] saved: {npy_path}")
+    print(f"[DebugCaptureMeta] saved: {json_path}")
+
 
 def reset_recording_buffers():
     global left_missing_count, right_missing_count, no_hand_run
-    global current_pred_label, current_pred_conf, motion_score
+    global current_pred_label, current_pred_conf, motion_score, last_margin
     global prev_left_center, prev_right_center
     sequence.clear()
     hand_presence_history.clear()
@@ -353,6 +390,7 @@ def reset_recording_buffers():
     current_pred_label = ""
     current_pred_conf = 0.0
     motion_score = 0.0
+    last_margin = 0.0
 
 
 def reset_all_state():
@@ -365,13 +403,14 @@ def reset_all_state():
 
 
 def run_one_shot_prediction():
-    global stable_label, stable_conf, current_pred_label, current_pred_conf, motion_score
+    global stable_label, stable_conf, current_pred_label, current_pred_conf, motion_score, last_margin
     if len(sequence) < SEQ_LEN:
         stable_label = "none"
         stable_conf = 0.0
         current_pred_label = ""
         current_pred_conf = 0.0
         motion_score = 0.0
+        last_margin = 0.0
         return
     seq_array = np.array(sequence, dtype=np.float32)
     motion_score = get_motion_score(seq_array)
@@ -389,6 +428,8 @@ def run_one_shot_prediction():
     current_pred_conf = top1_conf
     stable_label = top1_label
     stable_conf = top1_conf
+    last_margin = margin
+    save_debug_capture(seq_array, top1_label, top1_conf, top2_label, top2_conf, margin, motion_score)
     print(f"[Result] stable={stable_label} ({KOR_MAP.get(stable_label, stable_label)}) | conf={stable_conf:.3f} | top2={top2_label} ({top2_conf:.3f}) | margin={margin:.3f} | motion={motion_score:.3f}")
 
 
@@ -509,17 +550,20 @@ while True:
     mode_kor = {"WAIT": "대기", "COUNTDOWN": "카운트다운", "RECORDING": "녹화중"}.get(mode, mode)
     top1_kor = KOR_MAP.get(current_pred_label, current_pred_label) if current_pred_label else ""
     stable_kor = KOR_MAP.get(stable_label, stable_label)
+    gt_label = get_current_gt_label()
+    gt_kor = KOR_MAP.get(gt_label, gt_label) if gt_label else "미지정"
     draw_text_unicode(display_img, f"FPS: {fps_smooth:.1f}", (10, 12), font_size=28, text_color=(0, 0, 0))
     draw_text_unicode(display_img, f"상태: {mode_kor}", (165, 12), font_size=28, text_color=(0, 0, 0))
     draw_text_unicode(display_img, f"시퀀스: {len(sequence)}/{SEQ_LEN}", (380, 12), font_size=28, text_color=(0, 0, 0))
     draw_text_unicode(display_img, f"동작량: {motion_score:.3f}", (10, 48), font_size=24, text_color=(20, 20, 20))
+    draw_text_unicode(display_img, f"GT: {gt_kor}", (10, 82), font_size=24, text_color=(120, 60, 0))
     if current_pred_label:
         draw_text_unicode(display_img, f"예측 1순위: {top1_kor} ({current_pred_conf:.2f})", (230, 48), font_size=24, text_color=(0, 120, 160))
     result_color = (0, 120, 0) if stable_label != "none" else (90, 90, 90)
-    draw_text_unicode(display_img, f"결과: {stable_kor}", (10, 82), font_size=30, text_color=result_color)
+    draw_text_unicode(display_img, f"결과: {stable_kor}", (260, 82), font_size=30, text_color=result_color)
 
     if mode == "WAIT":
-        draw_text_unicode(display_img, "S 시작 | Q 종료 | C 초기화 | D 랜드마크", (10, 112), font_size=22, text_color=(25, 25, 25))
+        draw_text_unicode(display_img, "S 시작 | B 이전 GT | N 다음 GT | G GT해제 | Q 종료", (10, 112), font_size=22, text_color=(25, 25, 25))
     elif mode == "COUNTDOWN":
         remain_int = int(np.ceil(max(0.0, TRIGGER_DELAY_SEC - (time.time() - countdown_start))))
         draw_text_unicode(display_img, "준비 자세를 유지하세요", (10, 112), font_size=26, text_color=(0, 120, 160))
@@ -545,6 +589,17 @@ while True:
     elif key == ord("d"):
         DRAW_LANDMARKS = not DRAW_LANDMARKS
         print(f"DRAW_LANDMARKS = {DRAW_LANDMARKS}")
+    elif key == ord("n"):
+        if ACTIONS:
+            gt_label_index = (gt_label_index + 1) % len(ACTIONS)
+            print(f"[GT] {get_current_gt_label()}")
+    elif key == ord("b"):
+        if ACTIONS:
+            gt_label_index = len(ACTIONS) - 1 if gt_label_index < 0 else (gt_label_index - 1) % len(ACTIONS)
+            print(f"[GT] {get_current_gt_label()}")
+    elif key == ord("g"):
+        gt_label_index = -1
+        print("[GT] cleared")
 
 cap.release()
 cv2.destroyAllWindows()

@@ -1,0 +1,37 @@
+{
+  "collect_session_id": "20260407_164429",
+  "action": "gamsahamnida",
+  "sample_idx": 13,
+  "sequence_length": 60,
+  "alignment_quality": {
+    "frame_count": 60,
+    "delta_mean_ms": 10.377421655257542,
+    "delta_std_ms": 6.0297919346380535,
+    "delta_max_ms": 22.557299971580505,
+    "delta_p95_ms": 19.57200499176979,
+    "warn_over_33ms_frames": 0,
+    "bad_over_50ms_frames": 0,
+    "warn_over_33ms_ratio": 0.0,
+    "bad_over_50ms_ratio": 0.0
+  },
+  "vision_zero_quality": {
+    "any_zero_frames": 4,
+    "both_zero_frames": 1,
+    "first_any_zero_frame": 23,
+    "first_both_zero_frame": 54,
+    "any_zero_ratio": 0.06666666666666667,
+    "both_zero_ratio": 0.016666666666666666,
+    "reason_counts": {
+      "missing_right": 3,
+      "overlap": 3
+    }
+  },
+  "frame_flag_names": [
+    "left_detected",
+    "right_detected",
+    "left_held",
+    "right_held",
+    "overlap_flag",
+    "ambiguous_flag"
+  ]
+}

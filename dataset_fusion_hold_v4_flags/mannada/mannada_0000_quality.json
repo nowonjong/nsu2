@@ -1,0 +1,36 @@
+{
+  "collect_session_id": "20260407_151844",
+  "action": "mannada",
+  "sample_idx": 0,
+  "sequence_length": 60,
+  "alignment_quality": {
+    "frame_count": 60,
+    "delta_mean_ms": 10.384171668688456,
+    "delta_std_ms": 6.255680594090572,
+    "delta_max_ms": 22.763499975204468,
+    "delta_p95_ms": 20.061220023036004,
+    "warn_over_33ms_frames": 0,
+    "bad_over_50ms_frames": 0,
+    "warn_over_33ms_ratio": 0.0,
+    "bad_over_50ms_ratio": 0.0
+  },
+  "vision_zero_quality": {
+    "any_zero_frames": 4,
+    "both_zero_frames": 4,
+    "first_any_zero_frame": 56,
+    "first_both_zero_frame": 56,
+    "any_zero_ratio": 0.06666666666666667,
+    "both_zero_ratio": 0.06666666666666667,
+    "reason_counts": {
+      "overlap": 6
+    }
+  },
+  "frame_flag_names": [
+    "left_detected",
+    "right_detected",
+    "left_held",
+    "right_held",
+    "overlap_flag",
+    "ambiguous_flag"
+  ]
+}

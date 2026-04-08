@@ -1,0 +1,36 @@
+{
+  "collect_session_id": "20260407_160339",
+  "action": "billida",
+  "sample_idx": 8,
+  "sequence_length": 60,
+  "alignment_quality": {
+    "frame_count": 60,
+    "delta_mean_ms": 11.605646662910779,
+    "delta_std_ms": 5.677882422935475,
+    "delta_max_ms": 23.04320001602173,
+    "delta_p95_ms": 19.898524981737136,
+    "warn_over_33ms_frames": 0,
+    "bad_over_50ms_frames": 0,
+    "warn_over_33ms_ratio": 0.0,
+    "bad_over_50ms_ratio": 0.0
+  },
+  "vision_zero_quality": {
+    "any_zero_frames": 2,
+    "both_zero_frames": 0,
+    "first_any_zero_frame": 30,
+    "first_both_zero_frame": null,
+    "any_zero_ratio": 0.03333333333333333,
+    "both_zero_ratio": 0.0,
+    "reason_counts": {
+      "missing_right": 2
+    }
+  },
+  "frame_flag_names": [
+    "left_detected",
+    "right_detected",
+    "left_held",
+    "right_held",
+    "overlap_flag",
+    "ambiguous_flag"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "collect_session_id": "20260407_173727",
+  "action": "jamkkan",
+  "sample_idx": 24,
+  "sequence_length": 60,
+  "alignment_quality": {
+    "frame_count": 60,
+    "delta_mean_ms": 10.372995000084241,
+    "delta_std_ms": 5.814246584692281,
+    "delta_max_ms": 23.410899996757507,
+    "delta_p95_ms": 19.82136507332325,
+    "warn_over_33ms_frames": 0,
+    "bad_over_50ms_frames": 0,
+    "warn_over_33ms_ratio": 0.0,
+    "bad_over_50ms_ratio": 0.0
+  },
+  "vision_zero_quality": {
+    "any_zero_frames": 3,
+    "both_zero_frames": 0,
+    "first_any_zero_frame": 26,
+    "first_both_zero_frame": null,
+    "any_zero_ratio": 0.05,
+    "both_zero_ratio": 0.0,
+    "reason_counts": {
+      "missing_left": 3
+    }
+  },
+  "frame_flag_names": [
+    "left_detected",
+    "right_detected",
+    "left_held",
+    "right_held",
+    "overlap_flag",
+    "ambiguous_flag"
+  ]
+}

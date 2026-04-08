@@ -29,40 +29,38 @@ from tensorflow.keras import layers, models, callbacks
 
 
 ACTIONS = [
-    "gandanhada",
-    "sada",
-    "gamsahamnida",
-    "joesonghada",
-    "banggeum",
-    "billida",
-    "mannada",
-    "byeongyeong",
-    "jamkkan",
-    "oraenman",
-    "gakkapda",
     "more",
     "naeil",
     "eoje",
     "teukbyeol",
     "byeollo",
+    "jamkkan",
+    "oraenman",
+    "gakkapda",
     "jalhada",
     "annyeonghaseyo",
+    "mannada",
+    "byeongyeonghada",
+    "banggeum",
+    "billida",
+    "gandanhada",
+    "sada",
+    "gamsahamnida",
+    "joesonghada",
 ]
 
-DATA_DIR = "bare_hand_vision_18words_v1"
-RESULT_DIR = "vision_results_18words_v1"
+DATA_DIR = os.getenv("NSU_VISION_DATA_DIR", "bare_hand_vision_8words_v1")
+RESULT_DIR = os.getenv("NSU_VISION_RESULT_DIR", "bare_hand_vision_8words_v1_results")
 SEQ_LEN = 60
 FEATURE_DIM = 126
 TEST_SIZE = 0.15
 VAL_SIZE = 0.15
 MIN_SAMPLES_PER_CLASS = 5
 LEGACY_GROUP_BLOCK_SIZE = 5
-PSEUDO_SESSION_BLOCK_SIZE = 5
 BATCH_SIZE = 16
 EPOCHS = 100
-RANDOM_STATE = 42
+RANDOM_STATE = int(os.getenv("NSU_RANDOM_SEED", "42"))
 LEARNING_RATE = 1e-3
-FORCE_PSEUDO_SESSION_GROUPING = os.getenv("GPT_FORCE_PSEUDO_SESSION_GROUPING", "0") == "1"
 
 
 def set_seed(seed=42):
@@ -83,16 +81,6 @@ def infer_legacy_group_key(action, file_name):
         block_idx = sample_idx // LEGACY_GROUP_BLOCK_SIZE
         return f"legacy_block::{action}::{block_idx:04d}", "legacy_index_block"
     return f"legacy_file::{action}::{stem}", "legacy_file"
-
-
-def infer_pseudo_session_group_key(file_name, block_size=PSEUDO_SESSION_BLOCK_SIZE):
-    stem = os.path.splitext(file_name)[0]
-    match = re.search(r"_(\d+)$", stem)
-    if match:
-        sample_idx = int(match.group(1))
-        block_idx = sample_idx // block_size
-        return f"pseudo_session::{block_idx:04d}", "pseudo_session_index_block"
-    return f"pseudo_session::single::{stem}", "pseudo_session_file"
 
 
 def read_collect_session_id(meta_path):
@@ -119,15 +107,6 @@ def build_sample_group_info(file_path, action):
     stem = os.path.splitext(file_path)[0]
     meta_path = f"{stem}_meta.npz"
     collect_session_id = read_collect_session_id(meta_path)
-
-    if FORCE_PSEUDO_SESSION_GROUPING:
-        group_key, group_source = infer_pseudo_session_group_key(file_name)
-        return {
-            "meta_path": meta_path.replace("\\", "/") if os.path.exists(meta_path) else None,
-            "collect_session_id": collect_session_id,
-            "group_key": group_key,
-            "group_source": group_source,
-        }
 
     if collect_session_id:
         return {
@@ -571,8 +550,6 @@ def main():
         "split_group_count": split_meta["group_count"],
         "split_session_group_count": split_meta["session_group_count"],
         "split_legacy_group_count": split_meta["legacy_group_count"],
-        "force_pseudo_session_grouping": FORCE_PSEUDO_SESSION_GROUPING,
-        "pseudo_session_block_size": PSEUDO_SESSION_BLOCK_SIZE,
         "min_samples_per_class": get_min_required_samples_per_class(),
         "skipped_actions": skipped_actions,
         "split_index_file": "split_indices.npz",
@@ -730,8 +707,6 @@ def main():
         f.write(f"Group count      : {split_meta['group_count']}\n")
         f.write(f"Session groups   : {split_meta['session_group_count']}\n")
         f.write(f"Legacy groups    : {split_meta['legacy_group_count']}\n")
-        f.write(f"Pseudo grouping  : {FORCE_PSEUDO_SESSION_GROUPING}\n")
-        f.write(f"Pseudo block size: {PSEUDO_SESSION_BLOCK_SIZE}\n")
         f.write(f"Min/class used   : {get_min_required_samples_per_class()}\n")
         f.write(f"Split index file : {os.path.join(RESULT_DIR, 'split_indices.npz')}\n")
         f.write(f"Sample source file: {os.path.join(RESULT_DIR, 'sample_sources.json')}\n")

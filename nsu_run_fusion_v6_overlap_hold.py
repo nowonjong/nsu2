@@ -1,0 +1,1467 @@
+﻿import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+import cv2
+import json
+import time
+from datetime import datetime
+import numpy as np
+import mediapipe as mp
+import tensorflow as tf
+import serial
+from collections import deque
+import threading
+from PIL import Image, ImageDraw, ImageFont
+
+# =========================
+# 경로 설정
+# =========================
+DEFAULT_MODEL_DIR = os.getenv(
+    "NSU_RUN_MODEL_DIR",
+    r"C:\SignProject\experiments\glove_fusion\2026-04-07_stable_hybrid_18w_clean_v1",
+)
+MODEL_PATH = os.getenv("NSU_RUN_MODEL_PATH", os.path.join(DEFAULT_MODEL_DIR, "fusion_lstm_best.keras"))
+SCALER_PATH = os.getenv("NSU_RUN_SCALER_PATH", os.path.join(DEFAULT_MODEL_DIR, "fusion_scaler.npz"))
+CLASS_NAMES_PATH = os.getenv("NSU_RUN_LABELS_PATH", os.path.join(DEFAULT_MODEL_DIR, "labels.json"))
+CONFIG_PATH = os.getenv("NSU_RUN_CONFIG_PATH", os.path.join(DEFAULT_MODEL_DIR, "config.json"))
+DEBUG_CAPTURE_DIR = os.getenv("NSU_RUN_DEBUG_CAPTURE_DIR", "run_debug_captures")
+
+# =========================
+# 湲곕낯 ?ㅼ젙
+# =========================
+SEQ_LEN = 60
+VISION_DIM = 126
+RAW_SENSOR_DIM = 26
+SENSOR_FLAG_DIM = 6
+SENSOR_DIM = RAW_SENSOR_DIM + SENSOR_FLAG_DIM
+FEATURE_DIM = VISION_DIM + SENSOR_DIM
+FLEX_SENSOR_DIM = 8
+DEFAULT_FLEX_BASELINE_FRAMES = 5
+DEFAULT_FRAME_FLAG_NAMES = [
+    'left_detected',
+    'right_detected',
+    'left_held',
+    'right_held',
+    'overlap_flag',
+    'ambiguous_flag',
+]
+MODEL_SENSOR_RAW_DIM = RAW_SENSOR_DIM
+MODEL_SENSOR_FLAG_DIM = SENSOR_FLAG_DIM
+MODEL_SENSOR_DIM = SENSOR_DIM
+MODEL_FEATURE_DIM = FEATURE_DIM
+ACTIVE_RAW_SENSOR_INDICES = list(range(RAW_SENSOR_DIM))
+ACTIVE_FLAG_INDICES = list(range(SENSOR_FLAG_DIM))
+USE_FLEX_POSTURE = False
+FLEX_POSTURE_DIM = 0
+FLEX_BASELINE_FRAMES = DEFAULT_FLEX_BASELINE_FRAMES
+
+CAM_WIDTH = 640
+CAM_HEIGHT = 480
+
+DRAW_LANDMARKS = False
+MODEL_COMPLEXITY = 0
+MAX_NUM_HANDS = 2
+TRIGGER_DELAY_SEC = 2.0
+
+# =========================
+# ?쒕━???ㅼ젙
+# =========================
+SERIAL_PORT = 'COM9'
+SERIAL_BAUD = 115200
+
+# =========================
+# ?쒖옉 罹섎━釉뚮젅?댁뀡 ?덈궡 ?쒓컙
+# ?꾩옱 Arduino 肄붾뱶 湲곗?
+# 1) Keep still            : ??4.5珥?# 2) Fingers stretched     : ??4.0珥?# 3) Fingers bent          : ??4.0珥?# =========================
+STARTUP_GUIDE_STAGES = [
+    ("장갑을 움직이지 말고 유지하세요", "IMU 안정화 중", 4.5, (40, 40, 40)),
+    ("검지부터 새끼손가락까지 쭉 펴주세요", "Flex 펴짐 보정 중", 4.0, (60, 70, 40)),
+    ("검지부터 새끼손가락까지 구부려주세요", "Flex 굽힘 보정 중", 4.0, (70, 40, 40)),
+]
+
+# =========================
+# ?몄떇 ?덉젙???뚮씪誘명꽣
+# =========================
+HANDEDNESS_SCORE_TH = 0.55
+OVERLAP_IOU_THRESHOLD = 0.24
+OVERLAP_CENTER_DIST_PX = 60.0
+SLOT_AMBIGUOUS_MARGIN = 35.0
+OVERLAP_APPROACH_IOU_THRESHOLD = 0.05
+OVERLAP_APPROACH_CENTER_DIST_PX = 140.0
+POST_OVERLAP_HOLD_FRAMES = 3
+MISSING_HOLD_FRAMES = 6
+SHORT_OVERLAP_FREEZE_FRAMES = 4
+SHORT_MISSING_FREEZE_FRAMES = 3
+STATIC_SUPPORT_MOTION_PX = 18.0
+NO_HAND_RESET_FRAMES = 18
+MIN_HAND_FRAMES_FOR_WORD = 20
+SHORT_MOTION_WINDOW = 8
+WORD_MOTION_THRESHOLD = 0.040
+
+# UI / ?붾쾭洹?PRINT_DEBUG = False                  # 肄섏넄 ?붾쾭洹?異쒕젰
+SHOW_DEBUG_OVERLAY = False           # ?붾㈃ ?곸꽭 ?붾쾭洹??ㅻ쾭?덉씠
+
+# =========================
+# 踰덉뿭 ?ъ쟾
+# =========================
+KOR_MAP = {
+    'none': '대기',
+    'gandanhada': '간단하다',
+    'sada': '사다',
+    'gamsahamnida': '감사합니다',
+    'joesonghada': '죄송하다',
+    'banggeum': '방금',
+    'billida': '빌리다',
+    'mannada': '만나다',
+    'byeongyeong': '변경',
+}
+
+UI_FONT_PATH = r"C:\Windows\Fonts\malgun.ttf"
+_FONT_CACHE = {}
+
+# =========================
+# ?쇱꽌 ???쒖꽌
+# =========================
+SENSOR_KEYS = [
+    'lf0_norm', 'lf1_norm', 'lf2_norm', 'lf3_norm',
+    'rf0_norm', 'rf1_norm', 'rf2_norm', 'rf3_norm',
+
+    'l_ax_g', 'l_ay_g', 'l_az_g',
+    'l_gx_dps', 'l_gy_dps', 'l_gz_dps',
+    'l_roll_deg', 'l_pitch_deg', 'l_yaw_deg',
+
+    'r_ax_g', 'r_ay_g', 'r_az_g',
+    'r_gx_dps', 'r_gy_dps', 'r_gz_dps',
+    'r_roll_deg', 'r_pitch_deg', 'r_yaw_deg',
+]
+
+
+# =========================
+# TensorFlow GPU ?ㅼ젙
+# =========================
+print("TensorFlow version:", tf.__version__)
+gpus = tf.config.list_physical_devices('GPU')
+print("Detected GPUs:", gpus)
+
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        print("GPU memory growth enabled.")
+    except Exception as e:
+        print("GPU memory growth setting failed:", e)
+else:
+    print("GPU瑜?李얠? 紐삵빐??CPU濡??숈옉?⑸땲??")
+
+# =========================
+# 紐⑤뜽 / ?ㅼ??쇰윭 / ?대옒??濡쒕뱶
+# =========================
+if os.path.exists(CONFIG_PATH):
+    with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+        runtime_config = json.load(f)
+    SEQ_LEN = int(runtime_config.get('seq_length', SEQ_LEN))
+    VISION_DIM = int(runtime_config.get('vision_dim', VISION_DIM))
+else:
+    runtime_config = {}
+
+MODEL_SENSOR_RAW_DIM = int(runtime_config.get('sensor_raw_dim', runtime_config.get('full_raw_sensor_dim', RAW_SENSOR_DIM)))
+MODEL_SENSOR_FLAG_DIM = int(runtime_config.get('sensor_flag_dim', runtime_config.get('full_sensor_flag_dim', SENSOR_FLAG_DIM)))
+ACTIVE_RAW_SENSOR_INDICES = list(runtime_config.get('sensor_raw_indices', list(range(MODEL_SENSOR_RAW_DIM))))
+ACTIVE_FLAG_INDICES = list(runtime_config.get('sensor_flag_indices', list(range(MODEL_SENSOR_FLAG_DIM))))
+MODEL_SENSOR_DIM = int(
+    runtime_config.get(
+        'sensor_dim',
+        len(ACTIVE_RAW_SENSOR_INDICES) + len(ACTIVE_FLAG_INDICES),
+    )
+)
+MODEL_FEATURE_DIM = int(runtime_config.get('feature_dim', VISION_DIM + MODEL_SENSOR_DIM))
+USE_FLEX_POSTURE = bool(runtime_config.get('use_flex_posture', False))
+FLEX_POSTURE_DIM = int(runtime_config.get('flex_posture_dim', 0)) if USE_FLEX_POSTURE else 0
+FLEX_BASELINE_FRAMES = int(runtime_config.get('flex_baseline_frames', DEFAULT_FLEX_BASELINE_FRAMES))
+
+model = tf.keras.models.load_model(MODEL_PATH)
+MODEL_INPUT_COUNT = len(model.inputs)
+
+with open(CLASS_NAMES_PATH, 'r', encoding='utf-8') as f:
+    ACTIONS = json.load(f)
+
+scaler_data = np.load(SCALER_PATH)
+vision_scaler_mean = scaler_data['vision_mean'].astype(np.float32)
+vision_scaler_scale = scaler_data['vision_scale'].astype(np.float32)
+sensor_scaler_mean = scaler_data['sensor_mean'].astype(np.float32)
+sensor_scaler_scale = scaler_data['sensor_scale'].astype(np.float32)
+flex_posture_scaler_mean = scaler_data['flex_posture_mean'].astype(np.float32) if 'flex_posture_mean' in scaler_data.files else np.zeros((0,), dtype=np.float32)
+flex_posture_scaler_scale = scaler_data['flex_posture_scale'].astype(np.float32) if 'flex_posture_scale' in scaler_data.files else np.ones((0,), dtype=np.float32)
+vision_scaler_scale = np.where(
+    np.abs(vision_scaler_scale) < 1e-8, 1.0, vision_scaler_scale
+).astype(np.float32)
+sensor_scaler_scale = np.where(
+    np.abs(sensor_scaler_scale) < 1e-8, 1.0, sensor_scaler_scale
+).astype(np.float32)
+flex_posture_scaler_scale = np.where(
+    np.abs(flex_posture_scaler_scale) < 1e-8, 1.0, flex_posture_scaler_scale
+).astype(np.float32)
+
+FRAME_FLAG_NAMES = runtime_config.get(
+    'sensor_flag_names',
+    DEFAULT_FRAME_FLAG_NAMES,
+)
+
+print(
+    f"[ModelConfig] seq_len={SEQ_LEN}, vision_dim={VISION_DIM}, "
+    f"stream_raw_dim={RAW_SENSOR_DIM}, stream_flag_dim={SENSOR_FLAG_DIM}, "
+    f"model_sensor_raw_dim={MODEL_SENSOR_RAW_DIM}, model_sensor_flag_dim={MODEL_SENSOR_FLAG_DIM}, "
+    f"model_sensor_dim={MODEL_SENSOR_DIM}, model_feature_dim={MODEL_FEATURE_DIM}, "
+    f"use_flex_posture={USE_FLEX_POSTURE}, flex_posture_dim={FLEX_POSTURE_DIM}, "
+    f"model_inputs={MODEL_INPUT_COUNT}"
+)
+print(f"[ModelConfig] active_raw_indices={ACTIVE_RAW_SENSOR_INDICES}")
+print(f"[ModelConfig] active_flag_indices={ACTIVE_FLAG_INDICES}")
+print("로드된 클래스:", ACTIONS)
+
+if 'none' not in ACTIONS:
+    print("[경고] labels.json에 'none' 클래스가 없습니다.")
+
+# =========================
+# ?쒕━??由щ뜑
+# =========================
+class SerialReader(threading.Thread):
+    def __init__(self, port, baud):
+        super().__init__(daemon=True)
+        self.port = port
+        self.baud = baud
+
+        self.ser = None
+        self.stop_flag = False
+        self.lock = threading.Lock()
+
+        self.latest_sensor_time_ms = 0
+        self.latest_sensor_vector = np.zeros(RAW_SENSOR_DIM, dtype=np.float32)
+        self.latest_host_time_ms = 0.0
+        self.packet_count = 0
+        self.packet_buffer = deque(maxlen=256)
+
+        self.connected = False
+        self.connection_error = None
+
+    def connect(self):
+        self.ser = serial.Serial(self.port, self.baud, timeout=0.05)
+        time.sleep(2.0)
+        self.connected = True
+        print(f"[Serial] Connected: {self.port} @ {self.baud}")
+
+    def close(self):
+        self.stop_flag = True
+        try:
+            if self.ser is not None and self.ser.is_open:
+                self.ser.close()
+        except:
+            pass
+
+    def parse_csv_line(self, line):
+        parts = [p.strip() for p in line.split(',')]
+        if len(parts) != 27:
+            return None
+
+        try:
+            values = [float(x) for x in parts]
+        except ValueError:
+            return None
+
+        sensor_time_ms = int(values[0])
+        sensor_vec = np.array(values[1:], dtype=np.float32)
+
+        if sensor_vec.shape[0] != RAW_SENSOR_DIM:
+            return None
+
+        return sensor_time_ms, sensor_vec
+
+    def run(self):
+        try:
+            self.connect()
+        except Exception as e:
+            self.connection_error = e
+            print(f"[Serial] Connection failed: {e}")
+            return
+
+        while not self.stop_flag:
+            try:
+                raw = self.ser.readline()
+                if not raw:
+                    continue
+
+                line = raw.decode('utf-8', errors='ignore').strip()
+                if not line:
+                    continue
+
+                parsed = self.parse_csv_line(line)
+                if parsed is None:
+                    continue
+
+                sensor_time_ms, sensor_vec = parsed
+                host_time_ms = time.perf_counter() * 1000.0
+
+                with self.lock:
+                    self.latest_sensor_time_ms = sensor_time_ms
+                    self.latest_sensor_vector = sensor_vec
+                    self.latest_host_time_ms = host_time_ms
+                    self.packet_count += 1
+                    self.packet_buffer.append(
+                        (host_time_ms, sensor_time_ms, sensor_vec.copy(), self.packet_count)
+                    )
+
+            except Exception as e:
+                print(f"[Serial] Read error: {e}")
+                time.sleep(0.1)
+
+    def get_latest(self):
+        with self.lock:
+            return (
+                self.latest_sensor_time_ms,
+                self.latest_sensor_vector.copy(),
+                self.packet_count,
+                self.latest_host_time_ms,
+            )
+
+    def get_aligned_packet(self, frame_host_time_ms):
+        with self.lock:
+            if not self.packet_buffer:
+                return (
+                    self.latest_sensor_time_ms,
+                    self.latest_sensor_vector.copy(),
+                    self.packet_count,
+                    self.latest_host_time_ms,
+                )
+
+            eligible = [item for item in self.packet_buffer if item[0] <= frame_host_time_ms]
+            if eligible:
+                host_time_ms, sensor_time_ms, sensor_vec, packet_count = eligible[-1]
+                return sensor_time_ms, sensor_vec.copy(), packet_count, host_time_ms
+
+            host_time_ms, sensor_time_ms, sensor_vec, packet_count = self.packet_buffer[0]
+            return sensor_time_ms, sensor_vec.copy(), packet_count, host_time_ms
+
+
+def wait_for_serial_connected(serial_reader, timeout_sec=5):
+    start = time.time()
+    while time.time() - start < timeout_sec:
+        if serial_reader.connected:
+            return True
+        if serial_reader.connection_error is not None:
+            return False
+        time.sleep(0.05)
+    return False
+
+
+def wait_for_sensor_ready(serial_reader, timeout_sec=12):
+    start = time.time()
+    while time.time() - start < timeout_sec:
+        if serial_reader.connection_error is not None:
+            return False
+
+        _, _, packet_count, _ = serial_reader.get_latest()
+        if packet_count > 0:
+            print("[Sensor] Ready")
+            return True
+
+        time.sleep(0.05)
+
+    print("[Sensor] Timeout: ?쇱꽌 ?⑦궥?????ㅼ뼱?붿뒿?덈떎.")
+    return False
+
+
+# =========================
+# MediaPipe Hands
+# =========================
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(
+    static_image_mode=False,
+    max_num_hands=MAX_NUM_HANDS,
+    model_complexity=MODEL_COMPLEXITY,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5
+)
+
+# =========================
+# 移대찓???닿린
+# =========================
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+if not cap.isOpened():
+    cap = cv2.VideoCapture(0)
+
+if not cap.isOpened():
+    raise RuntimeError("?뱀틺???????놁뒿?덈떎.")
+
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_WIDTH)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+
+# =========================
+# ?좏떥 ?⑥닔
+# =========================
+def get_hand_data(res_hand):
+    wrist = res_hand.landmark[0]
+    joint = np.zeros((21, 3), dtype=np.float32)
+
+    for j, lm in enumerate(res_hand.landmark):
+        if j == 0:
+            joint[j] = [0.0, 0.0, 0.0]
+        else:
+            joint[j] = [lm.x - wrist.x, lm.y - wrist.y, lm.z - wrist.z]
+
+    scale = np.linalg.norm(joint[9])
+    if scale < 1e-6:
+        scale = 1e-6
+
+    joint = joint / scale
+    return joint.flatten()
+
+def get_hand_center_px(res_hand, frame_w, frame_h):
+    xs = [lm.x for lm in res_hand.landmark]
+    ys = [lm.y for lm in res_hand.landmark]
+    cx = float(np.mean(xs) * frame_w)
+    cy = float(np.mean(ys) * frame_h)
+    return np.array([cx, cy], dtype=np.float32)
+
+
+def get_hand_bbox_px(res_hand, frame_w, frame_h, pad_px=12.0):
+    xs = [lm.x * frame_w for lm in res_hand.landmark]
+    ys = [lm.y * frame_h for lm in res_hand.landmark]
+    x1 = max(0.0, min(xs) - pad_px)
+    y1 = max(0.0, min(ys) - pad_px)
+    x2 = min(float(frame_w - 1), max(xs) + pad_px)
+    y2 = min(float(frame_h - 1), max(ys) + pad_px)
+    return np.array([x1, y1, x2, y2], dtype=np.float32)
+
+
+def bbox_iou(box1, box2):
+    x1 = max(float(box1[0]), float(box2[0]))
+    y1 = max(float(box1[1]), float(box2[1]))
+    x2 = min(float(box1[2]), float(box2[2]))
+    y2 = min(float(box1[3]), float(box2[3]))
+
+    inter_w = max(0.0, x2 - x1)
+    inter_h = max(0.0, y2 - y1)
+    inter = inter_w * inter_h
+    if inter <= 0.0:
+        return 0.0
+
+    area1 = max(1.0, float(box1[2] - box1[0]) * float(box1[3] - box1[1]))
+    area2 = max(1.0, float(box2[2] - box2[0]) * float(box2[3] - box2[1]))
+    union = area1 + area2 - inter
+    if union <= 1e-6:
+        return 0.0
+    return float(inter / union)
+
+
+def hands_are_overlapping(candidates):
+    if len(candidates) < 2:
+        return False
+
+    c0, c1 = candidates[:2]
+    iou = bbox_iou(c0['bbox'], c1['bbox'])
+    center_dist = float(np.linalg.norm(c0['center'] - c1['center']))
+    return (iou >= OVERLAP_IOU_THRESHOLD) or (center_dist <= OVERLAP_CENTER_DIST_PX)
+
+
+def hands_are_approaching_overlap(candidates):
+    if len(candidates) < 2:
+        return False
+
+    c0, c1 = candidates[:2]
+    iou = bbox_iou(c0['bbox'], c1['bbox'])
+    center_dist = float(np.linalg.norm(c0['center'] - c1['center']))
+    return (iou >= OVERLAP_APPROACH_IOU_THRESHOLD) or (center_dist <= OVERLAP_APPROACH_CENTER_DIST_PX)
+
+
+def mp_label_to_person_side(label, frame_flipped=True):
+    if label not in ('Left', 'Right'):
+        return None
+
+    # ?꾩옱 肄붾뱶??frame??癒쇱? 醫뚯슦諛섏쟾????MediaPipe???ｊ퀬 ?덉쑝誘濡?    # selfie ?낅젰 湲곗? 洹몃?濡??щ엺 湲곗? 醫??곕줈 ?ъ슜?⑸땲??
+    if frame_flipped:
+        return label.lower()
+
+    # 諛섏쟾?섏? ?딆? ?먮낯 ?꾨젅?꾩쓣 ?ｋ뒗 寃쎌슦?먮뒗 ?꾩슂 ???ш린??swap ?섏꽭??
+    return 'right' if label == 'Left' else 'left'
+
+
+def make_hand_candidates(results, frame_w, frame_h):
+    candidates = []
+
+    if not (results.multi_hand_landmarks and results.multi_handedness):
+        return candidates
+
+    for res_hand, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
+        label = handedness.classification[0].label
+        score = handedness.classification[0].score
+        side_hint = None
+        if score >= HANDEDNESS_SCORE_TH:
+            side_hint = mp_label_to_person_side(label, frame_flipped=True)
+
+        candidates.append({
+            'data': get_hand_data(res_hand),
+            'center': get_hand_center_px(res_hand, frame_w, frame_h),
+            'bbox': get_hand_bbox_px(res_hand, frame_w, frame_h),
+            'mp_label': label,
+            'mp_score': float(score),
+            'person_side_hint': side_hint,
+            'res_hand': res_hand,
+        })
+
+    return candidates
+
+
+def slot_cost(candidate, slot_name, prev_center):
+    cost = 0.0
+
+    hint = candidate['person_side_hint']
+    if hint is not None and hint != slot_name:
+        cost += 120.0
+
+    if prev_center is not None:
+        cost += float(np.linalg.norm(candidate['center'] - prev_center))
+    else:
+        cost += 20.0
+
+    return cost
+
+
+def choose_slot_for_one_hand(candidate, prev_left_center, prev_right_center):
+    hint = candidate['person_side_hint']
+
+    if prev_left_center is None and prev_right_center is None and hint in ('left', 'right'):
+        return hint
+
+    left_cost = slot_cost(candidate, 'left', prev_left_center)
+    right_cost = slot_cost(candidate, 'right', prev_right_center)
+    if abs(left_cost - right_cost) < SLOT_AMBIGUOUS_MARGIN:
+        return None
+    return 'left' if left_cost <= right_cost else 'right'
+
+
+def assign_hand_slots(candidates, prev_left_center, prev_right_center):
+    assigned = {'left': None, 'right': None}
+    frame_ambiguous = False
+
+    if len(candidates) == 0:
+        return assigned, frame_ambiguous
+
+    if len(candidates) == 1:
+        slot = choose_slot_for_one_hand(candidates[0], prev_left_center, prev_right_center)
+        if slot is None:
+            return assigned, True
+        assigned[slot] = candidates[0]
+        return assigned, frame_ambiguous
+
+    # 理쒕? 2???ъ슜 議곌굔?대?濡??먯닔 ?믪? ??媛쒕쭔 ?ъ슜
+    cands = candidates[:2]
+
+    case1 = slot_cost(cands[0], 'left', prev_left_center) + slot_cost(cands[1], 'right', prev_right_center)
+    case2 = slot_cost(cands[1], 'left', prev_left_center) + slot_cost(cands[0], 'right', prev_right_center)
+
+    if abs(case1 - case2) < SLOT_AMBIGUOUS_MARGIN:
+        return assigned, True
+
+    if case1 <= case2:
+        assigned['left'] = cands[0]
+        assigned['right'] = cands[1]
+    else:
+        assigned['left'] = cands[1]
+        assigned['right'] = cands[0]
+
+    return assigned, frame_ambiguous
+
+
+def draw_custom_landmarks(img, hand_landmarks, color, label):
+    global DRAW_LANDMARKS
+    if not DRAW_LANDMARKS:
+        return
+
+    h, w, _ = img.shape
+    wrist = hand_landmarks.landmark[0]
+
+    for lm in hand_landmarks.landmark:
+        cx, cy = int(lm.x * w), int(lm.y * h)
+        cv2.circle(img, (cx, cy), 4, color, cv2.FILLED)
+
+    cv2.putText(
+        img,
+        label,
+        (int(wrist.x * w) - 15, int(wrist.y * h) - 15),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.8,
+        color,
+        2
+    )
+
+
+def get_ui_font(size):
+    key = int(size)
+    if key not in _FONT_CACHE:
+        _FONT_CACHE[key] = ImageFont.truetype(UI_FONT_PATH, key)
+    return _FONT_CACHE[key]
+
+
+def draw_text_unicode(img, text, org, font_size=28, text_color=(0, 0, 0)):
+    if not text:
+        return
+
+    pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    draw = ImageDraw.Draw(pil_img)
+    draw.text(org, text, font=get_ui_font(font_size), fill=(text_color[2], text_color[1], text_color[0]))
+    img[:] = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+
+
+def draw_text_box(img, top_left, bottom_right, fill_color=(255, 255, 255), alpha=0.55):
+    overlay = img.copy()
+    cv2.rectangle(overlay, top_left, bottom_right, fill_color, -1)
+    cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
+
+
+def standardize_modalities(seq):
+    seq = np.asarray(seq, dtype=np.float32)
+    seq_vision = seq[:, :VISION_DIM].astype(np.float32)
+    seq_sensor_full = seq[:, VISION_DIM:].astype(np.float32)
+
+    seq_sensor_raw_full = seq_sensor_full[:, :RAW_SENSOR_DIM]
+    seq_sensor_flags_full = seq_sensor_full[:, RAW_SENSOR_DIM:RAW_SENSOR_DIM + SENSOR_FLAG_DIM]
+
+    selected_sensor_parts = []
+    if ACTIVE_RAW_SENSOR_INDICES:
+        selected_sensor_parts.append(seq_sensor_raw_full[:, ACTIVE_RAW_SENSOR_INDICES])
+    if ACTIVE_FLAG_INDICES:
+        selected_sensor_parts.append(seq_sensor_flags_full[:, ACTIVE_FLAG_INDICES])
+
+    if selected_sensor_parts:
+        seq_sensor = np.concatenate(selected_sensor_parts, axis=1).astype(np.float32)
+    else:
+        seq_sensor = np.zeros((seq.shape[0], 0), dtype=np.float32)
+
+    seq_vision_scaled = np.zeros_like(seq_vision, dtype=np.float32)
+    nonzero_mask = np.any(np.abs(seq_vision) > 1e-6, axis=1)
+    if np.any(nonzero_mask):
+        seq_vision_scaled[nonzero_mask] = (
+            (seq_vision[nonzero_mask] - vision_scaler_mean) / vision_scaler_scale
+        ).astype(np.float32)
+
+    if seq_sensor.shape[1] > 0:
+        seq_sensor_scaled = ((seq_sensor - sensor_scaler_mean) / sensor_scaler_scale).astype(np.float32)
+    else:
+        seq_sensor_scaled = seq_sensor
+
+    return seq_vision_scaled, seq_sensor_scaled, seq_sensor_raw_full
+
+
+def extract_flex_posture_features_from_sequence(seq_sensor_raw_full):
+    if not USE_FLEX_POSTURE or FLEX_POSTURE_DIM <= 0:
+        return np.zeros((0,), dtype=np.float32)
+
+    if seq_sensor_raw_full.shape[1] < FLEX_SENSOR_DIM:
+        raise ValueError(
+            f"Expected at least {FLEX_SENSOR_DIM} flex channels, got {seq_sensor_raw_full.shape[1]}"
+        )
+
+    flex_seq = seq_sensor_raw_full[:, :FLEX_SENSOR_DIM].astype(np.float32)
+    baseline_frames = max(1, min(FLEX_BASELINE_FRAMES, flex_seq.shape[0]))
+    base = np.mean(flex_seq[:baseline_frames, :], axis=0, keepdims=True)
+    rel = flex_seq - base
+
+    mean_rel = np.mean(rel, axis=0)
+    std_rel = np.std(rel, axis=0)
+    range_rel = np.max(rel, axis=0) - np.min(rel, axis=0)
+    end_rel = np.mean(rel[-baseline_frames:, :], axis=0)
+    peak_abs_rel = np.max(np.abs(rel), axis=0)
+    lr_pair_diff = end_rel[: (FLEX_SENSOR_DIM // 2)] - end_rel[(FLEX_SENSOR_DIM // 2):]
+
+    features = np.concatenate(
+        [mean_rel, std_rel, range_rel, end_rel, peak_abs_rel, lr_pair_diff],
+        axis=0,
+    ).astype(np.float32)
+
+    if features.shape[0] != FLEX_POSTURE_DIM:
+        raise ValueError(
+            f"Expected flex posture dim {FLEX_POSTURE_DIM}, got {features.shape[0]}"
+        )
+
+    return ((features - flex_posture_scaler_mean) / flex_posture_scaler_scale).astype(np.float32)
+
+def get_motion_score(seq_vision):
+    if len(seq_vision) < 2:
+        return 0.0
+    diffs = np.diff(seq_vision, axis=0)
+    motion = np.mean(np.linalg.norm(diffs, axis=1))
+    return float(motion)
+
+def get_flex_stats(sensor_vec):
+    left_mean = float(np.mean(sensor_vec[0:4]))
+    right_mean = float(np.mean(sensor_vec[4:8]))
+    both_mean = (left_mean + right_mean) / 2.0
+    return left_mean, right_mean, both_mean
+
+
+def build_sensor_model_vec(sensor_vec, left_seen, right_seen, left_held, right_held, overlap_now, frame_ambiguous):
+    base_sensor = np.asarray(sensor_vec, dtype=np.float32)
+    if base_sensor.shape[0] != RAW_SENSOR_DIM:
+        raise ValueError(f"Expected raw sensor dim {RAW_SENSOR_DIM}, got {base_sensor.shape[0]}")
+
+    if SENSOR_FLAG_DIM <= 0:
+        return base_sensor
+
+    full_flag_vec = np.array(
+        [
+            1.0 if left_seen else 0.0,
+            1.0 if right_seen else 0.0,
+            1.0 if left_held else 0.0,
+            1.0 if right_held else 0.0,
+            1.0 if overlap_now else 0.0,
+            1.0 if frame_ambiguous else 0.0,
+        ],
+        dtype=np.float32,
+    )
+    flag_vec = full_flag_vec[:SENSOR_FLAG_DIM]
+    return np.concatenate([base_sensor, flag_vec]).astype(np.float32)
+
+
+def classify_sequence_once(seq_array):
+    seq_vision = seq_array[:, :VISION_DIM]
+    long_motion = get_motion_score(seq_vision)
+    hand_count = int(np.sum(np.any(np.abs(seq_vision) > 1e-6, axis=1)))
+
+    result = {
+        'label': 'none',
+        'conf': 1.0,
+        'raw_label': 'none',
+        'raw_conf': 1.0,
+        'margin': 0.0,
+        'long_motion': long_motion,
+        'hand_count': hand_count,
+    }
+
+    if hand_count < MIN_HAND_FRAMES_FOR_WORD or long_motion < WORD_MOTION_THRESHOLD:
+        return result
+
+    seq_vision_scaled, seq_sensor_scaled, seq_sensor_raw_full = standardize_modalities(seq_array)
+    flex_posture_scaled = extract_flex_posture_features_from_sequence(seq_sensor_raw_full)
+    vision_input = tf.convert_to_tensor(
+        np.expand_dims(seq_vision_scaled, axis=0), dtype=tf.float32
+    )
+    sensor_input = tf.convert_to_tensor(
+        np.expand_dims(seq_sensor_scaled, axis=0), dtype=tf.float32
+    )
+    if MODEL_INPUT_COUNT >= 3:
+        flex_input = tf.convert_to_tensor(
+            np.expand_dims(flex_posture_scaled, axis=0), dtype=tf.float32
+        )
+        y_prob = infer(vision_input, sensor_input, flex_input).numpy()[0]
+    else:
+        y_prob = infer(vision_input, sensor_input).numpy()[0]
+
+    sorted_idx = np.argsort(y_prob)
+    top1_idx = int(sorted_idx[-1])
+    top2_idx = int(sorted_idx[-2])
+
+    top1_label = ACTIONS[top1_idx]
+    top1_conf = float(y_prob[top1_idx])
+    top2_conf = float(y_prob[top2_idx])
+    margin = top1_conf - top2_conf
+
+    result['raw_label'] = top1_label
+    result['raw_conf'] = top1_conf
+    result['margin'] = margin
+    result['label'] = top1_label
+    result['conf'] = top1_conf
+
+    return result
+
+
+
+def draw_status_panel(img, state_text, sub_text, result_text, fps_text, progress_ratio=0.0, color=(40, 40, 40)):
+    x1, y1, x2, y2 = 10, 10, 430, 120
+    draw_text_box(img, (x1, y1), (x2, y2), fill_color=(255, 255, 255), alpha=0.58)
+    draw_text_unicode(img, state_text, (22, 18), font_size=28, text_color=(0, 0, 0))
+    draw_text_unicode(img, sub_text, (22, 50), font_size=22, text_color=(25, 25, 25))
+    draw_text_unicode(img, result_text, (22, 78), font_size=24, text_color=(0, 120, 0))
+    draw_text_unicode(img, fps_text, (300, 82), font_size=20, text_color=(30, 30, 30))
+
+    if progress_ratio > 0:
+        bar_w = x2 - x1 - 24
+        fill = int(bar_w * max(0.0, min(1.0, progress_ratio)))
+        cv2.rectangle(img, (22, 98), (22 + bar_w, 104), (70, 70, 70), -1)
+        cv2.rectangle(img, (22, 98), (22 + fill, 104), (0, 255, 0), -1)
+
+
+def draw_debug_panel(img, lines):
+    if not SHOW_DEBUG_OVERLAY:
+        return
+
+    x1, y1 = 10, 120
+    width = 360
+    line_h = 22
+    height = 16 + line_h * len(lines)
+    overlay = img.copy()
+    cv2.rectangle(overlay, (x1, y1), (x1 + width, y1 + height), (25, 25, 25), -1)
+    cv2.addWeighted(overlay, 0.60, img, 0.40, 0, img)
+
+    for i, line in enumerate(lines):
+        cv2.putText(img, line, (x1 + 12, y1 + 24 + i * line_h),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.53, (255, 255, 255), 1)
+
+def reset_runtime_state():
+    sequence.clear()
+    hand_presence_history.clear()
+    recent_frame_motion.clear()
+
+def draw_center_text(img, title, subtitle="", remain_text="", bar_color=(40, 40, 40)):
+    h, w, _ = img.shape
+    draw_text_box(img, (0, 0), (w, 92), fill_color=(255, 255, 255), alpha=0.58)
+    draw_text_unicode(img, "수집 준비 안내", (16, 18), font_size=30, text_color=(0, 0, 0))
+    draw_text_unicode(img, title, (40, 200), font_size=34, text_color=(255, 255, 255))
+
+    if subtitle:
+        draw_text_unicode(img, subtitle, (40, 246), font_size=28, text_color=(235, 235, 235))
+
+    if remain_text:
+        draw_text_unicode(img, remain_text, (220, 332), font_size=40, text_color=(0, 255, 255))
+
+    draw_text_box(img, (10, h - 46), (132, h - 8), fill_color=(255, 255, 255), alpha=0.48)
+    draw_text_unicode(img, "Q : 종료", (18, h - 40), font_size=24, text_color=(0, 0, 0))
+
+def show_startup_calibration_guide():
+    if not wait_for_serial_connected(serial_reader, timeout_sec=5):
+        return False
+
+    for title, subtitle, duration_sec, bar_color in STARTUP_GUIDE_STAGES:
+        stage_start = time.time()
+
+        while True:
+            elapsed = time.time() - stage_start
+            remain = duration_sec - elapsed
+            if remain <= 0:
+                break
+
+            ret, img = cap.read()
+            if not ret:
+                continue
+
+            img = cv2.flip(img, 1)
+            results = hands.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
+            remain_text = f"{int(np.ceil(remain))} sec"
+            draw_center_text(img, title, subtitle, remain_text, bar_color=bar_color)
+
+            if results.multi_hand_landmarks and results.multi_handedness and DRAW_LANDMARKS:
+                for res_hand, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
+                    label = handedness.classification[0].label
+                    if label == 'Left':
+                        draw_custom_landmarks(img, res_hand, (255, 0, 0), "L")
+                    else:
+                        draw_custom_landmarks(img, res_hand, (0, 0, 255), "R")
+
+            cv2.imshow('Fusion Real-time Sign Recognition v5', img)
+            key = cv2.waitKey(1)
+
+            if key in [ord('q'), ord('Q')]:
+                return None
+
+    return True
+
+def show_wait_sensor_screen():
+    start = time.time()
+
+    while True:
+        if serial_reader.connection_error is not None:
+            return False
+
+        _, _, packet_count, _ = serial_reader.get_latest()
+        if packet_count > 0:
+            print("[Sensor] Ready")
+            return True
+
+        if time.time() - start > 12:
+            print("[Sensor] Timeout: ?쇱꽌 ?⑦궥?????ㅼ뼱?붿뒿?덈떎.")
+            return False
+
+        ret, img = cap.read()
+        if not ret:
+            continue
+
+        img = cv2.flip(img, 1)
+        draw_center_text(
+            img,
+            "센서 패킷을 기다리는 중입니다",
+            "잠시만 기다려주세요",
+            "",
+            bar_color=(40, 40, 40)
+        )
+
+        cv2.imshow('Fusion Real-time Sign Recognition v5', img)
+        key = cv2.waitKey(1)
+        if key in [ord('q'), ord('Q')]:
+            return None
+
+@tf.function
+def infer(vision_input_tensor, sensor_input_tensor, flex_input_tensor=None):
+    model_inputs = [vision_input_tensor, sensor_input_tensor]
+    if MODEL_INPUT_COUNT >= 3:
+        if flex_input_tensor is None:
+            flex_input_tensor = tf.zeros((tf.shape(vision_input_tensor)[0], FLEX_POSTURE_DIM), dtype=tf.float32)
+        model_inputs.append(flex_input_tensor)
+    return model(model_inputs, training=False)
+
+dummy_vision = np.zeros((1, SEQ_LEN, VISION_DIM), dtype=np.float32)
+dummy_sensor = np.zeros((1, SEQ_LEN, MODEL_SENSOR_DIM), dtype=np.float32)
+if MODEL_INPUT_COUNT >= 3:
+    dummy_flex = np.zeros((1, FLEX_POSTURE_DIM), dtype=np.float32)
+    _ = infer(
+        tf.convert_to_tensor(dummy_vision),
+        tf.convert_to_tensor(dummy_sensor),
+        tf.convert_to_tensor(dummy_flex),
+    )
+else:
+    _ = infer(
+        tf.convert_to_tensor(dummy_vision),
+        tf.convert_to_tensor(dummy_sensor)
+    )
+
+# =========================
+# ?쇱꽌 ?쒖옉
+# =========================
+serial_reader = SerialReader(SERIAL_PORT, SERIAL_BAUD)
+serial_reader.start()
+
+guide_result = show_startup_calibration_guide()
+if guide_result is None:
+    serial_reader.close()
+    cap.release()
+    cv2.destroyAllWindows()
+    raise SystemExit
+if guide_result is False:
+    serial_reader.close()
+    cap.release()
+    cv2.destroyAllWindows()
+    raise RuntimeError("?쒕━???곌껐 ?ㅽ뙣: COM ?ы듃 ?뺤씤 ?먮뒗 ?쒕━??紐⑤땲??醫낅즺 ?꾩슂")
+
+ready_result = show_wait_sensor_screen()
+if ready_result is None:
+    serial_reader.close()
+    cap.release()
+    cv2.destroyAllWindows()
+    raise SystemExit
+if ready_result is False:
+    serial_reader.close()
+    cap.release()
+    cv2.destroyAllWindows()
+    raise RuntimeError("?쇱꽌 以鍮??ㅽ뙣: COM ?ы듃 ?뺤씤 ?먮뒗 ?꾨몢?대끂 異쒕젰 ?곹깭 ?뺤씤 ?꾩슂")
+
+# =========================
+# ?곹깭 蹂??# =========================
+sequence = deque(maxlen=SEQ_LEN)
+hand_presence_history = deque(maxlen=SEQ_LEN)
+recent_frame_motion = deque(maxlen=SHORT_MOTION_WINDOW)
+
+prev_left = np.zeros(63, dtype=np.float32)
+prev_right = np.zeros(63, dtype=np.float32)
+prev_left_center = None
+prev_right_center = None
+prev_vision_vec = np.zeros(VISION_DIM, dtype=np.float32)
+
+left_missing_count = 0
+right_missing_count = 0
+no_hand_run = 0
+post_overlap_hold_count = 0
+overlap_freeze_count = 0
+left_recent_motion_px = 0.0
+right_recent_motion_px = 0.0
+
+mode = "WAIT"
+countdown_start_time = None
+
+stable_label = 'none'
+stable_conf = 0.0
+current_pred_label = ''
+current_pred_conf = 0.0
+long_motion_score = 0.0
+short_motion_score = 0.0
+last_margin = 0.0
+gt_label_index = -1
+
+last_sensor_time_ms = 0
+last_sensor_host_delta_ms = 0.0
+sensor_packet_count = 0
+zero_any_frame_indices = []
+zero_both_frame_indices = []
+zero_reason_counts = {}
+
+fps_prev_time = time.time()
+fps_smooth = 0.0
+
+
+os.makedirs(DEBUG_CAPTURE_DIR, exist_ok=True)
+
+
+def get_current_gt_label():
+    if 0 <= gt_label_index < len(ACTIONS):
+        return ACTIONS[gt_label_index]
+    return None
+
+
+def save_debug_capture(seq_array, result, frame_count, sensor_time_ms, sensor_host_delta_ms):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    label = str(result.get('raw_label', 'unknown'))
+    stem = f"{timestamp}_{label}"
+    npy_path = os.path.join(DEBUG_CAPTURE_DIR, f"{stem}.npy")
+    json_path = os.path.join(DEBUG_CAPTURE_DIR, f"{stem}.json")
+    gt_label = get_current_gt_label()
+    pred_label = result.get("raw_label")
+
+    np.save(npy_path, seq_array.astype(np.float32))
+
+    meta = {
+        "timestamp": timestamp,
+        "model_dir": DEFAULT_MODEL_DIR,
+        "model_path": MODEL_PATH,
+        "seq_len": int(seq_array.shape[0]),
+        "feature_dim": int(seq_array.shape[1]),
+        "captured_frames": int(frame_count),
+        "raw_label": result.get("raw_label"),
+        "raw_conf": float(result.get("raw_conf", 0.0)),
+        "label": result.get("label"),
+        "conf": float(result.get("conf", 0.0)),
+        "margin": float(result.get("margin", 0.0)),
+        "long_motion": float(result.get("long_motion", 0.0)),
+        "hand_count": int(result.get("hand_count", 0)),
+        "sensor_time_ms": int(sensor_time_ms),
+        "sensor_host_delta_ms": float(sensor_host_delta_ms),
+        "zero_any_count": int(len(zero_any_frame_indices)),
+        "zero_both_count": int(len(zero_both_frame_indices)),
+        "zero_any_indices": list(zero_any_frame_indices),
+        "zero_both_indices": list(zero_both_frame_indices),
+        "zero_reason_counts": dict(zero_reason_counts),
+        "gt_label": gt_label,
+        "gt_matches_prediction": (gt_label == pred_label) if gt_label is not None else None,
+        "actions": ACTIONS,
+    }
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+
+    print(f"[DebugCapture] saved: {npy_path}")
+    print(f"[DebugCaptureMeta] saved: {json_path}")
+
+
+def reset_recording_buffers():
+    global left_missing_count, right_missing_count, no_hand_run
+    global current_pred_label, current_pred_conf, long_motion_score, short_motion_score, last_margin
+    global prev_left_center, prev_right_center
+    global post_overlap_hold_count, overlap_freeze_count
+    global left_recent_motion_px, right_recent_motion_px
+    global zero_any_frame_indices, zero_both_frame_indices, zero_reason_counts
+
+    sequence.clear()
+    hand_presence_history.clear()
+    recent_frame_motion.clear()
+
+    prev_left[:] = 0
+    prev_right[:] = 0
+    prev_vision_vec[:] = 0
+    prev_left_center = None
+    prev_right_center = None
+
+    left_missing_count = 0
+    right_missing_count = 0
+    no_hand_run = 0
+    post_overlap_hold_count = 0
+    overlap_freeze_count = 0
+    left_recent_motion_px = 0.0
+    right_recent_motion_px = 0.0
+    zero_any_frame_indices = []
+    zero_both_frame_indices = []
+    zero_reason_counts = {
+        'overlap': 0,
+        'ambiguous_slot': 0,
+        'missing_left': 0,
+        'missing_right': 0,
+        'both_missing': 0,
+    }
+
+    current_pred_label = ''
+    current_pred_conf = 0.0
+    long_motion_score = 0.0
+    short_motion_score = 0.0
+    last_margin = 0.0
+
+
+def reset_all_state():
+    global mode, countdown_start_time, stable_label, stable_conf
+
+    reset_recording_buffers()
+    mode = "WAIT"
+    countdown_start_time = None
+    stable_label = 'none'
+    stable_conf = 0.0
+
+
+# =========================
+# Main loop
+# =========================
+try:
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            continue
+
+        frame = cv2.flip(frame, 1)
+        frame = cv2.resize(frame, (CAM_WIDTH, CAM_HEIGHT))
+        display_img = frame.copy()
+
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb.flags.writeable = False
+        results = hands.process(rgb)
+        rgb.flags.writeable = True
+
+        frame_host_time_ms = time.perf_counter() * 1000.0
+        sensor_time_ms, sensor_vec, sensor_packet_count, sensor_host_time_ms = serial_reader.get_aligned_packet(frame_host_time_ms)
+        last_sensor_time_ms = sensor_time_ms
+        last_sensor_host_delta_ms = frame_host_time_ms - sensor_host_time_ms
+
+        left_data = np.zeros(63, dtype=np.float32)
+        right_data = np.zeros(63, dtype=np.float32)
+        left_seen = False
+        right_seen = False
+        zero_vision_reason = None
+
+        candidates = make_hand_candidates(results, CAM_WIDTH, CAM_HEIGHT)
+        overlap_now = hands_are_overlapping(candidates)
+        frame_ambiguous = False
+
+        overlap_freeze_applied = False
+        left_missing_freeze = False
+        right_missing_freeze = False
+
+        if mode == "RECORDING" and overlap_now:
+            if (
+                overlap_freeze_count < SHORT_OVERLAP_FREEZE_FRAMES
+                and prev_left_center is not None
+                and prev_right_center is not None
+                and np.any(np.abs(prev_left) > 1e-6)
+                and np.any(np.abs(prev_right) > 1e-6)
+            ):
+                overlap_freeze_applied = True
+                overlap_freeze_count += 1
+                assigned = {'left': None, 'right': None}
+            else:
+                assigned = {'left': None, 'right': None}
+                frame_ambiguous = True
+                zero_vision_reason = "overlap"
+        else:
+            overlap_freeze_count = 0
+            assigned, frame_ambiguous = assign_hand_slots(candidates, prev_left_center, prev_right_center)
+            if frame_ambiguous:
+                zero_vision_reason = "ambiguous_slot"
+
+        left_candidate = assigned['left']
+        right_candidate = assigned['right']
+
+        if frame_ambiguous:
+            warn_text = 'VISION AMBIGUOUS - ZERO VISION FRAME'
+            if zero_vision_reason == "overlap":
+                warn_text = 'HAND OVERLAP - ZERO VISION FRAME'
+            cv2.putText(display_img, warn_text, (20, 110),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 255), 2)
+        elif overlap_freeze_applied:
+            cv2.putText(display_img, 'SHORT OVERLAP - HOLD PREV VISION', (20, 110),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 255), 2)
+
+        if left_candidate is not None:
+            left_data = left_candidate['data']
+            left_seen = True
+            if left_candidate.get('res_hand') is not None:
+                draw_custom_landmarks(display_img, left_candidate['res_hand'], (255, 0, 0), 'L')
+        elif overlap_freeze_applied:
+            left_data = prev_left.copy()
+
+        if right_candidate is not None:
+            right_data = right_candidate['data']
+            right_seen = True
+            if right_candidate.get('res_hand') is not None:
+                draw_custom_landmarks(display_img, right_candidate['res_hand'], (0, 0, 255), 'R')
+        elif overlap_freeze_applied:
+            right_data = prev_right.copy()
+
+        any_hand_seen = left_seen or right_seen
+
+        if mode == "RECORDING":
+            if left_candidate is not None:
+                if prev_left_center is not None:
+                    left_recent_motion_px = float(
+                        0.7 * left_recent_motion_px
+                        + 0.3 * np.linalg.norm(left_candidate['center'] - prev_left_center)
+                    )
+                else:
+                    left_recent_motion_px = 0.0
+                prev_left = left_data.copy()
+                prev_left_center = left_candidate['center'].copy()
+                left_missing_count = 0
+            else:
+                left_missing_count += 1
+                left_is_static_support = (
+                    prev_left_center is not None
+                    and np.any(np.abs(prev_left) > 1e-6)
+                    and left_recent_motion_px <= STATIC_SUPPORT_MOTION_PX
+                )
+                if (
+                    left_missing_count <= (
+                        MISSING_HOLD_FRAMES if left_is_static_support else SHORT_MISSING_FREEZE_FRAMES
+                    )
+                    and prev_left_center is not None
+                    and np.any(np.abs(prev_left) > 1e-6)
+                ):
+                    left_data = prev_left.copy()
+                    left_missing_freeze = True
+                elif left_missing_count > MISSING_HOLD_FRAMES:
+                    prev_left = np.zeros(63, dtype=np.float32)
+                    left_data = prev_left.copy()
+                    prev_left_center = None
+                    left_recent_motion_px = 0.0
+
+            if right_candidate is not None:
+                if prev_right_center is not None:
+                    right_recent_motion_px = float(
+                        0.7 * right_recent_motion_px
+                        + 0.3 * np.linalg.norm(right_candidate['center'] - prev_right_center)
+                    )
+                else:
+                    right_recent_motion_px = 0.0
+                prev_right = right_data.copy()
+                prev_right_center = right_candidate['center'].copy()
+                right_missing_count = 0
+            else:
+                right_missing_count += 1
+                right_is_static_support = (
+                    prev_right_center is not None
+                    and np.any(np.abs(prev_right) > 1e-6)
+                    and right_recent_motion_px <= STATIC_SUPPORT_MOTION_PX
+                )
+                if (
+                    right_missing_count <= (
+                        MISSING_HOLD_FRAMES if right_is_static_support else SHORT_MISSING_FREEZE_FRAMES
+                    )
+                    and prev_right_center is not None
+                    and np.any(np.abs(prev_right) > 1e-6)
+                ):
+                    right_data = prev_right.copy()
+                    right_missing_freeze = True
+                elif right_missing_count > MISSING_HOLD_FRAMES:
+                    prev_right = np.zeros(63, dtype=np.float32)
+                    right_data = prev_right.copy()
+                    prev_right_center = None
+                    right_recent_motion_px = 0.0
+
+            if any_hand_seen:
+                no_hand_run = 0
+                hand_presence_history.append(1)
+            else:
+                no_hand_run += 1
+                hand_presence_history.append(0)
+
+            vision_vec = np.concatenate([left_data, right_data]).astype(np.float32)
+            frame_idx_1based = len(sequence) + 1
+            left_zero_now = not np.any(np.abs(left_data) > 1e-6)
+            right_zero_now = not np.any(np.abs(right_data) > 1e-6)
+            if left_zero_now or right_zero_now:
+                zero_any_frame_indices.append(frame_idx_1based)
+            if left_zero_now and right_zero_now:
+                zero_both_frame_indices.append(frame_idx_1based)
+            if zero_vision_reason in zero_reason_counts:
+                zero_reason_counts[zero_vision_reason] += 1
+            elif overlap_freeze_applied:
+                pass
+            elif left_zero_now and right_zero_now:
+                zero_reason_counts['both_missing'] += 1
+            elif left_zero_now:
+                zero_reason_counts['missing_left'] += 1
+            elif right_zero_now:
+                zero_reason_counts['missing_right'] += 1
+
+            sensor_model_vec = build_sensor_model_vec(
+                sensor_vec=sensor_vec,
+                left_seen=left_seen,
+                right_seen=right_seen,
+                left_held=bool(overlap_freeze_applied),
+                right_held=bool(overlap_freeze_applied),
+                overlap_now=overlap_now,
+                frame_ambiguous=frame_ambiguous,
+            )
+
+            frame_motion = float(np.linalg.norm(vision_vec - prev_vision_vec))
+            recent_frame_motion.append(frame_motion)
+            prev_vision_vec = vision_vec.copy()
+            short_motion_score = float(np.mean(recent_frame_motion)) if len(recent_frame_motion) > 0 else 0.0
+
+            full_joint = np.concatenate([vision_vec, sensor_model_vec]).astype(np.float32)
+            sequence.append(full_joint)
+
+            if no_hand_run >= NO_HAND_RESET_FRAMES:
+                reset_all_state()
+
+            elif len(sequence) >= SEQ_LEN:
+                seq_array = np.array(sequence, dtype=np.float32)
+                result = classify_sequence_once(seq_array)
+                save_debug_capture(
+                    seq_array,
+                    result,
+                    len(sequence),
+                    last_sensor_time_ms,
+                    last_sensor_host_delta_ms,
+                )
+
+                current_pred_label = result['raw_label']
+                current_pred_conf = result['raw_conf']
+                stable_label = result['label']
+                stable_conf = result['conf']
+                long_motion_score = result['long_motion']
+                last_margin = result['margin']
+
+                kor_text = KOR_MAP.get(stable_label, stable_label)
+                print(
+                    f"[Result] stable={stable_label} ({kor_text}) | conf={stable_conf:.3f} | "
+                    f"margin={last_margin:.3f} | motion={long_motion_score:.3f}"
+                )
+                first_zero_any = zero_any_frame_indices[0] if zero_any_frame_indices else "-"
+                first_zero_both = zero_both_frame_indices[0] if zero_both_frame_indices else "-"
+                print(
+                    f"[VisionZero] any_zero={len(zero_any_frame_indices)}/{SEQ_LEN} "
+                    f"first_any={first_zero_any} indices={zero_any_frame_indices}"
+                )
+                print(
+                    f"[VisionZeroBoth] both_zero={len(zero_both_frame_indices)}/{SEQ_LEN} "
+                    f"first_both={first_zero_both} indices={zero_both_frame_indices}"
+                )
+                print(f"[VisionZeroReason] {zero_reason_counts}")
+
+                mode = "WAIT"
+                countdown_start_time = None
+
+        elif mode == "COUNTDOWN":
+            elapsed = time.time() - countdown_start_time
+            remain = TRIGGER_DELAY_SEC - elapsed
+            if remain <= 0:
+                reset_recording_buffers()
+                mode = "RECORDING"
+
+        now = time.time()
+        instant_fps = 1.0 / max(now - fps_prev_time, 1e-6)
+        fps_prev_time = now
+        fps_smooth = 0.9 * fps_smooth + 0.1 * instant_fps if fps_smooth > 0 else instant_fps
+
+        h, w, _ = display_img.shape
+        draw_text_box(display_img, (0, 0), (w, 138), fill_color=(255, 255, 255), alpha=0.58)
+
+        mode_kor = {"WAIT": "대기", "COUNTDOWN": "카운트다운", "RECORDING": "녹화중"}.get(mode, mode)
+        top1_kor = KOR_MAP.get(current_pred_label, current_pred_label) if current_pred_label else ""
+        stable_kor = KOR_MAP.get(stable_label, stable_label)
+        gt_label = get_current_gt_label()
+        gt_kor = KOR_MAP.get(gt_label, gt_label) if gt_label else "미지정"
+
+        draw_text_unicode(display_img, f"FPS: {fps_smooth:.1f}", (10, 12), font_size=28, text_color=(0, 0, 0))
+        draw_text_unicode(display_img, f"상태: {mode_kor}", (165, 12), font_size=28, text_color=(0, 0, 0))
+        draw_text_unicode(display_img, f"시퀀스: {len(sequence)}/{SEQ_LEN}", (380, 12), font_size=28, text_color=(0, 0, 0))
+        draw_text_unicode(display_img, f"동작량: {long_motion_score:.3f}", (10, 48), font_size=24, text_color=(20, 20, 20))
+        draw_text_unicode(display_img, f"GT: {gt_kor}", (10, 82), font_size=24, text_color=(120, 60, 0))
+
+        if current_pred_label != '':
+            draw_text_unicode(
+                display_img,
+                f"예측 1순위: {top1_kor} ({current_pred_conf:.2f})",
+                (230, 48),
+                font_size=24,
+                text_color=(0, 120, 160)
+            )
+
+        result_color = (0, 120, 0) if stable_label != 'none' else (90, 90, 90)
+        draw_text_unicode(
+            display_img,
+            f"결과: {stable_kor}",
+            (260, 82),
+            font_size=30,
+            text_color=result_color
+        )
+
+        if mode == "WAIT":
+            draw_text_unicode(
+                display_img,
+                "S 시작 | B 이전 GT | N 다음 GT | G GT해제 | Q 종료",
+                (10, 112),
+                font_size=22,
+                text_color=(25, 25, 25)
+            )
+        elif mode == "COUNTDOWN":
+            remain = max(0.0, TRIGGER_DELAY_SEC - (time.time() - countdown_start_time))
+            remain_int = int(np.ceil(remain))
+            draw_text_unicode(display_img, "준비 자세를 유지하세요", (10, 112), font_size=26, text_color=(0, 120, 160))
+            cv2.putText(display_img, str(remain_int), (w // 2 - 30, h // 2), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 255, 255), 6)
+        elif mode == "RECORDING":
+            draw_text_unicode(
+                display_img,
+                f"녹화 중... {len(sequence)}/{SEQ_LEN}",
+                (10, 112),
+                font_size=26,
+                text_color=(0, 120, 160)
+            )
+
+        progress = int((len(sequence) / SEQ_LEN) * w) if mode == "RECORDING" else 0
+        cv2.rectangle(display_img, (0, h - 8), (progress, h), (0, 255, 0), -1)
+
+        debug_lines = [
+            f"Hands seen: L={left_seen} R={right_seen}",
+            f"Flex mean: L={float(np.mean(sensor_vec[0:4])):.3f} R={float(np.mean(sensor_vec[4:8])):.3f}",
+            f"Short motion={short_motion_score:.4f} long motion={long_motion_score:.4f}",
+            f"Sensor packets={sensor_packet_count} ts={last_sensor_time_ms}",
+            f"Sensor align delta={last_sensor_host_delta_ms:.1f}ms",
+            f"Raw={current_pred_label} conf={current_pred_conf:.3f} margin={last_margin:.3f}",
+            f"Zero any={len(zero_any_frame_indices)}/{len(sequence)} first={zero_any_frame_indices[0] if zero_any_frame_indices else '-'}",
+            f"Zero both={len(zero_both_frame_indices)}/{len(sequence)} first={zero_both_frame_indices[0] if zero_both_frame_indices else '-'}",
+            f"Reason ov={zero_reason_counts.get('overlap', 0)} amb={zero_reason_counts.get('ambiguous_slot', 0)}",
+            f"Reason ml={zero_reason_counts.get('missing_left', 0)} mr={zero_reason_counts.get('missing_right', 0)} bm={zero_reason_counts.get('both_missing', 0)}",
+        ]
+        draw_debug_panel(display_img, debug_lines)
+
+        cv2.imshow('Fusion Real-time Sign Recognition v5', display_img)
+
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            break
+        elif key == ord('s'):
+            if mode == "WAIT":
+                reset_recording_buffers()
+                countdown_start_time = time.time()
+                mode = "COUNTDOWN"
+                print("시작 입력 감지. 2초 뒤 녹화를 시작합니다.")
+        elif key == ord('c'):
+            reset_all_state()
+            print("상태를 초기화했습니다.")
+        elif key == ord('d'):
+            DRAW_LANDMARKS = not DRAW_LANDMARKS
+            print(f'DRAW_LANDMARKS = {DRAW_LANDMARKS}')
+        elif key == ord('p'):
+            PRINT_DEBUG = not PRINT_DEBUG
+            print(f'PRINT_DEBUG = {PRINT_DEBUG}')
+        elif key == ord('i'):
+            SHOW_DEBUG_OVERLAY = not SHOW_DEBUG_OVERLAY
+            print(f'SHOW_DEBUG_OVERLAY = {SHOW_DEBUG_OVERLAY}')
+        elif key == ord('n'):
+            if ACTIONS:
+                gt_label_index = (gt_label_index + 1) % len(ACTIONS)
+                print(f"[GT] {get_current_gt_label()}")
+        elif key == ord('b'):
+            if ACTIONS:
+                gt_label_index = len(ACTIONS) - 1 if gt_label_index < 0 else (gt_label_index - 1) % len(ACTIONS)
+                print(f"[GT] {get_current_gt_label()}")
+        elif key == ord('g'):
+            gt_label_index = -1
+            print("[GT] cleared")
+
+finally:
+    serial_reader.close()
+    cap.release()
+    cv2.destroyAllWindows()

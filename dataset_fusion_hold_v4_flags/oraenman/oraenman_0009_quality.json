@@ -1,0 +1,37 @@
+{
+  "collect_session_id": "20260407_160339",
+  "action": "oraenman",
+  "sample_idx": 9,
+  "sequence_length": 60,
+  "alignment_quality": {
+    "frame_count": 60,
+    "delta_mean_ms": 10.847093333800634,
+    "delta_std_ms": 6.280537825535802,
+    "delta_max_ms": 22.561100006103516,
+    "delta_p95_ms": 20.095629984140395,
+    "warn_over_33ms_frames": 0,
+    "bad_over_50ms_frames": 0,
+    "warn_over_33ms_ratio": 0.0,
+    "bad_over_50ms_ratio": 0.0
+  },
+  "vision_zero_quality": {
+    "any_zero_frames": 3,
+    "both_zero_frames": 1,
+    "first_any_zero_frame": 40,
+    "first_both_zero_frame": 40,
+    "any_zero_ratio": 0.05,
+    "both_zero_ratio": 0.016666666666666666,
+    "reason_counts": {
+      "ambiguous_slot": 1,
+      "missing_right": 2
+    }
+  },
+  "frame_flag_names": [
+    "left_detected",
+    "right_detected",
+    "left_held",
+    "right_held",
+    "overlap_flag",
+    "ambiguous_flag"
+  ]
+}
