@@ -1,0 +1,120 @@
+﻿{
+    "generated_at":  "2026-04-10 17:34:02",
+    "main_message":  "Offline에서는 vision-only가 더 높지만, Practical에서는 fusion baseline이 더 강하고 특히 Practical-Out에서 가장 robust했다. Practical-In 계열에서는 일부 후보 모델이 더 높게 나왔지만, Out까지 포함하면 baseline fusion이 최종 구조 기준선으로 가장 안전하다.",
+    "baselines":  {
+                      "offline":  {
+                                      "vision_only":  {
+                                                          "accuracy":  0.9333,
+                                                          "macro_f1":  0.9239,
+                                                          "model_dir":  "C:\\SignProject\\experiments\\glove_vision\\2026-04-07_glove_vision_18w_clean_v1"
+                                                      },
+                                      "fusion_baseline":  {
+                                                              "accuracy":  0.9,
+                                                              "macro_f1":  0.8796,
+                                                              "model_dir":  "C:\\SignProject\\experiments\\glove_fusion\\2026-04-07_stable_hybrid_18w_clean_v1"
+                                                          }
+                                  },
+                      "practical":  {
+                                        "practical_in":  {
+                                                             "vision_only":  {
+                                                                                 "accuracy":  0.73611111111111116,
+                                                                                 "macro_f1":  0.70729209062542386,
+                                                                                 "report":  "C:\\SignProject\\experiments\\live_eval\\practical_in\\reports\\vision_only_report.json"
+                                                                             },
+                                                             "fusion_baseline":  {
+                                                                                     "accuracy":  0.875,
+                                                                                     "macro_f1":  0.84904601571268234,
+                                                                                     "report":  "C:\\SignProject\\experiments\\live_eval\\practical_in\\reports\\fusion_baseline_report.json"
+                                                                                 }
+                                                         },
+                                        "practical_in_2":  {
+                                                               "vision_only":  {
+                                                                                   "accuracy":  0.90277777777777779,
+                                                                                   "macro_f1":  0.88095238095238093,
+                                                                                   "report":  "C:\\SignProject\\experiments\\live_eval\\practical_in_2\\reports\\vision_only_report.json"
+                                                                               },
+                                                               "fusion_baseline":  {
+                                                                                       "accuracy":  0.90277777777777779,
+                                                                                       "macro_f1":  0.89902998236331577,
+                                                                                       "report":  "C:\\SignProject\\experiments\\live_eval\\practical_in_2\\reports\\fusion_baseline_report.json"
+                                                                                   }
+                                                           },
+                                        "practical_out":  {
+                                                              "vision_only":  {
+                                                                                  "accuracy":  0.56944444444444442,
+                                                                                  "macro_f1":  0.50548340548340542,
+                                                                                  "report":  "C:\\SignProject\\experiments\\live_eval\\practical_out\\reports\\vision_only_report.json"
+                                                                              },
+                                                              "fusion_baseline":  {
+                                                                                      "accuracy":  0.88888888888888884,
+                                                                                      "macro_f1":  0.87248677248677253,
+                                                                                      "report":  "C:\\SignProject\\experiments\\live_eval\\practical_out\\reports\\fusion_baseline_report.json"
+                                                                                  }
+                                                          }
+                                    }
+                  },
+    "candidate_models":  {
+                             "practical_in":  {
+                                                  "sensor_correction":  {
+                                                                            "accuracy":  0.98611111111111116,
+                                                                            "macro_f1":  0.98589065255731922
+                                                                        },
+                                                  "sensor_correction_ambiguous":  {
+                                                                                      "accuracy":  0.94444444444444442,
+                                                                                      "macro_f1":  0.94215167548500878
+                                                                                  },
+                                                  "modality_aware_correction":  {
+                                                                                    "accuracy":  0.95833333333333337,
+                                                                                    "macro_f1":  0.95626102292768955
+                                                                                },
+                                                  "modality_aware_rerank":  {
+                                                                                "accuracy":  0.94444444444444442,
+                                                                                "macro_f1":  0.94428411095077769
+                                                                            }
+                                              },
+                             "practical_in_2":  {
+                                                    "sensor_correction":  {
+                                                                              "accuracy":  0.95833333333333337,
+                                                                              "macro_f1":  0.95767195767195767
+                                                                          },
+                                                    "sensor_correction_ambiguous":  {
+                                                                                        "accuracy":  0.98611111111111116,
+                                                                                        "macro_f1":  0.98589065255731922
+                                                                                    },
+                                                    "modality_aware_correction":  {
+                                                                                      "accuracy":  0.95833333333333337,
+                                                                                      "macro_f1":  0.95890652557319234
+                                                                                  },
+                                                    "modality_aware_rerank":  {
+                                                                                  "accuracy":  0.91666666666666663,
+                                                                                  "macro_f1":  0.90881834215167545
+                                                                              }
+                                                },
+                             "practical_out":  {
+                                                   "sensor_correction":  {
+                                                                             "accuracy":  0.80555555555555558,
+                                                                             "macro_f1":  0.7657848324514992
+                                                                         },
+                                                   "sensor_correction_ambiguous":  {
+                                                                                       "accuracy":  0.84722222222222221,
+                                                                                       "macro_f1":  0.80990860990861
+                                                                                   },
+                                                   "modality_aware_correction":  {
+                                                                                     "accuracy":  0.72222222222222221,
+                                                                                     "macro_f1":  0.66421356421356414
+                                                                                 },
+                                                   "modality_aware_rerank":  {
+                                                                                 "accuracy":  0.83333333333333337,
+                                                                                 "macro_f1":  0.80330780330780327
+                                                                             }
+                                               }
+                         },
+    "key_interpretation":  [
+                               "Offline clean 기준에서는 vision-only가 fusion baseline보다 높다.",
+                               "Practical-In에서는 fusion baseline이 vision-only보다 높다.",
+                               "Practical-In-2에서는 vision-only와 fusion baseline 정확도는 같고, fusion baseline의 macro F1이 더 높다.",
+                               "Practical-Out에서는 fusion baseline이 vision-only보다 크게 높다.",
+                               "후보 모델들은 Practical-In, Practical-In-2에서는 baseline보다 더 높게 나올 수 있지만, Practical-Out에서는 baseline fusion보다 낮다.",
+                               "따라서 최종 구조 기준선은 fusion baseline으로 유지하는 것이 가장 타당하다."
+                           ]
+}
