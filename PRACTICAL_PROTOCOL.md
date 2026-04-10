@@ -12,6 +12,7 @@
 
 ## Practical Types
 - `Practical-In`: performed by a data collection participant.
+- `Practical-In-2`: performed by an additional data collection participant under the same protocol.
 - `Practical-Out`: performed by a non-participant.
 
 ## Capture Tool
@@ -84,6 +85,10 @@ Repeat the full 18-word order for 4 rounds.
   - `C:\SignProject\experiments\live_eval\practical_in\captures`
 - `Practical-In` reports:
   - `C:\SignProject\experiments\live_eval\practical_in\reports`
+- `Practical-In-2` captures:
+  - `C:\SignProject\experiments\live_eval\practical_in_2\captures`
+- `Practical-In-2` reports:
+  - `C:\SignProject\experiments\live_eval\practical_in_2\reports`
 - `Practical-Out` captures:
   - `C:\SignProject\experiments\live_eval\practical_out\captures`
 - `Practical-Out` reports:
@@ -95,6 +100,11 @@ Before running, point the capture directory to the proper group.
 ### Practical-In
 ```powershell
 $env:NSU_RUN_DEBUG_CAPTURE_DIR='C:\SignProject\experiments\live_eval\practical_in\captures'
+```
+
+### Practical-In-2
+```powershell
+$env:NSU_RUN_DEBUG_CAPTURE_DIR='C:\SignProject\experiments\live_eval\practical_in_2\captures'
 ```
 
 ### Practical-Out
