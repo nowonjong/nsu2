@@ -27,7 +27,7 @@ CONFIG_PATH = os.getenv("NSU_RUN_CONFIG_PATH", os.path.join(DEFAULT_MODEL_DIR, "
 DEBUG_CAPTURE_DIR = os.getenv("NSU_RUN_DEBUG_CAPTURE_DIR", "run_debug_captures")
 
 # =========================
-# 湲곕낯 ?ㅼ젙
+# 기본 설정
 # =========================
 SEQ_LEN = 60
 VISION_DIM = 126
@@ -64,15 +64,18 @@ MAX_NUM_HANDS = 2
 TRIGGER_DELAY_SEC = 2.0
 
 # =========================
-# ?쒕━???ㅼ젙
+# 시리얼 설정
 # =========================
 SERIAL_PORT = 'COM9'
 SERIAL_BAUD = 115200
 
 # =========================
-# ?쒖옉 罹섎━釉뚮젅?댁뀡 ?덈궡 ?쒓컙
-# ?꾩옱 Arduino 肄붾뱶 湲곗?
-# 1) Keep still            : ??4.5珥?# 2) Fingers stretched     : ??4.0珥?# 3) Fingers bent          : ??4.0珥?# =========================
+# 시작 캘리브레이션 안내 시간
+# 현재 Arduino 코드 기준
+# 1) Keep still        : 약 4.5초
+# 2) Fingers stretched : 약 4.0초
+# 3) Fingers bent      : 약 4.0초
+# =========================
 STARTUP_GUIDE_STAGES = [
     ("장갑을 움직이지 말고 유지하세요", "IMU 안정화 중", 4.5, (40, 40, 40)),
     ("검지부터 새끼손가락까지 쭉 펴주세요", "Flex 펴짐 보정 중", 4.0, (60, 70, 40)),
@@ -80,7 +83,7 @@ STARTUP_GUIDE_STAGES = [
 ]
 
 # =========================
-# ?몄떇 ?덉젙???뚮씪誘명꽣
+# 인식 안정화 파라미터
 # =========================
 HANDEDNESS_SCORE_TH = 0.55
 OVERLAP_IOU_THRESHOLD = 0.24
@@ -97,15 +100,31 @@ NO_HAND_RESET_FRAMES = 18
 MIN_HAND_FRAMES_FOR_WORD = 20
 SHORT_MOTION_WINDOW = 8
 WORD_MOTION_THRESHOLD = 0.040
+LOW_CONF_THRESHOLD = 0.55
+LOW_MARGIN_THRESHOLD = 0.08
+LOW_QUALITY_ZERO_BOTH_THRESHOLD = 2
+LOW_QUALITY_OVERLAP_THRESHOLD = 3
+LOW_QUALITY_MISSING_THRESHOLD = 6
 
-# UI / ?붾쾭洹?PRINT_DEBUG = False                  # 肄섏넄 ?붾쾭洹?異쒕젰
-SHOW_DEBUG_OVERLAY = False           # ?붾㈃ ?곸꽭 ?붾쾭洹??ㅻ쾭?덉씠
+# UI / 디버그
+PRINT_DEBUG = False
+SHOW_DEBUG_OVERLAY = False
 
 # =========================
-# 踰덉뿭 ?ъ쟾
+# 표시명 사전
 # =========================
 KOR_MAP = {
     'none': '대기',
+    'more': '모레',
+    'naeil': '내일',
+    'eoje': '어제',
+    'teukbyeol': '특별',
+    'byeollo': '별로',
+    'jamkkan': '잠깐',
+    'oraenman': '오랜만',
+    'gakkapda': '가깝다',
+    'jalhada': '잘하다',
+    'annyeonghaseyo': '안녕하세요',
     'gandanhada': '간단하다',
     'sada': '사다',
     'gamsahamnida': '감사합니다',
@@ -113,14 +132,14 @@ KOR_MAP = {
     'banggeum': '방금',
     'billida': '빌리다',
     'mannada': '만나다',
-    'byeongyeong': '변경',
+    'byeongyeonghada': '변경하다',
 }
 
 UI_FONT_PATH = r"C:\Windows\Fonts\malgun.ttf"
 _FONT_CACHE = {}
 
 # =========================
-# ?쇱꽌 ???쒖꽌
+# 센서 키 순서
 # =========================
 SENSOR_KEYS = [
     'lf0_norm', 'lf1_norm', 'lf2_norm', 'lf3_norm',
@@ -137,7 +156,7 @@ SENSOR_KEYS = [
 
 
 # =========================
-# TensorFlow GPU ?ㅼ젙
+# TensorFlow GPU 설정
 # =========================
 print("TensorFlow version:", tf.__version__)
 gpus = tf.config.list_physical_devices('GPU')
@@ -151,10 +170,10 @@ if gpus:
     except Exception as e:
         print("GPU memory growth setting failed:", e)
 else:
-    print("GPU瑜?李얠? 紐삵빐??CPU濡??숈옉?⑸땲??")
+    print("GPU를 찾지 못해 CPU로 동작합니다.")
 
 # =========================
-# 紐⑤뜽 / ?ㅼ??쇰윭 / ?대옒??濡쒕뱶
+# 모델 / 스케일러 / 클래스 로드
 # =========================
 if os.path.exists(CONFIG_PATH):
     with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
@@ -223,7 +242,7 @@ if 'none' not in ACTIONS:
     print("[경고] labels.json에 'none' 클래스가 없습니다.")
 
 # =========================
-# ?쒕━??由щ뜑
+# 시리얼 리더
 # =========================
 class SerialReader(threading.Thread):
     def __init__(self, port, baud):
@@ -775,6 +794,21 @@ def classify_sequence_once(seq_array):
     return result
 
 
+def should_hold_as_none(result, zero_both_count, zero_reason_counts):
+    raw_conf = float(result.get('raw_conf', 0.0))
+    margin = float(result.get('margin', 0.0))
+    low_prediction_quality = (raw_conf < LOW_CONF_THRESHOLD) and (margin < LOW_MARGIN_THRESHOLD)
+    poor_input_quality = (
+        int(zero_both_count) >= LOW_QUALITY_ZERO_BOTH_THRESHOLD
+        or int(zero_reason_counts.get('overlap', 0)) >= LOW_QUALITY_OVERLAP_THRESHOLD
+        or (
+            int(zero_reason_counts.get('missing_left', 0))
+            + int(zero_reason_counts.get('missing_right', 0))
+        ) >= LOW_QUALITY_MISSING_THRESHOLD
+    )
+    return low_prediction_quality and poor_input_quality
+
+
 
 def draw_status_panel(img, state_text, sub_text, result_text, fps_text, progress_ratio=0.0, color=(40, 40, 40)):
     x1, y1, x2, y2 = 10, 10, 430, 120
@@ -1307,6 +1341,9 @@ try:
             elif len(sequence) >= SEQ_LEN:
                 seq_array = np.array(sequence, dtype=np.float32)
                 result = classify_sequence_once(seq_array)
+                if should_hold_as_none(result, len(zero_both_frame_indices), zero_reason_counts):
+                    result['label'] = 'none'
+                    result['conf'] = result['raw_conf']
                 save_debug_capture(
                     seq_array,
                     result,

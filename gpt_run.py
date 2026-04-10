@@ -1,4 +1,4 @@
-import os
+﻿import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 import cv2
@@ -20,7 +20,7 @@ MODEL_PATH = os.path.join(MODEL_DIR, "best_lstm.keras")
 SCALER_PATH = os.path.join(MODEL_DIR, "vision_scaler.npz")
 CLASS_NAMES_PATH = os.path.join(MODEL_DIR, "class_names.json")
 CONFIG_PATH = os.path.join(MODEL_DIR, "config.json")
-DEBUG_CAPTURE_DIR = os.getenv("NSU_VISION_DEBUG_CAPTURE_DIR", "experiments\\live_eval\\vision_run_debug_captures")
+DEBUG_CAPTURE_DIR = os.getenv("NSU_VISION_DEBUG_CAPTURE_DIR", r"experiments\live_eval\vision_run_debug_captures")
 
 SEQ_LEN = 60
 FEATURE_DIM = 126
@@ -32,31 +32,43 @@ MODEL_COMPLEXITY = 0
 MAX_NUM_HANDS = 2
 TRIGGER_DELAY_SEC = 2.0
 
-HAND_SCORE_THRESHOLD = 0.70
-OVERLAP_IOU_THRESHOLD = 0.18
-OVERLAP_CENTER_DIST_PX = 90.0
+HAND_SCORE_THRESHOLD = 0.55
+OVERLAP_IOU_THRESHOLD = 0.24
+OVERLAP_CENTER_DIST_PX = 60.0
 SLOT_AMBIGUOUS_MARGIN = 35.0
 MISSING_HOLD_FRAMES = 6
 NO_HAND_RESET_FRAMES = 18
-MIN_HAND_FRAMES_FOR_WORD = 0
-MOTION_THRESHOLD = 0.0
+MIN_HAND_FRAMES_FOR_WORD = 20
+MOTION_THRESHOLD = 0.040
+LOW_CONF_THRESHOLD = 0.55
+LOW_MARGIN_THRESHOLD = 0.08
 
 STARTUP_GUIDE_STAGES = [
-    ("손을 화면 안에 잘 보이게 준비하세요", "시작 자세를 맞춰주세요", 2.0, (40, 40, 40)),
+    ("손이 화면 안에 잘 보이게 준비하세요", "시작 자세를 맞춰주세요", 2.0, (40, 40, 40)),
     ("검지부터 새끼손가락까지 쭉 펴주세요", "손모양을 확인합니다", 2.0, (60, 70, 40)),
     ("검지부터 새끼손가락까지 구부려주세요", "손모양 변화를 확인합니다", 2.0, (70, 40, 40)),
 ]
 
 KOR_MAP = {
     "none": "대기",
+    "more": "모레",
+    "naeil": "내일",
+    "eoje": "어제",
+    "teukbyeol": "특별",
+    "byeollo": "별로",
+    "jamkkan": "잠깐",
+    "oraenman": "오랜만",
+    "gakkapda": "가깝다",
+    "jalhada": "잘하다",
+    "annyeonghaseyo": "안녕하세요",
+    "mannada": "만나다",
+    "byeongyeonghada": "변경하다",
+    "banggeum": "방금",
+    "billida": "빌리다",
     "gandanhada": "간단하다",
     "sada": "사다",
     "gamsahamnida": "감사합니다",
     "joesonghada": "죄송하다",
-    "banggeum": "방금",
-    "billida": "빌리다",
-    "mannada": "만나다",
-    "byeongyeong": "변경",
 }
 
 UI_FONT_PATH = r"C:\Windows\Fonts\malgun.ttf"
@@ -86,7 +98,8 @@ with open(CLASS_NAMES_PATH, "r", encoding="utf-8") as f:
     ACTIONS = json.load(f)
 scaler_data = np.load(SCALER_PATH)
 scaler_mean = scaler_data["mean"].astype(np.float32)
-scaler_scale = np.where(np.abs(scaler_data["scale"].astype(np.float32)) < 1e-8, 1.0, scaler_data["scale"].astype(np.float32))
+scaler_scale = scaler_data["scale"].astype(np.float32)
+scaler_scale = np.where(np.abs(scaler_scale) < 1e-8, 1.0, scaler_scale)
 
 print("로드된 클래스:", ACTIONS)
 if "none" not in ACTIONS:
@@ -264,6 +277,7 @@ def assign_hand_slots(candidates, prev_left_center, prev_right_center):
             return assigned, ambiguous
         assigned[slot_name] = candidates[0]
         return assigned, False
+
     cands = candidates[:2]
     case1 = slot_cost(cands[0], "left", prev_left_center) + slot_cost(cands[1], "right", prev_right_center)
     case2 = slot_cost(cands[1], "left", prev_left_center) + slot_cost(cands[0], "right", prev_right_center)
@@ -286,8 +300,15 @@ def draw_custom_landmarks(img, hand_landmarks, color, label):
     for lm in hand_landmarks.landmark:
         cx, cy = int(lm.x * w), int(lm.y * h)
         cv2.circle(img, (cx, cy), 4, color, cv2.FILLED)
-    cv2.putText(img, label, (int(wrist.x * w) - 15, int(wrist.y * h) - 15),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+    cv2.putText(
+        img,
+        label,
+        (int(wrist.x * w) - 15, int(wrist.y * h) - 15),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.8,
+        color,
+        2,
+    )
 
 
 def standardize_sequence(seq):
@@ -340,9 +361,9 @@ def get_current_gt_label():
     return None
 
 
-def save_debug_capture(seq_array, pred_label, pred_conf, top2_label, top2_conf, margin, motion):
+def save_debug_capture(seq_array, raw_label, raw_conf, final_label, final_conf, top2_label, top2_conf, margin, motion):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-    stem = f"{timestamp}_{pred_label}"
+    stem = f"{timestamp}_{raw_label}"
     npy_path = os.path.join(DEBUG_CAPTURE_DIR, f"{stem}.npy")
     json_path = os.path.join(DEBUG_CAPTURE_DIR, f"{stem}.json")
     gt_label = get_current_gt_label()
@@ -355,16 +376,16 @@ def save_debug_capture(seq_array, pred_label, pred_conf, top2_label, top2_conf, 
         "model_path": MODEL_PATH,
         "seq_len": int(seq_array.shape[0]),
         "feature_dim": int(seq_array.shape[1]),
-        "raw_label": pred_label,
-        "raw_conf": float(pred_conf),
-        "label": pred_label,
-        "conf": float(pred_conf),
+        "raw_label": raw_label,
+        "raw_conf": float(raw_conf),
+        "label": final_label,
+        "conf": float(final_conf),
         "top2_label": top2_label,
         "top2_conf": float(top2_conf),
         "margin": float(margin),
         "motion": float(motion),
         "gt_label": gt_label,
-        "gt_matches_prediction": (gt_label == pred_label) if gt_label is not None else None,
+        "gt_matches_prediction": (gt_label == final_label) if gt_label is not None else None,
         "actions": ACTIONS,
     }
     with open(json_path, "w", encoding="utf-8") as f:
@@ -378,6 +399,7 @@ def reset_recording_buffers():
     global left_missing_count, right_missing_count, no_hand_run
     global current_pred_label, current_pred_conf, motion_score, last_margin
     global prev_left_center, prev_right_center
+
     sequence.clear()
     hand_presence_history.clear()
     prev_left[:] = 0
@@ -404,6 +426,7 @@ def reset_all_state():
 
 def run_one_shot_prediction():
     global stable_label, stable_conf, current_pred_label, current_pred_conf, motion_score, last_margin
+
     if len(sequence) < SEQ_LEN:
         stable_label = "none"
         stable_conf = 0.0
@@ -412,8 +435,24 @@ def run_one_shot_prediction():
         motion_score = 0.0
         last_margin = 0.0
         return
+
     seq_array = np.array(sequence, dtype=np.float32)
     motion_score = get_motion_score(seq_array)
+    hand_count = int(np.sum(np.any(np.abs(seq_array) > 1e-6, axis=1)))
+
+    if hand_count < MIN_HAND_FRAMES_FOR_WORD or motion_score < MOTION_THRESHOLD:
+        stable_label = "none"
+        stable_conf = 1.0
+        current_pred_label = "none"
+        current_pred_conf = 1.0
+        last_margin = 0.0
+        save_debug_capture(seq_array, "none", 1.0, "none", 1.0, "none", 1.0, 0.0, motion_score)
+        print(
+            f"[Result] stable=none ({KOR_MAP.get('none', 'none')}) | "
+            f"hand_count={hand_count} | motion={motion_score:.3f}"
+        )
+        return
+
     x = np.expand_dims(standardize_sequence(seq_array), axis=0)
     y_prob = infer(tf.convert_to_tensor(x, dtype=tf.float32)).numpy()[0]
     sorted_idx = np.argsort(y_prob)
@@ -424,13 +463,26 @@ def run_one_shot_prediction():
     top2_label = ACTIONS[top2_idx]
     top2_conf = float(y_prob[top2_idx])
     margin = top1_conf - top2_conf
+
     current_pred_label = top1_label
     current_pred_conf = top1_conf
-    stable_label = top1_label
-    stable_conf = top1_conf
+
+    final_label = top1_label
+    final_conf = top1_conf
+    if top1_conf < LOW_CONF_THRESHOLD and margin < LOW_MARGIN_THRESHOLD:
+        final_label = "none"
+        final_conf = top1_conf
+
+    stable_label = final_label
+    stable_conf = final_conf
     last_margin = margin
-    save_debug_capture(seq_array, top1_label, top1_conf, top2_label, top2_conf, margin, motion_score)
-    print(f"[Result] stable={stable_label} ({KOR_MAP.get(stable_label, stable_label)}) | conf={stable_conf:.3f} | top2={top2_label} ({top2_conf:.3f}) | margin={margin:.3f} | motion={motion_score:.3f}")
+
+    save_debug_capture(seq_array, top1_label, top1_conf, final_label, final_conf, top2_label, top2_conf, margin, motion_score)
+    print(
+        f"[Result] stable={stable_label} ({KOR_MAP.get(stable_label, stable_label)}) | "
+        f"conf={stable_conf:.3f} | top2={top2_label} ({top2_conf:.3f}) | "
+        f"margin={margin:.3f} | motion={motion_score:.3f}"
+    )
 
 
 def show_startup_guide():
@@ -462,6 +514,7 @@ while True:
     ret, frame = cap.read()
     if not ret:
         continue
+
     frame = cv2.flip(frame, 1)
     frame = cv2.resize(frame, (CAM_WIDTH, CAM_HEIGHT))
     display_img = frame.copy()
@@ -483,6 +536,7 @@ while True:
         frame_ambiguous = True
     else:
         assigned, frame_ambiguous = assign_hand_slots(candidates, prev_left_center, prev_right_center)
+
     left_candidate = assigned["left"]
     right_candidate = assigned["right"]
 
@@ -552,13 +606,21 @@ while True:
     stable_kor = KOR_MAP.get(stable_label, stable_label)
     gt_label = get_current_gt_label()
     gt_kor = KOR_MAP.get(gt_label, gt_label) if gt_label else "미지정"
+
     draw_text_unicode(display_img, f"FPS: {fps_smooth:.1f}", (10, 12), font_size=28, text_color=(0, 0, 0))
     draw_text_unicode(display_img, f"상태: {mode_kor}", (165, 12), font_size=28, text_color=(0, 0, 0))
     draw_text_unicode(display_img, f"시퀀스: {len(sequence)}/{SEQ_LEN}", (380, 12), font_size=28, text_color=(0, 0, 0))
     draw_text_unicode(display_img, f"동작량: {motion_score:.3f}", (10, 48), font_size=24, text_color=(20, 20, 20))
     draw_text_unicode(display_img, f"GT: {gt_kor}", (10, 82), font_size=24, text_color=(120, 60, 0))
     if current_pred_label:
-        draw_text_unicode(display_img, f"예측 1순위: {top1_kor} ({current_pred_conf:.2f})", (230, 48), font_size=24, text_color=(0, 120, 160))
+        draw_text_unicode(
+            display_img,
+            f"예측 1순위: {top1_kor} ({current_pred_conf:.2f})",
+            (230, 48),
+            font_size=24,
+            text_color=(0, 120, 160),
+        )
+
     result_color = (0, 120, 0) if stable_label != "none" else (90, 90, 90)
     draw_text_unicode(display_img, f"결과: {stable_kor}", (260, 82), font_size=30, text_color=result_color)
 
