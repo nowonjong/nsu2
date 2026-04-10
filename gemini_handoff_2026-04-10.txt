@@ -1,0 +1,569 @@
+﻿[SignProject Gemini Handoff - 2026-04-10]
+
+이 문서는 C:\SignProject 프로젝트의 현재 상태, 지금까지의 의사결정, 실험 결과, 파일 역할, 그리고 앞으로의 계획을 Gemini 등 외부 어시스턴트에게 정확히 전달하기 위한 handoff 문서다.
+
+중요한 전제
+1. C:\SignProject는 예전 노트북 폴더가 아니라, 최신 lsm-version 핵심 코드와 결과를 반영한 병합 작업폴더다.
+2. stable hybrid는 현재 가장 유망한 fusion baseline 구조이지, 최종 확정 모델이라고 단정하면 안 된다.
+3. 교수님 비교 프레임은 아래 3축이다.
+   - bare hand + vision
+   - glove + vision
+   - glove + fusion
+4. 지금은 모델 구조를 많이 바꿔보는 단계에서, practical 기준으로 가장 강한 fusion baseline을 일단 고정했고, 이제 run/practical 중심으로 비교와 개선을 진행하는 흐름이다.
+5. 앞으로 결과를 정리할 때는 realistic offline은 메인에서 빼고, offline vs practical 두 축으로 설명하기로 정리했다.
+
+--------------------------------------------------
+1. 프로젝트 전체 방향
+--------------------------------------------------
+이 프로젝트는 한국 수어 인식 시스템을 만드는 작업이다. 핵심 질문은 단순히 오프라인 accuracy를 높이는 것이 아니라, 실제 run 환경에서 얼마나 안정적으로 인식되는지를 보는 것이다.
+
+초기에는 다음 질문이 중요했다.
+- vision-only가 더 높은 오프라인 지표를 보일 때, sensor fusion이 실제로 의미가 있는가?
+- stable hybrid 류의 fusion이 실제 사용에서 도움이 되는가?
+- offline 성능과 실제 run 성능이 왜 다르게 보이는가?
+
+현재는 다음 질문으로 정리되었다.
+- glove + vision과 glove + fusion을 practical 환경에서 공정하게 비교했을 때, 무엇이 더 강한가?
+- offline과 practical 사이의 차이를 어떻게 해석할 것인가?
+- practical 비교는 어떤 프로토콜로 고정할 것인가?
+- run 단계에서 오인식을 줄이는 공통 규칙은 어떻게 설계할 것인가?
+
+--------------------------------------------------
+2. 현재 비교 대상 모델
+--------------------------------------------------
+현재 구조 기준선으로 보는 핵심 모델은 아래 2개다.
+
+A. glove vision-only baseline
+경로:
+C:\SignProject\experiments\glove_vision\2026-04-07_glove_vision_18w_clean_v1
+
+B. glove fusion baseline (현재 구조 기준선)
+경로:
+C:\SignProject\experiments\glove_fusion\2026-04-07_stable_hybrid_18w_clean_v1
+
+이 두 모델을 기준으로 이후 practical 비교를 진행한다.
+
+중요:
+- 현재 최종 구조 기준선은 fusion baseline이다.
+- vision-only는 비교 기준선으로 고정한다.
+- 여러 fusion 변형을 만들어봤지만, practical 기준으로는 baseline fusion을 넘지 못했다.
+
+--------------------------------------------------
+3. 사용 단어 18개
+--------------------------------------------------
+현재 18개 단어 체계는 아래와 같다.
+
+1. more
+2. naeil
+3. eoje
+4. teukbyeol
+5. byeollo
+6. jamkkan
+7. oraenman
+8. gakkapda
+9. jalhada
+10. annyeonghaseyo
+11. mannada
+12. byeongyeonghada
+13. banggeum
+14. billida
+15. gandanhada
+16. sada
+17. gamsahamnida
+18. joesonghada
+
+한글 대응은 현재 run 코드에도 정리되어 있다.
+
+--------------------------------------------------
+4. 7개 유사 동작 그룹
+--------------------------------------------------
+이 18개 단어는 아래 7개 유사 동작 그룹으로 묶여 있다. 이 그룹은 confusion 해석 및 발표 서사에 중요하다.
+
+1. direction_difference
+- more
+- naeil
+- eoje
+
+2. wrist_angle_difference
+- teukbyeol
+- byeollo
+
+3. bend_path_difference
+- jamkkan
+- oraenman
+- gakkapda
+
+4. additional_motion_difference
+- jalhada
+- annyeonghaseyo
+
+5. cross_hand_difference
+- mannada
+- byeongyeonghada
+
+6. instant_handshape_difference
+- banggeum
+- billida
+
+7. handshape_difference
+- gandanhada
+- sada
+- gamsahamnida
+- joesonghada
+
+관련 파일:
+C:\SignProject\similar_sign_groups.json
+
+--------------------------------------------------
+5. 데이터 수집과 품질 확인
+--------------------------------------------------
+장갑 데이터는 nsu_collect 계열로 정리해서 만들었다. 최종적으로 18개 단어 각각 40개씩 정리되도록 구성했고, 품질이 안 좋았던 일부 샘플은 삭제 후 재촬영했다.
+
+중요한 품질 점검 결과:
+- 센서 연결 끊김 증거 없음
+- all_zero sensor frame = 0
+- 센서-프레임 정렬 delta_mean 대략 11ms 수준
+- warn33 = 0, bad50 = 0
+- 즉 센서 하드웨어/동기화 품질은 전체적으로 안정적이었다
+
+반면 vision 품질은 단어에 따라 흔들림이 있었고, 특히 overlap / missing / ambiguous 영향이 일부 단어에서 반복적으로 관찰되었다.
+
+재촬영/주의 단어 후보로 자주 언급된 단어:
+- mannada
+- joesonghada
+- jamkkan
+- oraenman
+- annyeonghaseyo
+
+하지만 데이터 측면에서는 현재 수준이면 충분하다고 판단했고, 이후에는 데이터 추가보다 평가 구조와 practical 비교가 더 중요하다고 정리했다.
+
+--------------------------------------------------
+6. Offline 결과
+--------------------------------------------------
+현재 메인으로 쓰는 offline은 clean offline, 즉 학습 후 정리된 데이터셋 기준 test 성능이다.
+
+A. glove vision-only baseline
+경로:
+C:\SignProject\experiments\glove_vision\2026-04-07_glove_vision_18w_clean_v1
+결과:
+- Test Accuracy: 0.9333
+- Test Macro F1: 0.9239
+
+B. glove fusion baseline
+경로:
+C:\SignProject\experiments\glove_fusion\2026-04-07_stable_hybrid_18w_clean_v1
+결과:
+- Test Accuracy: 0.9000
+- Test Macro F1: 0.8796
+
+즉 clean offline만 보면 vision-only가 더 좋다.
+
+--------------------------------------------------
+7. Practical 결과
+--------------------------------------------------
+현재 가장 중요한 practical 비교는 GT 포함 run capture를 활용한 live-like practical benchmark다.
+
+중요한 원칙:
+- glove + vision과 glove + fusion을 공정하게 비교하려면, 공통 입력은 nsu_run 캡처를 사용해야 한다.
+- nsu_run 캡처에는 vision + sensor가 함께 들어 있다.
+- 이 공통 캡처를 가지고:
+  - vision-only 모델은 앞 126차원 vision만 사용
+  - fusion 모델은 전체 입력 사용
+- 따라서 같은 실제 수행 데이터를 기준으로 두 모델을 비교할 수 있다.
+
+현재 practical benchmark 결과:
+
+A. glove vision-only baseline
+- Accuracy: 0.6587
+- Macro F1: 0.6021
+
+B. glove fusion baseline
+- Accuracy: 0.9048
+- Macro F1: 0.8999
+
+즉 practical에서는 fusion이 압도적으로 우세했다.
+
+이 결과는 clean offline 결과와 정반대이므로, 현재 프로젝트의 핵심 메시지는 다음과 같이 정리되고 있다.
+- 정리된 offline 성능만으로는 실제 성능을 설명할 수 없다.
+- 실제 사용에 가까운 practical 환경에서는 sensor fusion이 훨씬 강건하다.
+
+--------------------------------------------------
+8. realistic offline에 대한 정리
+--------------------------------------------------
+중간에 realistic offline이라는 보조 평가도 만들었다. 여기에는 hard-case, similar-group confusion, low-margin 성격의 보조 해석이 포함됐다.
+
+관련 파일:
+- C:\SignProject\evaluate_realistic_offline.py
+- 각 실험 폴더의 realistic_offline_eval.json
+
+하지만 현재 프로젝트 정리 방향에서는 realistic offline은 메인에서 빼고, 앞으로는 아래 2개만 공식 비교축으로 가져가기로 했다.
+- Offline
+- Practical
+
+즉 발표/보고서 메인에는 realistic offline을 쓰지 않고, 필요시 보조/부록/답변용 자료로만 참고한다.
+
+--------------------------------------------------
+9. 실험했던 fusion 구조 변형들
+--------------------------------------------------
+baseline fusion을 넘기 위해 여러 변형을 만들어봤다. 실험 결과 clean offline은 좋아지는 경우가 있었지만, practical에서는 baseline fusion을 넘는 모델이 없었다.
+
+실험했던 주요 후보:
+
+1. sensor_correction
+경로:
+C:\SignProject\experiments\glove_fusion\2026-04-08_sensor_correction_18w_v1
+의미:
+- baseline 위에 sensor residual correction을 전 클래스에 거는 방식
+결과:
+- clean offline은 크게 개선
+- practical은 baseline보다 하락
+결론:
+- 실전형 기준으로 탈락
+
+2. sensor_correction_ambiguous
+경로:
+C:\SignProject\experiments\glove_fusion\2026-04-08_sensor_correction_ambiguous_18w_v1
+의미:
+- baseline이 애매할 때만 correction 적용
+결과:
+- 전역 correction보단 나았지만 practical에서 baseline을 못 넘음
+결론:
+- 의미는 있으나 기준선 대체 실패
+
+3. modality_aware_correction
+경로:
+C:\SignProject\experiments\glove_fusion\2026-04-08_modality_aware_correction_18w_v1
+의미:
+- IMU 계열과 flex 계열을 분리해 샘플별로 어떤 modality를 더 쓸지 gate가 정하게 한 correction
+결과:
+- clean offline은 baseline과 비슷하거나 소폭 개선
+- practical은 baseline보다 소폭 낮음
+결론:
+- 철학은 좋았지만 baseline practical robustness를 못 넘음
+
+4. modality_aware_rerank
+경로:
+C:\SignProject\experiments\glove_fusion\2026-04-08_modality_aware_rerank_18w_v1
+의미:
+- 후보 재정렬 시 유의미한 센서 modality를 골라 활용하는 방향
+결과:
+- clean offline은 매우 좋았음
+- practical은 baseline보다 크게 낮아짐
+결론:
+- offline에는 잘 맞아도 practical robustness를 악화시킴
+
+현재 최종 구조 결론:
+- 위 후보들 모두 practical 기준으로 baseline fusion을 넘지 못했다.
+- 따라서 현재 구조 기준선은 여전히
+  C:\SignProject\experiments\glove_fusion\2026-04-07_stable_hybrid_18w_clean_v1
+  이다.
+
+중요:
+- 다만 아래 세 후보는 나중에 의미 있게 다시 볼 수 있으므로 버리지 않는다.
+  - sensor_correction_ambiguous_18w_v1
+  - modality_aware_correction_18w_v1
+  - modality_aware_rerank_18w_v1
+- 즉 baseline을 이기진 못했지만, 실험 흐름상 유의미한 근접 후보들이다.
+
+--------------------------------------------------
+10. 센서에 대한 현재 해석
+--------------------------------------------------
+센서는 무의미하지 않다. 하지만 모든 그룹에서 똑같이 강한 것도 아니다.
+
+확인된 것:
+1. 센서 스트림 자체는 안정적이다.
+2. practical 환경에서는 sensor fusion이 vision-only보다 훨씬 강했다.
+3. 하지만 센서 분리도는 그룹마다 다르다.
+
+센서 통계 기반 분석 결과 파일:
+C:\SignProject\sensor_separation_analysis.json
+
+요약 해석:
+- IMU나 flex가 특정 그룹에서 더 유효하다.
+- 예를 들어:
+  - teukbyeol / byeollo: flex보다 IMU가 더 의미 있을 가능성
+  - banggeum / billida: IMU보다 flex가 더 의미 있을 가능성
+  - gandanhada / sada / gamsahamnida / joesonghada: flex 정보가 유의미함
+  - mannada / byeongyeonghada: flex보다는 IMU/경로 쪽이 더 의미 있을 가능성
+
+그러나 이 센서 인사이트를 활용해 새 구조를 만들었을 때도, practical에서는 baseline fusion을 넘지 못했다. 그래서 지금은 “센서 활용 구조를 더 바꾸는 단계”보다 “baseline fusion을 practical 기준선으로 고정하고 run 단계에서 개선하는 단계”로 넘어가는 흐름이다.
+
+--------------------------------------------------
+11. run 코드 상태
+--------------------------------------------------
+현재 run 코드 핵심 파일은 아래 2개다.
+
+1. vision-only run
+C:\SignProject\gpt_run.py
+
+현재 상태:
+- 한글/UI 정리 완료
+- 18단어 KOR_MAP 정리 완료
+- 최소 공통 run 규칙 추가
+- GT 저장 기능 있음
+
+현재 최소 규칙:
+- HAND_SCORE_THRESHOLD = 0.55
+- OVERLAP_IOU_THRESHOLD = 0.24
+- OVERLAP_CENTER_DIST_PX = 60.0
+- MIN_HAND_FRAMES_FOR_WORD = 20
+- MOTION_THRESHOLD = 0.040
+
+추가된 run 규칙 v1:
+- LOW_CONF_THRESHOLD = 0.55
+- LOW_MARGIN_THRESHOLD = 0.08
+- top1 예측이 매우 약할 때만 final 결과를 none으로 보류
+- raw 예측은 debug capture에 그대로 저장
+
+2. fusion run
+C:\SignProject\nsu_run_fusion_v6_overlap_hold.py
+
+현재 상태:
+- GT 저장 기능 있음
+- 18단어 KOR_MAP 정리 완료
+- 상단 깨진 설명/주석 일부 정리 완료
+- PRINT_DEBUG 변수 복구
+- overlap / missing / ambiguous 처리 유지
+- sensor alignment / debug capture 저장 유지
+
+현재 핵심 구조:
+- overlap freeze
+- missing hold
+- ambiguous slot 처리
+- min hand frames / motion threshold 적용
+- debug json에 conf, margin, zero_any, zero_both, zero_reason_counts, gt_label 등 저장
+
+run 규칙 v1:
+- LOW_CONF_THRESHOLD = 0.55
+- LOW_MARGIN_THRESHOLD = 0.08
+- zero_both / overlap / missing이 일정 이상인 경우와, 예측 자체가 약한 경우가 동시에 겹칠 때만 none 보류
+
+즉 현재 run v1은 “아주 약한 안전장치” 수준이다. 보류를 남발하지 않기 위해 의도적으로 약하게 설정했다.
+
+--------------------------------------------------
+12. practical의 현재 정의
+--------------------------------------------------
+현재 practical은 live run 기반 평가이고, 메인 실험에서는 아래 방식으로 정의한다.
+
+- 실험 수행은 run 환경에서 한다.
+- GT를 지정한 상태로 실제 수어를 수행한다.
+- nsu_run에서 vision + sensor가 모두 포함된 실제 시퀀스를 저장한다.
+- 그 저장된 capture를 공통 benchmark로 삼는다.
+- 같은 capture에 대해:
+  - vision-only 모델은 vision만 사용
+  - fusion 모델은 vision+sensor 사용
+- 이렇게 계산된 성능을 practical 지표로 사용한다.
+
+즉 앞으로 practical은 “그냥 즉석 live 체감”이 아니라, “nsu_run practical capture 기반 공식 benchmark”로 사용한다.
+
+--------------------------------------------------
+13. 앞으로의 공식 비교 축
+--------------------------------------------------
+앞으로는 아래 2개만 메인으로 사용한다.
+
+1. Offline
+- 학습 후 정리된 데이터셋 기준 성능
+- Accuracy
+- Macro F1
+
+2. Practical
+- nsu_run practical capture 기반 성능
+- Accuracy
+- Macro F1
+
+즉 발표나 문서에서는 앞으로
+- Offline에서는 어떠했는가
+- Practical에서는 어떠했는가
+만 메인 축으로 설명한다.
+
+--------------------------------------------------
+14. 앞으로의 practical 실험 프로토콜
+--------------------------------------------------
+이 내용은 별도 문서에도 있다.
+파일:
+C:\SignProject\PRACTICAL_PROTOCOL.md
+
+핵심 내용:
+- practical 공식 수집은 무조건 nsu_run 사용
+- 18개 단어 전체 진행
+- 단어당 4회
+- 한 사람당 총 72개
+
+공식 권장 순서:
+1. more
+2. teukbyeol
+3. jamkkan
+4. jalhada
+5. mannada
+6. gandanhada
+7. naeil
+8. byeollo
+9. oraenman
+10. annyeonghaseyo
+11. byeongyeonghada
+12. sada
+13. eoje
+14. gakkapda
+15. banggeum
+16. gamsahamnida
+17. billida
+18. joesonghada
+
+이 18개를 4라운드 반복한다.
+
+--------------------------------------------------
+15. Practical-In / Practical-Out 분리
+--------------------------------------------------
+앞으로 practical은 사용자 그룹을 나눠서 본다.
+
+1. Practical-In
+- 데이터 수집 참여자가 수행
+
+2. Practical-Out
+- 데이터 수집 비참여자가 수행
+
+이렇게 나누는 이유:
+- 학습 분포 내부 사용자의 practical 성능
+- 학습 분포 외 사용자에 대한 generalization / robustness
+를 구분해서 보기 위해서다.
+
+현재 practical 저장 경로:
+
+Practical-In
+- captures:
+  C:\SignProject\experiments\live_eval\practical_in\captures
+- reports:
+  C:\SignProject\experiments\live_eval\practical_in\reports
+
+Practical-Out
+- captures:
+  C:\SignProject\experiments\live_eval\practical_out\captures
+- reports:
+  C:\SignProject\experiments\live_eval\practical_out\reports
+
+실행 전 설정 예시:
+
+Practical-In
+$env:NSU_RUN_DEBUG_CAPTURE_DIR='C:\SignProject\experiments\live_eval\practical_in\captures'
+
+Practical-Out
+$env:NSU_RUN_DEBUG_CAPTURE_DIR='C:\SignProject\experiments\live_eval\practical_out\captures'
+
+그 후 실행:
+& C:\SignProject\myenv\Scripts\python.exe C:\SignProject\nsu_run_fusion_v6_overlap_hold.py
+
+--------------------------------------------------
+16. 이전 practical 데이터에 대한 방침
+--------------------------------------------------
+이전 practical benchmark는 중간 GT 실수, 재시도, 다양한 중간 단계가 섞여 있었기 때문에, 앞으로 공식 결과를 만들 때는 새 프로토콜에 따라 practical을 다시 수집하는 게 맞다.
+
+즉:
+- 이전 practical 데이터는 참고/보조용으로 둔다.
+- 앞으로 공식 practical 지표는 새롭게 수집한 In / Out 세트로 만든다.
+
+--------------------------------------------------
+17. 왜 gpt_run이 아니라 nsu_run만 practical 수집에 쓰는가
+--------------------------------------------------
+이 부분은 오해가 매우 쉽게 생기므로 분명히 정리한다.
+
+- gpt_run 캡처는 vision-only 입력만 저장한다.
+- nsu_run 캡처는 vision + sensor를 함께 저장한다.
+
+공정한 practical 비교를 위해서는 같은 실제 수행 데이터를 두 모델에 동시에 넣어야 한다.
+이를 만족하려면 nsu_run 캡처만 사용해야 한다.
+
+즉 practical 공식 비교는:
+- nsu_run으로 실제 수행을 저장
+- 그 같은 capture를 vision-only와 fusion에 각각 넣어서 평가
+라는 구조다.
+
+따라서 앞으로 practical 공식본은 gpt_run으로 수집하지 않는다.
+
+--------------------------------------------------
+18. 지금까지 GitHub one 브랜치 상태
+--------------------------------------------------
+원격 저장소:
+https://github.com/nowonjong/nsu2
+브랜치:
+one
+
+현재 one 브랜치에는 C:\SignProject의 현재 핵심 코드가 덮어쓰기 방식으로 올라가 있다.
+단, 아래는 업로드 제외/주의 대상이다.
+- myenv 제외
+- dataset_fusion_hold_v4_flags\fusion_frame_log.csv 는 GitHub 100MB 제한 때문에 제외
+
+최근 one 브랜치 반영 내용에는 run 정리 및 v1 runtime rules도 포함되어 있다.
+
+--------------------------------------------------
+19. 지금 시점의 핵심 결론
+--------------------------------------------------
+1. 구조 기준 최종 baseline은 fusion baseline이다.
+2. offline은 vision-only가 더 높지만, practical은 fusion이 훨씬 강하다.
+3. 따라서 sensor fusion의 의미는 clean offline보다 practical robustness에서 설명하는 것이 더 타당하다.
+4. 앞으로는 realistic offline을 메인에서 빼고 offline vs practical만 비교한다.
+5. practical 공식본은 nsu_run practical capture를 공통 benchmark로 사용한다.
+6. practical은 Practical-In / Practical-Out로 나눠서 진행한다.
+7. run v1 규칙은 막 넣은 상태이며, practical 재수집 후 coverage/accuracy를 보면서 추가 조정할 가능성이 있다.
+
+--------------------------------------------------
+20. Gemini에게 기대하는 도움
+--------------------------------------------------
+다음과 같은 질문/검토에 대해 비판적이고 실전적인 의견이 필요하다.
+
+1. offline vs practical 스토리를 어떻게 가장 설득력 있게 정리할지
+2. Practical-In / Practical-Out 결과를 어떻게 해석할지
+3. run v1 규칙이 너무 약한지 / 강한지 / coverage를 얼마나 떨어뜨릴지
+4. run 단계에서 sensor를 거름망 형태로 쓰는 방식이 타당한지
+5. 발표/논문에서 “offline은 vision-only가 높지만 practical은 fusion이 높다”는 결과를 어떻게 설명할지
+6. practical benchmark를 공식 지표로 사용할 때 생길 수 있는 비판 포인트와 대응 논리
+
+--------------------------------------------------
+21. 현재 중요한 파일 목록
+--------------------------------------------------
+핵심 모델/실험
+- C:\SignProject\experiments\glove_vision\2026-04-07_glove_vision_18w_clean_v1
+- C:\SignProject\experiments\glove_fusion\2026-04-07_stable_hybrid_18w_clean_v1
+- C:\SignProject\experiments\glove_fusion\2026-04-08_sensor_correction_18w_v1
+- C:\SignProject\experiments\glove_fusion\2026-04-08_sensor_correction_ambiguous_18w_v1
+- C:\SignProject\experiments\glove_fusion\2026-04-08_modality_aware_correction_18w_v1
+- C:\SignProject\experiments\glove_fusion\2026-04-08_modality_aware_rerank_18w_v1
+
+핵심 run 코드
+- C:\SignProject\gpt_run.py
+- C:\SignProject\nsu_run_fusion_v6_overlap_hold.py
+
+핵심 평가/프로토콜 파일
+- C:\SignProject\PRACTICAL_PROTOCOL.md
+- C:\SignProject\similar_sign_groups.json
+- C:\SignProject\sensor_separation_analysis.json
+- C:\SignProject\evaluate_realistic_offline.py
+- C:\SignProject\build_live_eval_dataset.py
+- C:\SignProject\evaluate_live_eval_dataset.py
+
+기존 전체 context 문서
+- C:\SignProject\handoff_2026-04-06_full_context_for_new_chat.md
+
+--------------------------------------------------
+22. 현재 가장 가까운 다음 행동
+--------------------------------------------------
+1. Practical-In 세트 새로 수집
+- nsu_run 사용
+- 18개 x 4회 = 72개
+- 지정 경로에 저장
+
+2. Practical-Out 세트 새로 수집
+- nsu_run 사용
+- 18개 x 4회 = 72개
+- 지정 경로에 저장
+
+3. 같은 practical capture를 기준으로
+- vision-only baseline
+- fusion baseline
+- 필요시 이전 fusion 후보들
+모두 재평가
+
+4. 그 결과를 offline vs practical 두 축으로 비교
+
+5. 이후 필요하면 run 규칙 v1을 조정하거나 sensor 거름망 규칙을 더 세밀화
+
+이 문서는 2026-04-10 기준 handoff 정리본이다.
