@@ -12,6 +12,7 @@ import serial
 from collections import deque
 import threading
 from PIL import Image, ImageDraw, ImageFont
+from runtime_profile_utils import FpsLimiter, RuntimeProfiler, env_flag, env_float, env_int
 
 # =========================
 # 경로 설정
@@ -55,8 +56,8 @@ USE_FLEX_POSTURE = False
 FLEX_POSTURE_DIM = 0
 FLEX_BASELINE_FRAMES = DEFAULT_FLEX_BASELINE_FRAMES
 
-CAM_WIDTH = 640
-CAM_HEIGHT = 480
+CAM_WIDTH = env_int("NSU_RUN_CAMERA_WIDTH", 640)
+CAM_HEIGHT = env_int("NSU_RUN_CAMERA_HEIGHT", 480)
 
 DRAW_LANDMARKS = False
 MODEL_COMPLEXITY = 0
@@ -109,6 +110,10 @@ LOW_QUALITY_MISSING_THRESHOLD = 6
 # UI / 디버그
 PRINT_DEBUG = False
 SHOW_DEBUG_OVERLAY = False
+TARGET_FPS = env_float("NSU_RUN_TARGET_FPS", 25.0)
+MIN_STABLE_FPS = env_float("NSU_RUN_MIN_STABLE_FPS", 20.0)
+PROFILE_ENABLED = env_flag("NSU_RUN_PROFILE", True)
+PROFILE_DIR = os.getenv("NSU_RUN_PROFILE_DIR", r"experiments\runtime_profile")
 
 # =========================
 # 표시명 사전
@@ -385,7 +390,7 @@ def wait_for_sensor_ready(serial_reader, timeout_sec=12):
 
         time.sleep(0.05)
 
-    print("[Sensor] Timeout: ?쇱꽌 ?⑦궥?????ㅼ뼱?붿뒿?덈떎.")
+    print("[Sensor] Timeout: 센서 패킷이 들어오지 않습니다.")
     return False
 
 
@@ -402,21 +407,23 @@ hands = mp_hands.Hands(
 )
 
 # =========================
-# 移대찓???닿린
+# 카메라 열기
 # =========================
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 if not cap.isOpened():
     cap = cv2.VideoCapture(0)
 
 if not cap.isOpened():
-    raise RuntimeError("?뱀틺???????놁뒿?덈떎.")
+    raise RuntimeError("웹캠을 열 수 없습니다.")
 
+cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_WIDTH)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT)
+cap.set(cv2.CAP_PROP_FPS, TARGET_FPS)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 # =========================
-# ?좏떥 ?⑥닔
+# 유틸 함수
 # =========================
 def get_hand_data(res_hand):
     wrist = res_hand.landmark[0]
@@ -743,6 +750,7 @@ def build_sensor_model_vec(sensor_vec, left_seen, right_seen, left_held, right_h
 
 
 def classify_sequence_once(seq_array):
+    classify_start = time.perf_counter()
     seq_vision = seq_array[:, :VISION_DIM]
     long_motion = get_motion_score(seq_vision)
     hand_count = int(np.sum(np.any(np.abs(seq_vision) > 1e-6, axis=1)))
@@ -758,8 +766,10 @@ def classify_sequence_once(seq_array):
     }
 
     if hand_count < MIN_HAND_FRAMES_FOR_WORD or long_motion < WORD_MOTION_THRESHOLD:
+        runtime_profiler.add_duration("classify_skip_gate", classify_start)
         return result
 
+    prep_start = time.perf_counter()
     seq_vision_scaled, seq_sensor_scaled, seq_sensor_raw_full = standardize_modalities(seq_array)
     flex_posture_scaled = extract_flex_posture_features_from_sequence(seq_sensor_raw_full)
     vision_input = tf.convert_to_tensor(
@@ -772,9 +782,15 @@ def classify_sequence_once(seq_array):
         flex_input = tf.convert_to_tensor(
             np.expand_dims(flex_posture_scaled, axis=0), dtype=tf.float32
         )
+        runtime_profiler.add_duration("classify_preprocess", prep_start)
+        infer_start = time.perf_counter()
         y_prob = infer(vision_input, sensor_input, flex_input).numpy()[0]
+        runtime_profiler.add_duration("model_inference", infer_start)
     else:
+        runtime_profiler.add_duration("classify_preprocess", prep_start)
+        infer_start = time.perf_counter()
         y_prob = infer(vision_input, sensor_input).numpy()[0]
+        runtime_profiler.add_duration("model_inference", infer_start)
 
     sorted_idx = np.argsort(y_prob)
     top1_idx = int(sorted_idx[-1])
@@ -790,6 +806,7 @@ def classify_sequence_once(seq_array):
     result['margin'] = margin
     result['label'] = top1_label
     result['conf'] = top1_conf
+    runtime_profiler.add_duration("classify_total", classify_start)
 
     return result
 
@@ -913,7 +930,7 @@ def show_wait_sensor_screen():
             return True
 
         if time.time() - start > 12:
-            print("[Sensor] Timeout: ?쇱꽌 ?⑦궥?????ㅼ뼱?붿뒿?덈떎.")
+            print("[Sensor] Timeout: 센서 패킷이 들어오지 않습니다.")
             return False
 
         ret, img = cap.read()
@@ -959,7 +976,7 @@ else:
     )
 
 # =========================
-# ?쇱꽌 ?쒖옉
+# 센서 시작
 # =========================
 serial_reader = SerialReader(SERIAL_PORT, SERIAL_BAUD)
 serial_reader.start()
@@ -974,7 +991,7 @@ if guide_result is False:
     serial_reader.close()
     cap.release()
     cv2.destroyAllWindows()
-    raise RuntimeError("?쒕━???곌껐 ?ㅽ뙣: COM ?ы듃 ?뺤씤 ?먮뒗 ?쒕━??紐⑤땲??醫낅즺 ?꾩슂")
+    raise RuntimeError("시리얼 연결 실패: COM 포트 확인 또는 시리얼 모니터 종료 필요")
 
 ready_result = show_wait_sensor_screen()
 if ready_result is None:
@@ -986,10 +1003,11 @@ if ready_result is False:
     serial_reader.close()
     cap.release()
     cv2.destroyAllWindows()
-    raise RuntimeError("?쇱꽌 以鍮??ㅽ뙣: COM ?ы듃 ?뺤씤 ?먮뒗 ?꾨몢?대끂 異쒕젰 ?곹깭 ?뺤씤 ?꾩슂")
+    raise RuntimeError("센서 준비 실패: COM 포트 또는 Arduino 출력 상태 확인 필요")
 
 # =========================
-# ?곹깭 蹂??# =========================
+# 상태 변수
+# =========================
 sequence = deque(maxlen=SEQ_LEN)
 hand_presence_history = deque(maxlen=SEQ_LEN)
 recent_frame_motion = deque(maxlen=SHORT_MOTION_WINDOW)
@@ -1029,7 +1047,11 @@ zero_reason_counts = {}
 
 fps_prev_time = time.time()
 fps_smooth = 0.0
+fps_limiter = FpsLimiter(TARGET_FPS)
+runtime_profiler = RuntimeProfiler(enabled=PROFILE_ENABLED, report_dir=PROFILE_DIR)
 
+print(f"[Runtime] target_fps={TARGET_FPS:.1f} profile_enabled={PROFILE_ENABLED} profile_dir={PROFILE_DIR}")
+print(f"[Runtime] camera={CAM_WIDTH}x{CAM_HEIGHT} min_stable_fps={MIN_STABLE_FPS:.1f}")
 
 os.makedirs(DEBUG_CAPTURE_DIR, exist_ok=True)
 
@@ -1140,21 +1162,30 @@ def reset_all_state():
 # =========================
 try:
     while True:
+        loop_start_perf = time.perf_counter()
+        cap_read_start = time.perf_counter()
         ret, frame = cap.read()
+        runtime_profiler.add_duration("camera_read", cap_read_start)
         if not ret:
             continue
 
+        preprocess_start = time.perf_counter()
         frame = cv2.flip(frame, 1)
         frame = cv2.resize(frame, (CAM_WIDTH, CAM_HEIGHT))
         display_img = frame.copy()
 
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         rgb.flags.writeable = False
+        runtime_profiler.add_duration("frame_preprocess", preprocess_start)
+        mediapipe_start = time.perf_counter()
         results = hands.process(rgb)
+        runtime_profiler.add_duration("mediapipe_process", mediapipe_start)
         rgb.flags.writeable = True
 
         frame_host_time_ms = time.perf_counter() * 1000.0
+        sensor_align_start = time.perf_counter()
         sensor_time_ms, sensor_vec, sensor_packet_count, sensor_host_time_ms = serial_reader.get_aligned_packet(frame_host_time_ms)
+        runtime_profiler.add_duration("sensor_align", sensor_align_start)
         last_sensor_time_ms = sensor_time_ms
         last_sensor_host_delta_ms = frame_host_time_ms - sensor_host_time_ms
 
@@ -1391,6 +1422,7 @@ try:
         fps_prev_time = now
         fps_smooth = 0.9 * fps_smooth + 0.1 * instant_fps if fps_smooth > 0 else instant_fps
 
+        render_start = time.perf_counter()
         h, w, _ = display_img.shape
         draw_text_box(display_img, (0, 0), (w, 138), fill_color=(255, 255, 255), alpha=0.58)
 
@@ -1464,8 +1496,11 @@ try:
         draw_debug_panel(display_img, debug_lines)
 
         cv2.imshow('Fusion Real-time Sign Recognition v5', display_img)
+        runtime_profiler.add_duration("render_and_imshow", render_start)
 
+        waitkey_start = time.perf_counter()
         key = cv2.waitKey(1) & 0xFF
+        runtime_profiler.add_duration("cv2_waitkey", waitkey_start)
         if key == ord('q'):
             break
         elif key == ord('s'):
@@ -1498,7 +1533,26 @@ try:
             gt_label_index = -1
             print("[GT] cleared")
 
+        sleep_ms = fps_limiter.sleep_remaining(loop_start_perf)
+        runtime_profiler.add_ms("fps_cap_sleep", sleep_ms)
+        runtime_profiler.add_duration("loop_total", loop_start_perf)
+
 finally:
+    profile_path = runtime_profiler.save(
+        "nsu_run_fusion_v6_overlap_hold",
+        TARGET_FPS,
+        extra={
+            "model_path": MODEL_PATH,
+            "debug_capture_dir": DEBUG_CAPTURE_DIR,
+            "serial_port": SERIAL_PORT,
+            "serial_baud": SERIAL_BAUD,
+            "camera_width": CAM_WIDTH,
+            "camera_height": CAM_HEIGHT,
+            "min_stable_fps": MIN_STABLE_FPS,
+        },
+    )
+    if profile_path:
+        print(f"[RuntimeProfile] saved: {profile_path}")
     serial_reader.close()
     cap.release()
     cv2.destroyAllWindows()

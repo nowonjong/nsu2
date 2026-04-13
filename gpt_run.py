@@ -1,4 +1,4 @@
-﻿import os
+import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 import cv2
@@ -10,6 +10,7 @@ import tensorflow as tf
 from collections import deque
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
+from runtime_profile_utils import FpsLimiter, RuntimeProfiler, env_flag, env_float, env_int
 
 
 MODEL_DIR = os.getenv(
@@ -24,13 +25,17 @@ DEBUG_CAPTURE_DIR = os.getenv("NSU_VISION_DEBUG_CAPTURE_DIR", r"experiments\live
 
 SEQ_LEN = 60
 FEATURE_DIM = 126
-CAM_WIDTH = 640
-CAM_HEIGHT = 480
+CAM_WIDTH = env_int("NSU_VISION_CAMERA_WIDTH", 640)
+CAM_HEIGHT = env_int("NSU_VISION_CAMERA_HEIGHT", 480)
 
 DRAW_LANDMARKS = False
 MODEL_COMPLEXITY = 0
 MAX_NUM_HANDS = 2
 TRIGGER_DELAY_SEC = 2.0
+TARGET_FPS = env_float("NSU_VISION_TARGET_FPS", 25.0)
+MIN_STABLE_FPS = env_float("NSU_VISION_MIN_STABLE_FPS", 20.0)
+PROFILE_ENABLED = env_flag("NSU_VISION_PROFILE", True)
+PROFILE_DIR = os.getenv("NSU_VISION_PROFILE_DIR", r"experiments\runtime_profile")
 
 HAND_SCORE_THRESHOLD = 0.55
 OVERLAP_IOU_THRESHOLD = 0.24
@@ -120,8 +125,10 @@ if not cap.isOpened():
 if not cap.isOpened():
     raise RuntimeError("웹캠을 열 수 없습니다.")
 
+cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_WIDTH)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT)
+cap.set(cv2.CAP_PROP_FPS, TARGET_FPS)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 
@@ -351,6 +358,11 @@ mode = "WAIT"
 countdown_start = None
 fps_prev_time = time.time()
 fps_smooth = 0.0
+fps_limiter = FpsLimiter(TARGET_FPS)
+runtime_profiler = RuntimeProfiler(enabled=PROFILE_ENABLED, report_dir=PROFILE_DIR)
+
+print(f"[Runtime] target_fps={TARGET_FPS:.1f} profile_enabled={PROFILE_ENABLED} profile_dir={PROFILE_DIR}")
+print(f"[Runtime] camera={CAM_WIDTH}x{CAM_HEIGHT} min_stable_fps={MIN_STABLE_FPS:.1f}")
 
 os.makedirs(DEBUG_CAPTURE_DIR, exist_ok=True)
 
@@ -427,6 +439,7 @@ def reset_all_state():
 def run_one_shot_prediction():
     global stable_label, stable_conf, current_pred_label, current_pred_conf, motion_score, last_margin
 
+    classify_start = time.perf_counter()
     if len(sequence) < SEQ_LEN:
         stable_label = "none"
         stable_conf = 0.0
@@ -434,6 +447,7 @@ def run_one_shot_prediction():
         current_pred_conf = 0.0
         motion_score = 0.0
         last_margin = 0.0
+        runtime_profiler.add_duration("classify_skip_gate", classify_start)
         return
 
     seq_array = np.array(sequence, dtype=np.float32)
@@ -451,10 +465,15 @@ def run_one_shot_prediction():
             f"[Result] stable=none ({KOR_MAP.get('none', 'none')}) | "
             f"hand_count={hand_count} | motion={motion_score:.3f}"
         )
+        runtime_profiler.add_duration("classify_skip_gate", classify_start)
         return
 
+    prep_start = time.perf_counter()
     x = np.expand_dims(standardize_sequence(seq_array), axis=0)
+    runtime_profiler.add_duration("classify_preprocess", prep_start)
+    infer_start = time.perf_counter()
     y_prob = infer(tf.convert_to_tensor(x, dtype=tf.float32)).numpy()[0]
+    runtime_profiler.add_duration("model_inference", infer_start)
     sorted_idx = np.argsort(y_prob)
     top1_idx = int(sorted_idx[-1])
     top2_idx = int(sorted_idx[-2])
@@ -483,6 +502,7 @@ def run_one_shot_prediction():
         f"conf={stable_conf:.3f} | top2={top2_label} ({top2_conf:.3f}) | "
         f"margin={margin:.3f} | motion={motion_score:.3f}"
     )
+    runtime_profiler.add_duration("classify_total", classify_start)
 
 
 def show_startup_guide():
@@ -510,158 +530,189 @@ if not show_startup_guide():
     raise SystemExit
 
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        continue
+try:
+    while True:
+        loop_start_perf = time.perf_counter()
+        cap_read_start = time.perf_counter()
+        ret, frame = cap.read()
+        runtime_profiler.add_duration("camera_read", cap_read_start)
+        if not ret:
+            continue
 
-    frame = cv2.flip(frame, 1)
-    frame = cv2.resize(frame, (CAM_WIDTH, CAM_HEIGHT))
-    display_img = frame.copy()
-    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    rgb.flags.writeable = False
-    results = hands.process(rgb)
-    rgb.flags.writeable = True
+        preprocess_start = time.perf_counter()
+        frame = cv2.flip(frame, 1)
+        frame = cv2.resize(frame, (CAM_WIDTH, CAM_HEIGHT))
+        display_img = frame.copy()
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb.flags.writeable = False
+        runtime_profiler.add_duration("frame_preprocess", preprocess_start)
+        mediapipe_start = time.perf_counter()
+        results = hands.process(rgb)
+        runtime_profiler.add_duration("mediapipe_process", mediapipe_start)
+        rgb.flags.writeable = True
 
-    left_data = np.zeros(63, dtype=np.float32)
-    right_data = np.zeros(63, dtype=np.float32)
-    left_seen = False
-    right_seen = False
+        left_data = np.zeros(63, dtype=np.float32)
+        right_data = np.zeros(63, dtype=np.float32)
+        left_seen = False
+        right_seen = False
 
-    candidates = make_hand_candidates(results, CAM_WIDTH, CAM_HEIGHT)
-    overlap_now = hands_are_overlapping(candidates)
-    frame_ambiguous = False
-    if overlap_now:
-        assigned = {"left": None, "right": None}
-        frame_ambiguous = True
-    else:
-        assigned, frame_ambiguous = assign_hand_slots(candidates, prev_left_center, prev_right_center)
-
-    left_candidate = assigned["left"]
-    right_candidate = assigned["right"]
-
-    if left_candidate is not None:
-        left_data = left_candidate["data"]
-        left_seen = True
-        draw_custom_landmarks(display_img, left_candidate["res_hand"], (255, 0, 0), "L")
-    if right_candidate is not None:
-        right_data = right_candidate["data"]
-        right_seen = True
-        draw_custom_landmarks(display_img, right_candidate["res_hand"], (0, 0, 255), "R")
-
-    any_hand_seen = left_seen or right_seen
-
-    if mode == "RECORDING":
-        if left_seen:
-            prev_left = left_data.copy()
-            prev_left_center = left_candidate["center"].copy()
-            left_missing_count = 0
+        candidates = make_hand_candidates(results, CAM_WIDTH, CAM_HEIGHT)
+        overlap_now = hands_are_overlapping(candidates)
+        frame_ambiguous = False
+        if overlap_now:
+            assigned = {"left": None, "right": None}
+            frame_ambiguous = True
         else:
-            left_missing_count += 1
-            if left_missing_count > MISSING_HOLD_FRAMES:
-                prev_left = np.zeros(63, dtype=np.float32)
-                prev_left_center = None
+            assigned, frame_ambiguous = assign_hand_slots(candidates, prev_left_center, prev_right_center)
 
-        if right_seen:
-            prev_right = right_data.copy()
-            prev_right_center = right_candidate["center"].copy()
-            right_missing_count = 0
-        else:
-            right_missing_count += 1
-            if right_missing_count > MISSING_HOLD_FRAMES:
-                prev_right = np.zeros(63, dtype=np.float32)
-                prev_right_center = None
+        left_candidate = assigned["left"]
+        right_candidate = assigned["right"]
 
-        if any_hand_seen:
-            no_hand_run = 0
-            hand_presence_history.append(1)
-        else:
-            no_hand_run += 1
-            hand_presence_history.append(0)
+        if left_candidate is not None:
+            left_data = left_candidate["data"]
+            left_seen = True
+            draw_custom_landmarks(display_img, left_candidate["res_hand"], (255, 0, 0), "L")
+        if right_candidate is not None:
+            right_data = right_candidate["data"]
+            right_seen = True
+            draw_custom_landmarks(display_img, right_candidate["res_hand"], (0, 0, 255), "R")
 
-        sequence.append(np.concatenate([left_data, right_data]).astype(np.float32))
+        any_hand_seen = left_seen or right_seen
 
-        if no_hand_run >= NO_HAND_RESET_FRAMES:
-            reset_all_state()
-        elif len(sequence) >= SEQ_LEN:
-            run_one_shot_prediction()
-            mode = "WAIT"
-            countdown_start = None
+        if mode == "RECORDING":
+            if left_seen:
+                prev_left = left_data.copy()
+                prev_left_center = left_candidate["center"].copy()
+                left_missing_count = 0
+            else:
+                left_missing_count += 1
+                if left_missing_count > MISSING_HOLD_FRAMES:
+                    prev_left = np.zeros(63, dtype=np.float32)
+                    prev_left_center = None
 
-    elif mode == "COUNTDOWN":
-        remain = TRIGGER_DELAY_SEC - (time.time() - countdown_start)
-        if remain <= 0:
+            if right_seen:
+                prev_right = right_data.copy()
+                prev_right_center = right_candidate["center"].copy()
+                right_missing_count = 0
+            else:
+                right_missing_count += 1
+                if right_missing_count > MISSING_HOLD_FRAMES:
+                    prev_right = np.zeros(63, dtype=np.float32)
+                    prev_right_center = None
+
+            if any_hand_seen:
+                no_hand_run = 0
+                hand_presence_history.append(1)
+            else:
+                no_hand_run += 1
+                hand_presence_history.append(0)
+
+            sequence.append(np.concatenate([left_data, right_data]).astype(np.float32))
+
+            if no_hand_run >= NO_HAND_RESET_FRAMES:
+                reset_all_state()
+            elif len(sequence) >= SEQ_LEN:
+                run_one_shot_prediction()
+                mode = "WAIT"
+                countdown_start = None
+
+        elif mode == "COUNTDOWN":
+            remain = TRIGGER_DELAY_SEC - (time.time() - countdown_start)
+            if remain <= 0:
+                reset_recording_buffers()
+                mode = "RECORDING"
+
+        now = time.time()
+        instant_fps = 1.0 / max(now - fps_prev_time, 1e-6)
+        fps_prev_time = now
+        fps_smooth = 0.9 * fps_smooth + 0.1 * instant_fps if fps_smooth > 0 else instant_fps
+
+        render_start = time.perf_counter()
+        h, w, _ = display_img.shape
+        draw_text_box(display_img, (0, 0), (w, 138), fill_color=(255, 255, 255), alpha=0.58)
+        mode_kor = {"WAIT": "대기", "COUNTDOWN": "카운트다운", "RECORDING": "녹화중"}.get(mode, mode)
+        top1_kor = KOR_MAP.get(current_pred_label, current_pred_label) if current_pred_label else ""
+        stable_kor = KOR_MAP.get(stable_label, stable_label)
+        gt_label = get_current_gt_label()
+        gt_kor = KOR_MAP.get(gt_label, gt_label) if gt_label else "미지정"
+
+        draw_text_unicode(display_img, f"FPS: {fps_smooth:.1f}", (10, 12), font_size=28, text_color=(0, 0, 0))
+        draw_text_unicode(display_img, f"상태: {mode_kor}", (165, 12), font_size=28, text_color=(0, 0, 0))
+        draw_text_unicode(display_img, f"시퀀스: {len(sequence)}/{SEQ_LEN}", (380, 12), font_size=28, text_color=(0, 0, 0))
+        draw_text_unicode(display_img, f"동작량: {motion_score:.3f}", (10, 48), font_size=24, text_color=(20, 20, 20))
+        draw_text_unicode(display_img, f"GT: {gt_kor}", (10, 82), font_size=24, text_color=(120, 60, 0))
+        if current_pred_label:
+            draw_text_unicode(
+                display_img,
+                f"예측 1순위: {top1_kor} ({current_pred_conf:.2f})",
+                (230, 48),
+                font_size=24,
+                text_color=(0, 120, 160),
+            )
+
+        result_color = (0, 120, 0) if stable_label != "none" else (90, 90, 90)
+        draw_text_unicode(display_img, f"결과: {stable_kor}", (260, 82), font_size=30, text_color=result_color)
+
+        if mode == "WAIT":
+            draw_text_unicode(display_img, "S 시작 | B 이전 GT | N 다음 GT | G GT해제 | Q 종료", (10, 112), font_size=22, text_color=(25, 25, 25))
+        elif mode == "COUNTDOWN":
+            remain_int = int(np.ceil(max(0.0, TRIGGER_DELAY_SEC - (time.time() - countdown_start))))
+            draw_text_unicode(display_img, "준비 자세를 유지하세요", (10, 112), font_size=26, text_color=(0, 120, 160))
+            cv2.putText(display_img, str(remain_int), (w // 2 - 30, h // 2), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 255, 255), 6)
+        elif mode == "RECORDING":
+            draw_text_unicode(display_img, f"녹화 중... {len(sequence)}/{SEQ_LEN}", (10, 112), font_size=26, text_color=(0, 120, 160))
+
+        progress = int((len(sequence) / SEQ_LEN) * w) if mode == "RECORDING" else 0
+        cv2.rectangle(display_img, (0, h - 8), (progress, h), (0, 255, 0), -1)
+
+        cv2.imshow("Vision Real-time Sign Recognition", display_img)
+        runtime_profiler.add_duration("render_and_imshow", render_start)
+
+        waitkey_start = time.perf_counter()
+        key = cv2.waitKey(1) & 0xFF
+        runtime_profiler.add_duration("cv2_waitkey", waitkey_start)
+        if key == ord("q"):
+            break
+        elif key == ord("s") and mode == "WAIT":
             reset_recording_buffers()
-            mode = "RECORDING"
+            countdown_start = time.time()
+            mode = "COUNTDOWN"
+            print("시작 입력 감지. 2초 뒤 녹화를 시작합니다.")
+        elif key == ord("c"):
+            reset_all_state()
+            print("상태를 초기화했습니다.")
+        elif key == ord("d"):
+            DRAW_LANDMARKS = not DRAW_LANDMARKS
+            print(f"DRAW_LANDMARKS = {DRAW_LANDMARKS}")
+        elif key == ord("n"):
+            if ACTIONS:
+                gt_label_index = (gt_label_index + 1) % len(ACTIONS)
+                print(f"[GT] {get_current_gt_label()}")
+        elif key == ord("b"):
+            if ACTIONS:
+                gt_label_index = len(ACTIONS) - 1 if gt_label_index < 0 else (gt_label_index - 1) % len(ACTIONS)
+                print(f"[GT] {get_current_gt_label()}")
+        elif key == ord("g"):
+            gt_label_index = -1
+            print("[GT] cleared")
 
-    now = time.time()
-    instant_fps = 1.0 / max(now - fps_prev_time, 1e-6)
-    fps_prev_time = now
-    fps_smooth = 0.9 * fps_smooth + 0.1 * instant_fps if fps_smooth > 0 else instant_fps
+        sleep_ms = fps_limiter.sleep_remaining(loop_start_perf)
+        runtime_profiler.add_ms("fps_cap_sleep", sleep_ms)
+        runtime_profiler.add_duration("loop_total", loop_start_perf)
 
-    h, w, _ = display_img.shape
-    draw_text_box(display_img, (0, 0), (w, 138), fill_color=(255, 255, 255), alpha=0.58)
-    mode_kor = {"WAIT": "대기", "COUNTDOWN": "카운트다운", "RECORDING": "녹화중"}.get(mode, mode)
-    top1_kor = KOR_MAP.get(current_pred_label, current_pred_label) if current_pred_label else ""
-    stable_kor = KOR_MAP.get(stable_label, stable_label)
-    gt_label = get_current_gt_label()
-    gt_kor = KOR_MAP.get(gt_label, gt_label) if gt_label else "미지정"
-
-    draw_text_unicode(display_img, f"FPS: {fps_smooth:.1f}", (10, 12), font_size=28, text_color=(0, 0, 0))
-    draw_text_unicode(display_img, f"상태: {mode_kor}", (165, 12), font_size=28, text_color=(0, 0, 0))
-    draw_text_unicode(display_img, f"시퀀스: {len(sequence)}/{SEQ_LEN}", (380, 12), font_size=28, text_color=(0, 0, 0))
-    draw_text_unicode(display_img, f"동작량: {motion_score:.3f}", (10, 48), font_size=24, text_color=(20, 20, 20))
-    draw_text_unicode(display_img, f"GT: {gt_kor}", (10, 82), font_size=24, text_color=(120, 60, 0))
-    if current_pred_label:
-        draw_text_unicode(
-            display_img,
-            f"예측 1순위: {top1_kor} ({current_pred_conf:.2f})",
-            (230, 48),
-            font_size=24,
-            text_color=(0, 120, 160),
-        )
-
-    result_color = (0, 120, 0) if stable_label != "none" else (90, 90, 90)
-    draw_text_unicode(display_img, f"결과: {stable_kor}", (260, 82), font_size=30, text_color=result_color)
-
-    if mode == "WAIT":
-        draw_text_unicode(display_img, "S 시작 | B 이전 GT | N 다음 GT | G GT해제 | Q 종료", (10, 112), font_size=22, text_color=(25, 25, 25))
-    elif mode == "COUNTDOWN":
-        remain_int = int(np.ceil(max(0.0, TRIGGER_DELAY_SEC - (time.time() - countdown_start))))
-        draw_text_unicode(display_img, "준비 자세를 유지하세요", (10, 112), font_size=26, text_color=(0, 120, 160))
-        cv2.putText(display_img, str(remain_int), (w // 2 - 30, h // 2), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 255, 255), 6)
-    elif mode == "RECORDING":
-        draw_text_unicode(display_img, f"녹화 중... {len(sequence)}/{SEQ_LEN}", (10, 112), font_size=26, text_color=(0, 120, 160))
-
-    progress = int((len(sequence) / SEQ_LEN) * w) if mode == "RECORDING" else 0
-    cv2.rectangle(display_img, (0, h - 8), (progress, h), (0, 255, 0), -1)
-
-    cv2.imshow("Vision Real-time Sign Recognition", display_img)
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord("q"):
-        break
-    elif key == ord("s") and mode == "WAIT":
-        reset_recording_buffers()
-        countdown_start = time.time()
-        mode = "COUNTDOWN"
-        print("시작 입력 감지. 2초 뒤 녹화를 시작합니다.")
-    elif key == ord("c"):
-        reset_all_state()
-        print("상태를 초기화했습니다.")
-    elif key == ord("d"):
-        DRAW_LANDMARKS = not DRAW_LANDMARKS
-        print(f"DRAW_LANDMARKS = {DRAW_LANDMARKS}")
-    elif key == ord("n"):
-        if ACTIONS:
-            gt_label_index = (gt_label_index + 1) % len(ACTIONS)
-            print(f"[GT] {get_current_gt_label()}")
-    elif key == ord("b"):
-        if ACTIONS:
-            gt_label_index = len(ACTIONS) - 1 if gt_label_index < 0 else (gt_label_index - 1) % len(ACTIONS)
-            print(f"[GT] {get_current_gt_label()}")
-    elif key == ord("g"):
-        gt_label_index = -1
-        print("[GT] cleared")
-
-cap.release()
-cv2.destroyAllWindows()
+finally:
+    profile_path = runtime_profiler.save(
+        "gpt_run_vision",
+        TARGET_FPS,
+        extra={
+            "model_path": MODEL_PATH,
+            "debug_capture_dir": DEBUG_CAPTURE_DIR,
+            "camera_width": CAM_WIDTH,
+            "camera_height": CAM_HEIGHT,
+            "min_stable_fps": MIN_STABLE_FPS,
+        },
+    )
+    if profile_path:
+        print(f"[RuntimeProfile] saved: {profile_path}")
+    cap.release()
+    cv2.destroyAllWindows()
