@@ -1,0 +1,240 @@
+﻿# NSU2 One Branch Short Handoff - 2026-04-13
+
+이 문서는 현재 `C:\SignProject` 기준으로 주요 파일 위치, 실험 진행 방식, 핵심 결과를 빠르게 이어받기 위한 짧은 요약이다.
+
+## 1. 현재 프로젝트 방향
+
+최종 비교 프레임은 다음 3축이다.
+
+- bare hand + vision
+- glove + vision
+- glove + fusion
+
+현재 가장 중요한 실험 흐름은 `glove + vision`과 `glove + fusion`을 같은 실제 입력 조건에서 비교하여, 비슷한 수어 동작에서 센서 데이터가 실사용 성능을 얼마나 보완하는지 확인하는 것이다.
+
+주의할 점:
+
+- `stable hybrid`는 현재 가장 안전한 fusion baseline / 최종 구조 후보이지, 절대적인 최종 확정 모델이라고 단정하지 않는다.
+- 최종 지표 프레임은 `Offline` vs `Practical` 중심으로 정리한다.
+- `Realistic offline`은 중간 분석용으로 남길 수 있지만, 현재 보고의 메인 축에서는 제외한다.
+
+## 2. 주요 실행/학습 파일
+
+- `gpt_collect.py`
+  - 맨손/비전 쪽 데이터 수집에 사용했던 collect 계열 파일.
+
+- `nsu_collect.py`
+  - 장갑 착용 상태에서 vision + sensor 데이터를 수집하는 핵심 collect 파일.
+  - 현재 18개 단어 수집 기준으로 맞춰져 있다.
+
+- `gpt_run.py`
+  - vision-only run 파일.
+  - 현재는 공식 Practical 평가 수집용이 아니라 보조 실행/확인용에 가깝다.
+
+- `nsu_run_fusion_v6_overlap_hold.py`
+  - 공식 Practical capture 수집용 run 파일.
+  - GT 라벨 지정, 18개 단어 표시, vision + sensor capture 저장, 약한 hold/overlap 안정화 로직이 포함되어 있다.
+  - Practical 비교는 앞으로 이 파일로 저장한 capture만 공식 입력으로 사용한다.
+
+- `nsu_train.py`
+  - 장갑 기반 모델 학습 파일.
+
+## 3. 주요 모델/결과 폴더
+
+### Glove Vision-Only Baseline
+
+- 폴더: `experiments\glove_vision\2026-04-07_glove_vision_18w_clean_v1`
+- Offline 결과:
+  - Accuracy: `0.9333`
+  - Macro F1: `0.9239`
+
+### Glove Fusion Baseline / Stable Hybrid Candidate
+
+- 폴더: `experiments\glove_fusion\2026-04-07_stable_hybrid_18w_clean_v1`
+- Offline 결과:
+  - Accuracy: `0.9000`
+  - Macro F1: `0.8796`
+
+Offline 기준에서는 vision-only가 fusion보다 높게 나온다. 하지만 실제 run 기반 Practical 평가에서는 fusion이 모든 최종 세트에서 더 안정적으로 높게 나왔다.
+
+## 4. 공식 Practical 데이터셋
+
+공식 Practical 데이터셋은 모두 `nsu_run_fusion_v6_overlap_hold.py`로 수집했다. 이유는 같은 capture 안에 vision + sensor가 모두 들어 있어, 동일 입력을 기준으로 vision-only 모델과 fusion 모델을 각각 평가할 수 있기 때문이다.
+
+각 세트는 최종 기준 `18 words x 4 reps = 72 samples`이다.
+
+### Practical-In
+
+- 의미: 학습 데이터 수집 참여자
+- captures: `experiments\live_eval\practical_in\captures`
+- reports: `experiments\live_eval\practical_in\reports`
+- 결과:
+  - Vision-only Accuracy: `0.7361`, Macro F1: `0.7073`
+  - Fusion Accuracy: `0.8750`, Macro F1: `0.8490`
+
+### Practical-In-2
+
+- 의미: 학습 데이터 수집 참여자 1명 추가
+- captures: `experiments\live_eval\practical_in_2\captures`
+- reports: `experiments\live_eval\practical_in_2\reports`
+- 2026-04-13에 FPS 흔들림 우려로 기존 파일을 archive하고 다시 수집한 최종본이다.
+- 결과:
+  - Vision-only Accuracy: `0.8889`, Macro F1: `0.8845`
+  - Fusion Accuracy: `0.9306`, Macro F1: `0.9270`
+
+### Practical-Out
+
+- 의미: 학습 데이터 수집 미참여자
+- captures: `experiments\live_eval\practical_out\captures`
+- reports: `experiments\live_eval\practical_out\reports`
+- 결과:
+  - Vision-only Accuracy: `0.5694`, Macro F1: `0.5055`
+  - Fusion Accuracy: `0.8889`, Macro F1: `0.8725`
+
+### Practical-Out-2
+
+- 의미: 학습 데이터 수집 미참여자 1명 추가
+- captures: `experiments\live_eval\practical_out_2\captures`
+- reports: `experiments\live_eval\practical_out_2\reports`
+- 2026-04-13에 FPS/path 이슈 우려로 기존 파일을 archive하고 다시 수집한 최종본이다.
+- 결과:
+  - Vision-only Accuracy: `0.7083`, Macro F1: `0.6517`
+  - Fusion Accuracy: `0.8750`, Macro F1: `0.8621`
+
+## 5. 현재까지 얻은 핵심 결론
+
+### Offline vs Practical
+
+- Offline LSTM 평가에서는 vision-only가 더 높다.
+- Practical 평가에서는 네 세트 모두 fusion이 vision-only보다 높다.
+- 특히 학습 데이터 수집에 참여하지 않은 사람(Out, Out-2)에서 fusion의 장점이 더 크게 드러난다.
+
+정리하면, vision-only는 잘린 샘플 기반 offline 환경에서는 강하지만, 실제 run 환경에서는 사용자 차이와 자세/속도/손 위치 변화에 취약하다. Fusion은 센서의 물리적 정보를 함께 사용해서 Practical 환경에서 더 안정적이다.
+
+### Practical 결과 요약
+
+- Practical-In: fusion이 vision보다 Accuracy 기준 `+0.1389`
+- Practical-In-2: fusion이 vision보다 Accuracy 기준 `+0.0417`
+- Practical-Out: fusion이 vision보다 Accuracy 기준 `+0.3195`
+- Practical-Out-2: fusion이 vision보다 Accuracy 기준 `+0.1667`
+
+따라서 메인 스토리는 “offline 수치가 높은 vision-only가 실제 환경에서도 항상 더 좋은 것은 아니며, 장갑 센서 fusion은 Practical 환경, 특히 미참여자 조건에서 강건성을 보완한다”로 잡는 것이 안전하다.
+
+## 6. 비슷한 수어 그룹 분석
+
+최종 그룹 분석 파일:
+
+- JSON: `experiments\live_eval\final_practical_group_analysis_2026-04-13.json`
+- Markdown: `experiments\live_eval\final_practical_group_analysis_2026-04-13.md`
+
+전체 Practical 세트를 합산했을 때 그룹별 결과는 다음과 같다.
+
+- `direction_difference` (`more`, `naeil`, `eoje`)
+  - Vision: `0.6875`, Fusion: `1.0000`, Diff: `+0.3125`
+
+- `instant_handshape_difference` (`banggeum`, `billida`)
+  - Vision: `0.5938`, Fusion: `0.9062`, Diff: `+0.3125`
+
+- `additional_motion_difference` (`jalhada`, `annyeonghaseyo`)
+  - Vision: `0.7500`, Fusion: `1.0000`, Diff: `+0.2500`
+
+- `bend_path_difference` (`jamkkan`, `oraenman`, `gakkapda`)
+  - Vision: `0.4792`, Fusion: `0.6667`, Diff: `+0.1875`
+
+- `wrist_angle_difference` (`teukbyeol`, `byeollo`)
+  - Vision: `0.8125`, Fusion: `0.9062`, Diff: `+0.0938`
+
+- `cross_hand_difference` (`mannada`, `byeongyeonghada`)
+  - Vision: `0.9062`, Fusion: `0.9375`, Diff: `+0.0312`
+
+- `handshape_difference` (`gandanhada`, `sada`, `gamsahamnida`, `joesonghada`)
+  - Vision: `0.8594`, Fusion: `0.8906`, Diff: `+0.0312`
+
+해석:
+
+- Fusion은 모든 그룹에서 평균적으로 vision-only보다 높다.
+- 가장 큰 개선은 방향 차이, 순간 손모양 차이, 추가 동작 차이, 경로/굽힘 차이 그룹에서 나타났다.
+- 단, 모든 그룹에서 같은 크기로 좋아졌다고 말하면 안 된다. “특정 유형의 유사 동작에서 더 크게 도움을 줬다”가 정확하다.
+
+## 7. 후보 모델 실험 상태
+
+센서 보정/재정렬 계열 후보 모델도 실험했다.
+
+대표 후보 폴더:
+
+- `experiments\glove_fusion\2026-04-08_sensor_correction_18w_v1`
+- `experiments\glove_fusion\2026-04-08_sensor_correction_ambiguous_18w_v1`
+- `experiments\glove_fusion\2026-04-08_modality_aware_correction_18w_v1`
+- `experiments\glove_fusion\2026-04-08_modality_aware_rerank_18w_v1`
+
+관찰:
+
+- 일부 후보는 Practical-In/In-2에서는 baseline보다 좋아질 수 있었다.
+- 하지만 Practical-Out에서 baseline보다 떨어지는 경우가 있었다.
+- 따라서 현재는 stable hybrid baseline이 가장 안전한 최종 구조 후보로 남아 있다.
+- 후보 모델들은 “센서 활용 방식 탐색” 또는 “추가 ablation 후보”로 보관한다.
+
+## 8. Practical 수집 프로토콜
+
+상세 문서:
+
+- `PRACTICAL_PROTOCOL.md`
+
+공식 Practical 수집 기본 방식:
+
+1. PowerShell 또는 VSCode 터미널에서 capture 저장 경로를 지정한다.
+2. 같은 터미널에서 `nsu_run_fusion_v6_overlap_hold.py`를 실행한다.
+3. GT 라벨을 맞춘 뒤 단어별 4회씩 수행한다.
+4. 잘못된 GT 또는 명백한 실수 샘플은 즉시 삭제한다.
+5. 종료 후 captures/reports 개수와 GT 분포를 확인한다.
+
+예시:
+
+```powershell
+$env:NSU_RUN_DEBUG_CAPTURE_DIR='C:\SignProject\experiments\live_eval\practical_out_2\captures'
+& C:\SignProject\myenv\Scripts\python.exe C:\SignProject\nsu_run_fusion_v6_overlap_hold.py
+```
+
+주의:
+
+- 터미널을 껐다 켜면 `$env:NSU_RUN_DEBUG_CAPTURE_DIR` 설정은 사라진다.
+- 따라서 run을 다시 시작할 때는 반드시 저장 경로를 다시 지정해야 한다.
+
+## 9. 다음 우선순위
+
+바로 다음에 하면 좋은 작업은 다음 순서다.
+
+1. FPS / latency 측정
+   - 교수님 질문 대비: “센서 fusion 때문에 실시간성이 떨어지지 않는가?”에 답해야 한다.
+   - vision-only vs fusion의 FPS, loop time, inference time을 비교한다.
+
+2. Sensor ablation 분석
+   - full fusion, sensor-zero, flex 제거, IMU 제거 등을 비교한다.
+   - 어떤 센서가 어떤 그룹에서 도움을 줬는지 설명할 수 있게 만든다.
+
+3. Hardware architecture 정리
+   - 센서 -> MCU -> PC Python -> model 흐름도
+   - baudrate, sampling rate, 동기화 방식, 비용/전력 등을 정리한다.
+
+4. Hold / overlap 안정성 분석
+   - 현재 Practical은 one-shot 60 frame capture 중심이라 flicker 분석 우선순위는 낮다.
+   - 발표에서 실시간 안정화 기여를 강조하려면 output flicker rate 전후 비교를 추가로 만들 수 있다.
+
+## 10. 최종 발표/보고서에서 안전한 표현
+
+좋은 표현:
+
+- “Offline 평가에서는 vision-only가 더 높았지만, Practical 평가에서는 fusion이 네 세트 모두에서 더 안정적이었다.”
+- “장갑 센서는 특히 미참여자 조건과 비슷한 동작 그룹에서 vision-only의 취약점을 보완했다.”
+- “Fusion 개선폭은 그룹별로 다르며, 방향/순간 손모양/추가 동작/경로 차이 그룹에서 더 크게 나타났다.”
+
+피해야 할 표현:
+
+- “stable hybrid가 최종 확정 모델이다.”
+- “실시간 문제 원인은 class mapping 버그였다.”
+- “센서 fusion이 모든 상황에서 무조건 압도적으로 좋다.”
+- “Realistic offline이 공식 최종 지표다.”
+
+현재 가장 방어력 있는 결론은 다음이다.
+
+> Vision-only는 offline score는 높지만 실제 사용 조건에서 흔들릴 수 있고, glove fusion은 같은 Practical 입력 조건에서 더 안정적인 성능을 보였다. 특히 미참여자와 유사 수어 그룹에서 센서 정보의 보완 효과가 확인되었다.
