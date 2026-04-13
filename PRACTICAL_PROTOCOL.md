@@ -14,6 +14,7 @@
 - `Practical-In`: performed by a data collection participant.
 - `Practical-In-2`: performed by an additional data collection participant under the same protocol.
 - `Practical-Out`: performed by a non-participant.
+- `Practical-Out-2`: performed by an additional non-participant, collected as a lighter confirmation set.
 
 ## Capture Tool
 - Script: `nsu_run_fusion_v6_overlap_hold.py`
@@ -44,6 +45,7 @@
 ## Repetitions
 - 4 repetitions per word
 - 18 words x 4 = 72 captures per person
+- For `Practical-Out-2`, use 2 repetitions per word as a lighter confirmation set.
 
 ## Recommended Order
 1. `more`
@@ -93,6 +95,10 @@ Repeat the full 18-word order for 4 rounds.
   - `C:\SignProject\experiments\live_eval\practical_out\captures`
 - `Practical-Out` reports:
   - `C:\SignProject\experiments\live_eval\practical_out\reports`
+- `Practical-Out-2` captures:
+  - `C:\SignProject\experiments\live_eval\practical_out_2\captures`
+- `Practical-Out-2` reports:
+  - `C:\SignProject\experiments\live_eval\practical_out_2\reports`
 
 ## Environment Variables
 Before running, point the capture directory to the proper group.
@@ -112,6 +118,11 @@ $env:NSU_RUN_DEBUG_CAPTURE_DIR='C:\SignProject\experiments\live_eval\practical_i
 $env:NSU_RUN_DEBUG_CAPTURE_DIR='C:\SignProject\experiments\live_eval\practical_out\captures'
 ```
 
+### Practical-Out-2
+```powershell
+$env:NSU_RUN_DEBUG_CAPTURE_DIR='C:\SignProject\experiments\live_eval\practical_out_2\captures'
+```
+
 ## Official Metrics
 ### Offline
 - Accuracy
@@ -129,3 +140,4 @@ Optional support metrics:
 For practical scoring, always use the `nsu_run` captures as the common benchmark.
 - Vision-only model: use the vision portion only.
 - Fusion model: use the full captured input.
+

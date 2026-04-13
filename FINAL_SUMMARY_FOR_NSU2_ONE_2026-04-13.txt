@@ -1,0 +1,116 @@
+﻿SignProject / nsu2 one branch short handoff (2026-04-13)
+
+1. Current main comparison frame
+- Main official metrics are now only two axes:
+  - Offline: standard LSTM test-set metrics from collected dataset.
+  - Practical: GT-labeled nsu_run captures replayed as a common benchmark.
+- Realistic-offline was explored but is no longer the main reporting axis.
+- Practical must be collected with nsu_run_fusion_v6_overlap_hold.py because it stores both vision and sensor streams.
+- For Practical scoring:
+  - glove vision-only model uses only the first 126 vision features from the same nsu_run capture.
+  - glove fusion model uses the full vision+sensor input from the same capture.
+
+2. Current fixed baseline models
+- Glove vision-only baseline:
+  - C:\SignProject\experiments\glove_vision\2026-04-07_glove_vision_18w_clean_v1
+- Glove fusion baseline / current final structure candidate:
+  - C:\SignProject\experiments\glove_fusion\2026-04-07_stable_hybrid_18w_clean_v1
+- Important interpretation:
+  - stable_hybrid is the current final structure baseline/candidate, not a universally final confirmed model.
+  - It is kept because it is the most robust on Practical-Out users.
+
+3. Offline baseline result
+- glove vision-only:
+  - Accuracy 0.9333
+  - Macro F1 0.9239
+- glove fusion baseline:
+  - Accuracy 0.9000
+  - Macro F1 0.8796
+- Offline alone favors vision-only.
+
+4. Final Practical datasets
+All are 18 words x 4 repetitions = 72 samples each.
+- Practical-In:
+  - data collection participant
+  - captures: C:\SignProject\experiments\live_eval\practical_in\captures
+  - reports: C:\SignProject\experiments\live_eval\practical_in\reports
+- Practical-In-2:
+  - additional data collection participant, re-collected on 2026-04-13 due earlier FPS instability concern
+  - captures: C:\SignProject\experiments\live_eval\practical_in_2\captures
+  - reports: C:\SignProject\experiments\live_eval\practical_in_2\reports
+- Practical-Out:
+  - non-participant user
+  - captures: C:\SignProject\experiments\live_eval\practical_out\captures
+  - reports: C:\SignProject\experiments\live_eval\practical_out\reports
+- Practical-Out-2:
+  - additional non-participant user, re-collected on 2026-04-13 due earlier FPS/path issue
+  - captures: C:\SignProject\experiments\live_eval\practical_out_2\captures
+  - reports: C:\SignProject\experiments\live_eval\practical_out_2\reports
+
+5. Final Practical baseline results
+- Practical-In:
+  - vision-only: Acc 0.7361, Macro F1 0.7073
+  - fusion: Acc 0.8750, Macro F1 0.8490
+- Practical-In-2:
+  - vision-only: Acc 0.8889, Macro F1 0.8845
+  - fusion: Acc 0.9306, Macro F1 0.9270
+- Practical-Out:
+  - vision-only: Acc 0.5694, Macro F1 0.5055
+  - fusion: Acc 0.8889, Macro F1 0.8725
+- Practical-Out-2:
+  - vision-only: Acc 0.7083, Macro F1 0.6517
+  - fusion: Acc 0.8750, Macro F1 0.8621
+- Final interpretation:
+  - Offline favors vision-only.
+  - Every final Practical set favors fusion baseline.
+  - Fusion advantage is especially important for non-participant users.
+
+6. Similar-sign group analysis
+- Final group analysis files:
+  - C:\SignProject\experiments\live_eval\final_practical_group_analysis_2026-04-13.json
+  - C:\SignProject\experiments\live_eval\final_practical_group_analysis_2026-04-13.md
+- Overall across all final Practical sets:
+  - direction_difference: vision 0.6875, fusion 1.0000, diff +0.3125
+  - instant_handshape_difference: vision 0.5938, fusion 0.9062, diff +0.3125
+  - additional_motion_difference: vision 0.7500, fusion 1.0000, diff +0.2500
+  - bend_path_difference: vision 0.4792, fusion 0.6667, diff +0.1875
+  - wrist_angle_difference: vision 0.8125, fusion 0.9062, diff +0.0938
+  - cross_hand_difference: vision 0.9062, fusion 0.9375, diff +0.0312
+  - handshape_difference: vision 0.8594, fusion 0.8906, diff +0.0312
+- Main research message:
+  - In practical settings, fusion improves recognition in all predefined similar-sign groups.
+  - The largest gains appear in direction, instant-handshape, additional-motion, and bend/path groups.
+
+7. Candidate model experiments
+Candidate fusion variants were explored:
+- sensor_correction_18w_v1
+- sensor_correction_ambiguous_18w_v1
+- modality_aware_correction_18w_v1
+- modality_aware_rerank_18w_v1
+Observed pattern:
+- Some candidates look better on Practical-In / In-2.
+- But they degrade on Practical-Out compared with baseline fusion.
+- Therefore baseline fusion remains the safer final structure candidate for robustness.
+
+8. Run/runtime state
+- gpt_run.py:
+  - cleaned UI/KOR_MAP
+  - GT support
+  - weak v1 hold rule for very low confidence and margin
+- nsu_run_fusion_v6_overlap_hold.py:
+  - GT support
+  - full 18-word display mapping
+  - weak v1 runtime hold rule using low confidence/margin plus input quality checks
+- Practical official capture must use nsu_run_fusion_v6_overlap_hold.py only.
+
+9. Next recommended work remembered for later
+- FPS / latency profiling:
+  - compare vision-only and fusion FPS/inference time/loop time.
+  - determine whether bottleneck is MediaPipe, model inference, sensor read, UI, or disk I/O.
+- Sensor ablation:
+  - evaluate practical captures with full fusion, sensor-zero, flex-removed, IMU-removed, etc.
+  - connect sensor modality contribution to similar-sign groups.
+- Hardware architecture/spec documentation:
+  - sensor -> MCU -> PC Python -> model pipeline
+  - baudrate, sampling rate, sync, sensor_host_delta, cost/power if available.
+- Flicker/hold stability can be explored later, but only if continuous output mode is formally evaluated.
