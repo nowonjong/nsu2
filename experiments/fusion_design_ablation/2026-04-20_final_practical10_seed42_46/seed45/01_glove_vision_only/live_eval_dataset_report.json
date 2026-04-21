@@ -1,0 +1,2013 @@
+{
+  "model_dir": "C:\\SignProject\\experiments\\fusion_design_ablation\\2026-04-20_final_practical10_seed42_46\\seed45\\01_glove_vision_only",
+  "dataset_dir": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10",
+  "sample_count": 180,
+  "accuracy": 0.5777777777777777,
+  "macro_f1": 0.5358653227141583,
+  "low_margin_rate_lt_0_10": 0.03888888888888889,
+  "low_margin_rate_lt_0_20": 0.05555555555555555,
+  "labels": [
+    "more",
+    "naeil",
+    "eoje",
+    "teukbyeol",
+    "byeollo",
+    "jamkkan",
+    "oraenman",
+    "gakkapda",
+    "jalhada",
+    "annyeonghaseyo",
+    "mannada",
+    "byeongyeonghada",
+    "banggeum",
+    "billida",
+    "gandanhada",
+    "sada",
+    "gamsahamnida",
+    "joesonghada"
+  ],
+  "confusion_matrix": [
+    [
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      4,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      7,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      6,
+      1,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      8,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      9,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      6,
+      4,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      6,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      9,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      7
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      7,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      9
+    ]
+  ],
+  "per_sample": [
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.8676955699920654,
+      "pred_conf": 0.9199585318565369,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174315_261882_more.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9644696712493896,
+      "pred_conf": 0.973506510257721,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174330_202853_teukbyeol.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "oraenman",
+      "correct": false,
+      "margin": 0.22567039728164673,
+      "pred_conf": 0.5930628180503845,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174826_672122_oraenman.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.970069169998169,
+      "pred_conf": 0.984046995639801,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174849_361008_jalhada.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9970531463623047,
+      "pred_conf": 0.9979199767112732,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174857_956948_mannada.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "joesonghada",
+      "correct": false,
+      "margin": 0.7610911130905151,
+      "pred_conf": 0.835643470287323,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174906_956609_gandanhada.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9504786133766174,
+      "pred_conf": 0.9732557535171509,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174916_776823_naeil.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9928510785102844,
+      "pred_conf": 0.995826005935669,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174927_688505_byeollo.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "oraenman",
+      "correct": true,
+      "margin": 0.9687083959579468,
+      "pred_conf": 0.9780054688453674,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174940_145956_oraenman.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9620667695999146,
+      "pred_conf": 0.97031569480896,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_174954_116652_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "byeongyeonghada",
+      "correct": true,
+      "margin": 0.999596893787384,
+      "pred_conf": 0.9997110962867737,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175003_785142_byeongyeonghada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "sada",
+      "correct": true,
+      "margin": 0.0521584153175354,
+      "pred_conf": 0.4726729393005371,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175017_036004_sada.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.990837037563324,
+      "pred_conf": 0.9941600561141968,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175026_555900_eoje.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "gakkapda",
+      "correct": true,
+      "margin": 0.9988861680030823,
+      "pred_conf": 0.9991807341575623,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175041_386471_gakkapda.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "banggeum",
+      "correct": true,
+      "margin": 0.053237080574035645,
+      "pred_conf": 0.524178147315979,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175054_214419_banggeum.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "gamsahamnida",
+      "correct": true,
+      "margin": 0.576907753944397,
+      "pred_conf": 0.7455008625984192,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175103_626312_gamsahamnida.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.6167872548103333,
+      "pred_conf": 0.7220139503479004,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175116_531673_banggeum.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.6953508853912354,
+      "pred_conf": 0.8257783055305481,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175130_225404_joesonghada.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.9106276035308838,
+      "pred_conf": 0.946774959564209,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175139_752218_more.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9578205943107605,
+      "pred_conf": 0.9679952263832092,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175151_169420_teukbyeol.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "oraenman",
+      "correct": false,
+      "margin": 0.6582069396972656,
+      "pred_conf": 0.8181647658348083,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175201_094519_jamkkan.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.8921858668327332,
+      "pred_conf": 0.9336100816726685,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175210_341162_jalhada.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9988222718238831,
+      "pred_conf": 0.9991981387138367,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175219_172423_mannada.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "joesonghada",
+      "correct": false,
+      "margin": 0.6772955656051636,
+      "pred_conf": 0.7722170948982239,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175231_418774_gandanhada.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9563021063804626,
+      "pred_conf": 0.9758346080780029,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175246_144707_naeil.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9914993643760681,
+      "pred_conf": 0.9947498440742493,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175254_459725_byeollo.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "oraenman",
+      "correct": true,
+      "margin": 0.5493929982185364,
+      "pred_conf": 0.7010939121246338,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175304_485206_oraenman.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.955274760723114,
+      "pred_conf": 0.9653674960136414,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175313_603725_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.9511995315551758,
+      "pred_conf": 0.9746885299682617,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175322_252703_mannada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "sada",
+      "correct": true,
+      "margin": 0.9376832246780396,
+      "pred_conf": 0.9588941335678101,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175338_624524_sada.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.9958047270774841,
+      "pred_conf": 0.9970447421073914,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175347_031895_eoje.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "gakkapda",
+      "correct": true,
+      "margin": 0.9996410012245178,
+      "pred_conf": 0.9997125267982483,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175400_159868_gakkapda.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "banggeum",
+      "correct": true,
+      "margin": 0.7362109422683716,
+      "pred_conf": 0.8668789267539978,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175408_531811_banggeum.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "sada",
+      "correct": false,
+      "margin": 0.8243475556373596,
+      "pred_conf": 0.8962000608444214,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175419_360672_gamsahamnida.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.8097748160362244,
+      "pred_conf": 0.8762894868850708,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175427_970282_banggeum.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.6617881059646606,
+      "pred_conf": 0.8074747323989868,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175437_909239_joesonghada.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.943663477897644,
+      "pred_conf": 0.9711053371429443,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175445_266970_more.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9489036202430725,
+      "pred_conf": 0.9613822102546692,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175455_218875_teukbyeol.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "oraenman",
+      "correct": false,
+      "margin": 0.9986539483070374,
+      "pred_conf": 0.9989631175994873,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175505_019707_oraenman.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9641816020011902,
+      "pred_conf": 0.9800642132759094,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175518_575172_jalhada.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9975401163101196,
+      "pred_conf": 0.9983212351799011,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175526_515752_mannada.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "joesonghada",
+      "correct": false,
+      "margin": 0.4887678325176239,
+      "pred_conf": 0.641496479511261,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175536_395402_gandanhada.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9600250720977783,
+      "pred_conf": 0.9788147807121277,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175545_170714_naeil.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9909859895706177,
+      "pred_conf": 0.9943302869796753,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175556_296184_byeollo.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "oraenman",
+      "correct": true,
+      "margin": 0.9552162885665894,
+      "pred_conf": 0.9751549959182739,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175604_033869_oraenman.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.6236109733581543,
+      "pred_conf": 0.7005575299263,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175612_173923_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "byeongyeonghada",
+      "correct": true,
+      "margin": 0.998907744884491,
+      "pred_conf": 0.9992951154708862,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175621_785291_mannada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "sada",
+      "correct": true,
+      "margin": 0.9283234477043152,
+      "pred_conf": 0.9495803713798523,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175643_767651_sada.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.9974963665008545,
+      "pred_conf": 0.9982184767723083,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175653_029823_eoje.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "oraenman",
+      "correct": false,
+      "margin": 0.9731113910675049,
+      "pred_conf": 0.98375004529953,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175702_746822_oraenman.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "banggeum",
+      "correct": true,
+      "margin": 0.7627530694007874,
+      "pred_conf": 0.8809324502944946,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175717_489991_banggeum.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "sada",
+      "correct": false,
+      "margin": 0.8991570472717285,
+      "pred_conf": 0.9310508370399475,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175725_728005_gamsahamnida.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "billida",
+      "correct": true,
+      "margin": 0.8181259036064148,
+      "pred_conf": 0.9073777198791504,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175732_885173_billida.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.6408047676086426,
+      "pred_conf": 0.7970367074012756,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175741_971783_joesonghada.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.9004213809967041,
+      "pred_conf": 0.946107804775238,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175750_455344_more.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9618250131607056,
+      "pred_conf": 0.9714402556419373,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175801_204689_teukbyeol.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "oraenman",
+      "correct": false,
+      "margin": 0.9784926176071167,
+      "pred_conf": 0.988097071647644,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175827_428163_oraenman.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9672616720199585,
+      "pred_conf": 0.9808965921401978,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175847_768200_jalhada.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.998625636100769,
+      "pred_conf": 0.9990548491477966,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175856_398643_mannada.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "joesonghada",
+      "correct": false,
+      "margin": 0.1331321895122528,
+      "pred_conf": 0.43078428506851196,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175907_134909_gandanhada.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9484339952468872,
+      "pred_conf": 0.9716967940330505,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175916_278102_naeil.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9915379881858826,
+      "pred_conf": 0.9951047897338867,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175928_375544_byeollo.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "oraenman",
+      "correct": true,
+      "margin": 0.3494880199432373,
+      "pred_conf": 0.652107834815979,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175940_850297_oraenman.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.9681126475334167,
+      "pred_conf": 0.9737367630004883,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175950_435805_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "byeongyeonghada",
+      "correct": true,
+      "margin": 0.9989639520645142,
+      "pred_conf": 0.999363362789154,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_175958_235707_byeongyeonghada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "sada",
+      "correct": true,
+      "margin": 0.9270913600921631,
+      "pred_conf": 0.9566608667373657,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_180018_440610_sada.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.9263029098510742,
+      "pred_conf": 0.9589528441429138,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_180028_231413_eoje.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "gakkapda",
+      "correct": true,
+      "margin": 0.9361827373504639,
+      "pred_conf": 0.957219123840332,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_180036_904710_gakkapda.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "billida",
+      "correct": false,
+      "margin": 0.9372174143791199,
+      "pred_conf": 0.9680576920509338,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_180047_591320_banggeum.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "sada",
+      "correct": false,
+      "margin": 0.012729138135910034,
+      "pred_conf": 0.4606340229511261,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_180055_534201_gamsahamnida.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.8237132430076599,
+      "pred_conf": 0.8988127112388611,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_180122_817143_banggeum.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.834776759147644,
+      "pred_conf": 0.9038643836975098,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\original4__20260413_180138_591561_joesonghada.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.9297373294830322,
+      "pred_conf": 0.95396888256073,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165403_779109_more.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.9302830696105957,
+      "pred_conf": 0.9559381604194641,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165411_461813_more.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.8817127346992493,
+      "pred_conf": 0.9247516393661499,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165637_309836_naeil.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9388005137443542,
+      "pred_conf": 0.9601559638977051,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165648_678203_naeil.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.9698988795280457,
+      "pred_conf": 0.9789875745773315,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165656_753149_eoje.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.8962767124176025,
+      "pred_conf": 0.9390180706977844,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165703_962959_eoje.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "teukbyeol",
+      "correct": true,
+      "margin": 0.7086683511734009,
+      "pred_conf": 0.8442763090133667,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165715_044772_byeollo.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "teukbyeol",
+      "correct": true,
+      "margin": 0.822790265083313,
+      "pred_conf": 0.9018754959106445,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165726_305993_byeollo.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9930620789527893,
+      "pred_conf": 0.9960482716560364,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165737_131375_byeollo.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9919435381889343,
+      "pred_conf": 0.9955371618270874,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165744_135542_jalhada.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "oraenman",
+      "correct": false,
+      "margin": 0.9958794116973877,
+      "pred_conf": 0.997521698474884,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165804_696255_oraenman.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "oraenman",
+      "correct": false,
+      "margin": 0.935791015625,
+      "pred_conf": 0.9652796983718872,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165812_698635_oraenman.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "oraenman",
+      "correct": true,
+      "margin": 0.18003281950950623,
+      "pred_conf": 0.39696285128593445,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165820_691313_oraenman.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "oraenman",
+      "correct": true,
+      "margin": 0.09768995642662048,
+      "pred_conf": 0.4313388764858246,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_165944_074205_mannada.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "gakkapda",
+      "correct": true,
+      "margin": 0.9992666244506836,
+      "pred_conf": 0.9994404911994934,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170004_076549_gakkapda.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.290006548166275,
+      "pred_conf": 0.5095271468162537,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170010_269285_oraenman.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9589099884033203,
+      "pred_conf": 0.9768536686897278,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170023_591125_jalhada.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "jalhada",
+      "correct": true,
+      "margin": 0.9456850290298462,
+      "pred_conf": 0.9699063897132874,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170031_007428_jalhada.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.9822320342063904,
+      "pred_conf": 0.9847684502601624,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170038_578994_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.9981711506843567,
+      "pred_conf": 0.9984797835350037,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170045_102686_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9990270733833313,
+      "pred_conf": 0.9993239641189575,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170052_763924_mannada.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9986831545829773,
+      "pred_conf": 0.999099850654602,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170059_209646_mannada.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "byeongyeonghada",
+      "correct": true,
+      "margin": 0.08386561274528503,
+      "pred_conf": 0.537062406539917,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170106_832011_mannada.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.9983958005905151,
+      "pred_conf": 0.9989904761314392,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170114_854018_mannada.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "billida",
+      "correct": false,
+      "margin": 0.9713013768196106,
+      "pred_conf": 0.9823549389839172,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170124_662051_banggeum.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "billida",
+      "correct": false,
+      "margin": 0.9584079384803772,
+      "pred_conf": 0.9738922119140625,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170136_781859_banggeum.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.643595814704895,
+      "pred_conf": 0.7708096504211426,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170144_909002_billida.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.5387387871742249,
+      "pred_conf": 0.683983564376831,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170151_682058_billida.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.8353966474533081,
+      "pred_conf": 0.8880641460418701,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170204_508698_gandanhada.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "gandanhada",
+      "correct": true,
+      "margin": 0.511126697063446,
+      "pred_conf": 0.7250242829322815,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170211_167827_gandanhada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "sada",
+      "correct": true,
+      "margin": 0.8050399422645569,
+      "pred_conf": 0.8695923686027527,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170224_472900_sada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "sada",
+      "correct": true,
+      "margin": 0.9326958656311035,
+      "pred_conf": 0.9592856764793396,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170233_388047_sada.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "gamsahamnida",
+      "correct": true,
+      "margin": 0.9643325805664062,
+      "pred_conf": 0.9782028794288635,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170244_220689_gamsahamnida.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "gamsahamnida",
+      "correct": true,
+      "margin": 0.7924001216888428,
+      "pred_conf": 0.8849790692329407,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170250_791763_gamsahamnida.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "sada",
+      "correct": false,
+      "margin": 0.5898240804672241,
+      "pred_conf": 0.7526504397392273,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170343_303064_joesonghada.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.6278800964355469,
+      "pred_conf": 0.7922400236129761,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170349_496238_joesonghada.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.9543164372444153,
+      "pred_conf": 0.969986617565155,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170357_551515_more.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.9614985585212708,
+      "pred_conf": 0.976524829864502,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170403_751507_more.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9414573311805725,
+      "pred_conf": 0.9686586260795593,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170412_109583_naeil.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9589152932167053,
+      "pred_conf": 0.9770081043243408,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170418_810917_naeil.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.977135956287384,
+      "pred_conf": 0.9852586984634399,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170426_190807_eoje.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.9859541058540344,
+      "pred_conf": 0.9900582432746887,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170434_385205_eoje.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.20845210552215576,
+      "pred_conf": 0.5893887877464294,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170442_664734_teukbyeol.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "teukbyeol",
+      "correct": true,
+      "margin": 0.8260059356689453,
+      "pred_conf": 0.8909904956817627,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170449_974554_teukbyeol.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9920973777770996,
+      "pred_conf": 0.9955968260765076,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170458_622694_jalhada.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9865284562110901,
+      "pred_conf": 0.9904952049255371,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170508_439740_jalhada.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "jamkkan",
+      "correct": true,
+      "margin": 0.34017032384872437,
+      "pred_conf": 0.5292713642120361,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170519_495049_oraenman.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "oraenman",
+      "correct": false,
+      "margin": 0.6910288333892822,
+      "pred_conf": 0.8395257592201233,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170528_657998_jamkkan.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.8210417032241821,
+      "pred_conf": 0.8942192196846008,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170536_669177_oraenman.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "gakkapda",
+      "correct": false,
+      "margin": 0.31749311089515686,
+      "pred_conf": 0.4612589180469513,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170544_135441_oraenman.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "gakkapda",
+      "correct": true,
+      "margin": 0.9994558095932007,
+      "pred_conf": 0.9995852112770081,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170551_586517_gakkapda.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "gakkapda",
+      "correct": true,
+      "margin": 0.9990735054016113,
+      "pred_conf": 0.9993205070495605,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170558_072557_gakkapda.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9493701457977295,
+      "pred_conf": 0.9641104340553284,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170721_454464_jalhada.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9919169545173645,
+      "pred_conf": 0.9955326318740845,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_170727_797634_jalhada.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.9956340789794922,
+      "pred_conf": 0.9963178634643555,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171017_836575_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.9586991667747498,
+      "pred_conf": 0.9680978059768677,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171024_125275_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9986832737922668,
+      "pred_conf": 0.9990886449813843,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171031_348044_mannada.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9990859031677246,
+      "pred_conf": 0.9993778467178345,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171037_853375_mannada.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.9984920024871826,
+      "pred_conf": 0.9990252256393433,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171114_767704_mannada.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.9985179901123047,
+      "pred_conf": 0.9990758895874023,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171122_525594_mannada.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "billida",
+      "correct": false,
+      "margin": 0.9179090261459351,
+      "pred_conf": 0.9574882388114929,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171130_795894_banggeum.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "billida",
+      "correct": false,
+      "margin": 0.3275327980518341,
+      "pred_conf": 0.6549338698387146,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171137_201816_banggeum.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.33731603622436523,
+      "pred_conf": 0.5859928131103516,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171144_731312_billida.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.1683676540851593,
+      "pred_conf": 0.5284641981124878,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171151_104867_billida.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "joesonghada",
+      "correct": false,
+      "margin": 0.9916946291923523,
+      "pred_conf": 0.9941656589508057,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171159_497662_gandanhada.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.3181627094745636,
+      "pred_conf": 0.5989696383476257,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171205_664072_gandanhada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "sada",
+      "correct": true,
+      "margin": 0.9093292355537415,
+      "pred_conf": 0.9466363787651062,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171213_135368_sada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.4282568693161011,
+      "pred_conf": 0.6715335249900818,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171219_653731_sada.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "gamsahamnida",
+      "correct": true,
+      "margin": 0.9689370393753052,
+      "pred_conf": 0.9806681871414185,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171226_802722_gamsahamnida.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "gamsahamnida",
+      "correct": true,
+      "margin": 0.9723232388496399,
+      "pred_conf": 0.981696367263794,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171234_216365_gamsahamnida.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.9975481033325195,
+      "pred_conf": 0.9983691573143005,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171241_312116_joesonghada.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.46911704540252686,
+      "pred_conf": 0.687548816204071,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171247_708272_joesonghada.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.932649552822113,
+      "pred_conf": 0.9598672389984131,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171255_088020_more.json"
+    },
+    {
+      "gt_label": "more",
+      "pred_label": "more",
+      "correct": true,
+      "margin": 0.9019637107849121,
+      "pred_conf": 0.9449921250343323,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171301_173133_more.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9587324857711792,
+      "pred_conf": 0.9775756597518921,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171308_272238_naeil.json"
+    },
+    {
+      "gt_label": "naeil",
+      "pred_label": "more",
+      "correct": false,
+      "margin": 0.9597204923629761,
+      "pred_conf": 0.9780972599983215,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171314_607822_naeil.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.9764963388442993,
+      "pred_conf": 0.9844295978546143,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171321_980820_eoje.json"
+    },
+    {
+      "gt_label": "eoje",
+      "pred_label": "eoje",
+      "correct": true,
+      "margin": 0.9917578101158142,
+      "pred_conf": 0.993408203125,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171328_304869_eoje.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "teukbyeol",
+      "correct": true,
+      "margin": 0.7647488117218018,
+      "pred_conf": 0.8716448545455933,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171335_514735_teukbyeol.json"
+    },
+    {
+      "gt_label": "teukbyeol",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.296383798122406,
+      "pred_conf": 0.6333510875701904,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171342_582844_teukbyeol.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9928442239761353,
+      "pred_conf": 0.9958563446998596,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171349_758295_byeollo.json"
+    },
+    {
+      "gt_label": "byeollo",
+      "pred_label": "byeollo",
+      "correct": true,
+      "margin": 0.9925448298454285,
+      "pred_conf": 0.9957810640335083,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171356_611384_byeollo.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "jamkkan",
+      "correct": true,
+      "margin": 0.7998080849647522,
+      "pred_conf": 0.8920074701309204,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171403_987369_jamkkan.json"
+    },
+    {
+      "gt_label": "jamkkan",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.9478148221969604,
+      "pred_conf": 0.968458354473114,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171410_634443_mannada.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "jamkkan",
+      "correct": false,
+      "margin": 0.09814402461051941,
+      "pred_conf": 0.33591026067733765,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171422_074398_oraenman.json"
+    },
+    {
+      "gt_label": "oraenman",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.9499340057373047,
+      "pred_conf": 0.9683319330215454,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171429_024437_mannada.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "gakkapda",
+      "correct": true,
+      "margin": 0.9992609024047852,
+      "pred_conf": 0.9994396567344666,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171438_163611_gakkapda.json"
+    },
+    {
+      "gt_label": "gakkapda",
+      "pred_label": "gakkapda",
+      "correct": true,
+      "margin": 0.9885256886482239,
+      "pred_conf": 0.9919262528419495,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171445_556372_gakkapda.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9681284427642822,
+      "pred_conf": 0.9829325675964355,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171452_843715_jalhada.json"
+    },
+    {
+      "gt_label": "jalhada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.9521755576133728,
+      "pred_conf": 0.9737246632575989,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171459_746016_jalhada.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.9606801271438599,
+      "pred_conf": 0.9675441980361938,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171506_965334_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "annyeonghaseyo",
+      "pred_label": "annyeonghaseyo",
+      "correct": true,
+      "margin": 0.9945403337478638,
+      "pred_conf": 0.9953067898750305,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171513_062093_annyeonghaseyo.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9989787936210632,
+      "pred_conf": 0.9993095397949219,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171521_015679_mannada.json"
+    },
+    {
+      "gt_label": "mannada",
+      "pred_label": "mannada",
+      "correct": true,
+      "margin": 0.9963390827178955,
+      "pred_conf": 0.9974325299263,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171527_346253_mannada.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.9976041913032532,
+      "pred_conf": 0.998497724533081,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171535_292551_mannada.json"
+    },
+    {
+      "gt_label": "byeongyeonghada",
+      "pred_label": "mannada",
+      "correct": false,
+      "margin": 0.9983936548233032,
+      "pred_conf": 0.9989769458770752,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171544_311189_mannada.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "billida",
+      "correct": false,
+      "margin": 0.9601343274116516,
+      "pred_conf": 0.9778339862823486,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171555_049492_banggeum.json"
+    },
+    {
+      "gt_label": "banggeum",
+      "pred_label": "banggeum",
+      "correct": true,
+      "margin": 0.7891316413879395,
+      "pred_conf": 0.8879388570785522,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171604_334103_banggeum.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.5780099630355835,
+      "pred_conf": 0.7217000722885132,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171611_552888_billida.json"
+    },
+    {
+      "gt_label": "billida",
+      "pred_label": "banggeum",
+      "correct": false,
+      "margin": 0.611812174320221,
+      "pred_conf": 0.7708284854888916,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171617_929702_billida.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "joesonghada",
+      "correct": false,
+      "margin": 0.9914135932922363,
+      "pred_conf": 0.9938788414001465,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171625_593010_gandanhada.json"
+    },
+    {
+      "gt_label": "gandanhada",
+      "pred_label": "joesonghada",
+      "correct": false,
+      "margin": 0.0038452744483947754,
+      "pred_conf": 0.47221848368644714,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171631_765601_gandanhada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "sada",
+      "correct": true,
+      "margin": 0.5232797861099243,
+      "pred_conf": 0.7130598425865173,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171638_751887_sada.json"
+    },
+    {
+      "gt_label": "sada",
+      "pred_label": "byeollo",
+      "correct": false,
+      "margin": 0.27736032009124756,
+      "pred_conf": 0.5915975570678711,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171644_931404_sada.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "gamsahamnida",
+      "correct": true,
+      "margin": 0.9643625020980835,
+      "pred_conf": 0.9780338406562805,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171652_091333_gamsahamnida.json"
+    },
+    {
+      "gt_label": "gamsahamnida",
+      "pred_label": "gamsahamnida",
+      "correct": true,
+      "margin": 0.9754824638366699,
+      "pred_conf": 0.9836951494216919,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171658_461923_gamsahamnida.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.6618742346763611,
+      "pred_conf": 0.8035349249839783,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171705_763931_joesonghada.json"
+    },
+    {
+      "gt_label": "joesonghada",
+      "pred_label": "joesonghada",
+      "correct": true,
+      "margin": 0.8422750234603882,
+      "pred_conf": 0.9055513739585876,
+      "source_model_name": "final_practical_out_2_10",
+      "source_json": "C:\\SignProject\\experiments\\live_eval_dataset\\final_practical_out_2_10\\captures\\add6__20260420_171712_085790_joesonghada.json"
+    }
+  ]
+}

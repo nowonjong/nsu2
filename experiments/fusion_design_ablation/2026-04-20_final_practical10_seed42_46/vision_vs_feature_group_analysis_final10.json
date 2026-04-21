@@ -1,0 +1,2035 @@
+{
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "models": {
+    "01_glove_vision_only": "Vision-only",
+    "03_feature_redesigned_simple_fusion": "Feature redesigned fusion"
+  },
+  "groups": {
+    "direction_difference": {
+      "display_name_ko": "?? ???",
+      "actions": [
+        "more",
+        "naeil",
+        "eoje"
+      ]
+    },
+    "wrist_angle_difference": {
+      "display_name_ko": "???? ???",
+      "actions": [
+        "teukbyeol",
+        "byeollo"
+      ]
+    },
+    "bend_path_difference": {
+      "display_name_ko": "??, ?? ???",
+      "actions": [
+        "jamkkan",
+        "oraenman",
+        "gakkapda"
+      ]
+    },
+    "additional_motion_difference": {
+      "display_name_ko": "???? ???",
+      "actions": [
+        "jalhada",
+        "annyeonghaseyo"
+      ]
+    },
+    "cross_hand_difference": {
+      "display_name_ko": "???? ???",
+      "actions": [
+        "mannada",
+        "byeongyeonghada"
+      ]
+    },
+    "instant_handshape_difference": {
+      "display_name_ko": "?? ??? ???",
+      "actions": [
+        "banggeum",
+        "billida"
+      ]
+    },
+    "handshape_difference": {
+      "display_name_ko": "??? ???",
+      "actions": [
+        "gandanhada",
+        "sada",
+        "gamsahamnida",
+        "joesonghada"
+      ]
+    }
+  },
+  "overall": {},
+  "group_results": {
+    "all": [
+      {
+        "group_key": "instant_handshape_difference",
+        "display_name_ko": "?? ??? ???",
+        "actions": [
+          "banggeum",
+          "billida"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.5625,
+            0.525,
+            0.4375,
+            0.4375,
+            0.55
+          ],
+          "mean_acc": 0.5025000000000001,
+          "std_acc": 0.060853307223190434
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.9625,
+            0.925,
+            0.9625,
+            1.0,
+            0.975
+          ],
+          "mean_acc": 0.9650000000000001,
+          "std_acc": 0.027099354235848482
+        },
+        "gain": {
+          "seed_gains": [
+            0.4,
+            0.4,
+            0.525,
+            0.5625,
+            0.42499999999999993
+          ],
+          "mean_gain": 0.4625,
+          "std_gain": 0.07603453162872775
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "billida",
+              "pred": "banggeum",
+              "count": 119
+            },
+            {
+              "gt": "banggeum",
+              "pred": "billida",
+              "count": 39
+            },
+            {
+              "gt": "banggeum",
+              "pred": "eoje",
+              "count": 13
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "billida",
+              "pred": "banggeum",
+              "count": 6
+            },
+            {
+              "gt": "banggeum",
+              "pred": "billida",
+              "count": 6
+            },
+            {
+              "gt": "banggeum",
+              "pred": "teukbyeol",
+              "count": 1
+            }
+          ]
+        },
+        "per_action": {
+          "banggeum": {
+            "vision_only_mean": 0.695,
+            "feature_redesigned_mean": 0.96,
+            "gain": 0.265
+          },
+          "billida": {
+            "vision_only_mean": 0.30999999999999994,
+            "feature_redesigned_mean": 0.97,
+            "gain": 0.66
+          }
+        }
+      },
+      {
+        "group_key": "direction_difference",
+        "display_name_ko": "?? ???",
+        "actions": [
+          "more",
+          "naeil",
+          "eoje"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.7166666666666667,
+            0.675,
+            0.7416666666666667,
+            0.675,
+            0.7916666666666666
+          ],
+          "mean_acc": 0.72,
+          "std_acc": 0.049159604012508726
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.9916666666666667,
+            1.0,
+            0.9916666666666667,
+            0.9916666666666667,
+            1.0
+          ],
+          "mean_acc": 0.9949999999999999,
+          "std_acc": 0.004564354645876368
+        },
+        "gain": {
+          "seed_gains": [
+            0.275,
+            0.32499999999999996,
+            0.25,
+            0.31666666666666665,
+            0.20833333333333337
+          ],
+          "mean_gain": 0.275,
+          "std_gain": 0.048232653761625915
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "naeil",
+              "pred": "more",
+              "count": 139
+            },
+            {
+              "gt": "more",
+              "pred": "naeil",
+              "count": 9
+            },
+            {
+              "gt": "naeil",
+              "pred": "oraenman",
+              "count": 8
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "naeil",
+              "pred": "eoje",
+              "count": 2
+            },
+            {
+              "gt": "more",
+              "pred": "naeil",
+              "count": 1
+            }
+          ]
+        },
+        "per_action": {
+          "more": {
+            "vision_only_mean": 0.915,
+            "feature_redesigned_mean": 0.9949999999999999,
+            "gain": 0.07999999999999985
+          },
+          "naeil": {
+            "vision_only_mean": 0.24500000000000002,
+            "feature_redesigned_mean": 0.99,
+            "gain": 0.745
+          },
+          "eoje": {
+            "vision_only_mean": 1.0,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.0
+          }
+        }
+      },
+      {
+        "group_key": "bend_path_difference",
+        "display_name_ko": "??, ?? ???",
+        "actions": [
+          "jamkkan",
+          "oraenman",
+          "gakkapda"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.6416666666666667,
+            0.625,
+            0.575,
+            0.6416666666666667,
+            0.44166666666666665
+          ],
+          "mean_acc": 0.585,
+          "std_acc": 0.08465616732800199
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.75,
+            0.725,
+            0.725,
+            0.7416666666666667,
+            0.6666666666666666
+          ],
+          "mean_acc": 0.7216666666666667,
+          "std_acc": 0.03259601202601326
+        },
+        "gain": {
+          "seed_gains": [
+            0.10833333333333328,
+            0.09999999999999998,
+            0.15000000000000002,
+            0.09999999999999998,
+            0.22499999999999998
+          ],
+          "mean_gain": 0.13666666666666666,
+          "std_gain": 0.0535542300435321
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "jamkkan",
+              "pred": "oraenman",
+              "count": 74
+            },
+            {
+              "gt": "gakkapda",
+              "pred": "jamkkan",
+              "count": 58
+            },
+            {
+              "gt": "oraenman",
+              "pred": "mannada",
+              "count": 56
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "jamkkan",
+              "pred": "oraenman",
+              "count": 105
+            },
+            {
+              "gt": "gakkapda",
+              "pred": "jamkkan",
+              "count": 22
+            },
+            {
+              "gt": "gakkapda",
+              "pred": "oraenman",
+              "count": 11
+            }
+          ]
+        },
+        "per_action": {
+          "jamkkan": {
+            "vision_only_mean": 0.47000000000000003,
+            "feature_redesigned_mean": 0.41500000000000004,
+            "gain": -0.05499999999999999
+          },
+          "oraenman": {
+            "vision_only_mean": 0.64,
+            "feature_redesigned_mean": 0.9200000000000002,
+            "gain": 0.28000000000000014
+          },
+          "gakkapda": {
+            "vision_only_mean": 0.6449999999999999,
+            "feature_redesigned_mean": 0.8299999999999998,
+            "gain": 0.18499999999999994
+          }
+        }
+      },
+      {
+        "group_key": "additional_motion_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "jalhada",
+          "annyeonghaseyo"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.6875,
+            0.525,
+            0.65,
+            0.6875,
+            0.725
+          ],
+          "mean_acc": 0.655,
+          "std_acc": 0.07735874223382899
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.8625,
+            0.8,
+            0.7625,
+            0.775,
+            0.6125
+          ],
+          "mean_acc": 0.7625,
+          "std_acc": 0.09228014412645875
+        },
+        "gain": {
+          "seed_gains": [
+            0.17500000000000004,
+            0.275,
+            0.11249999999999993,
+            0.08750000000000002,
+            -0.11249999999999993
+          ],
+          "mean_gain": 0.10750000000000001,
+          "std_gain": 0.14268628175126016
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "jalhada",
+              "pred": "byeollo",
+              "count": 68
+            },
+            {
+              "gt": "annyeonghaseyo",
+              "pred": "oraenman",
+              "count": 21
+            },
+            {
+              "gt": "jalhada",
+              "pred": "teukbyeol",
+              "count": 13
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "jalhada",
+              "pred": "byeollo",
+              "count": 47
+            },
+            {
+              "gt": "jalhada",
+              "pred": "teukbyeol",
+              "count": 33
+            },
+            {
+              "gt": "annyeonghaseyo",
+              "pred": "mannada",
+              "count": 6
+            }
+          ]
+        },
+        "per_action": {
+          "jalhada": {
+            "vision_only_mean": 0.58,
+            "feature_redesigned_mean": 0.5900000000000001,
+            "gain": 0.01000000000000012
+          },
+          "annyeonghaseyo": {
+            "vision_only_mean": 0.7300000000000001,
+            "feature_redesigned_mean": 0.9349999999999999,
+            "gain": 0.20499999999999985
+          }
+        }
+      },
+      {
+        "group_key": "handshape_difference",
+        "display_name_ko": "??? ???",
+        "actions": [
+          "gandanhada",
+          "sada",
+          "gamsahamnida",
+          "joesonghada"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.79375,
+            0.76875,
+            0.7625,
+            0.7625,
+            0.7875
+          ],
+          "mean_acc": 0.7750000000000001,
+          "std_acc": 0.014657549249448213
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.89375,
+            0.80625,
+            0.80625,
+            0.89375,
+            0.89375
+          ],
+          "mean_acc": 0.85875,
+          "std_acc": 0.04792572378170205
+        },
+        "gain": {
+          "seed_gains": [
+            0.10000000000000009,
+            0.03749999999999998,
+            0.04375000000000007,
+            0.1312500000000001,
+            0.10625000000000007
+          ],
+          "mean_gain": 0.08375000000000006,
+          "std_gain": 0.04112670969090529
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "gamsahamnida",
+              "pred": "sada",
+              "count": 34
+            },
+            {
+              "gt": "gandanhada",
+              "pred": "joesonghada",
+              "count": 30
+            },
+            {
+              "gt": "gandanhada",
+              "pred": "gamsahamnida",
+              "count": 20
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "sada",
+              "pred": "gamsahamnida",
+              "count": 26
+            },
+            {
+              "gt": "sada",
+              "pred": "joesonghada",
+              "count": 21
+            },
+            {
+              "gt": "joesonghada",
+              "pred": "sada",
+              "count": 20
+            }
+          ]
+        },
+        "per_action": {
+          "gandanhada": {
+            "vision_only_mean": 0.6799999999999999,
+            "feature_redesigned_mean": 0.905,
+            "gain": 0.2250000000000001
+          },
+          "sada": {
+            "vision_only_mean": 0.805,
+            "feature_redesigned_mean": 0.72,
+            "gain": -0.08500000000000008
+          },
+          "gamsahamnida": {
+            "vision_only_mean": 0.8,
+            "feature_redesigned_mean": 0.9400000000000001,
+            "gain": 0.14
+          },
+          "joesonghada": {
+            "vision_only_mean": 0.8150000000000001,
+            "feature_redesigned_mean": 0.8699999999999999,
+            "gain": 0.05499999999999983
+          }
+        }
+      },
+      {
+        "group_key": "wrist_angle_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "teukbyeol",
+          "byeollo"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.8,
+            0.725,
+            0.8375,
+            0.725,
+            0.8625
+          ],
+          "mean_acc": 0.79,
+          "std_acc": 0.06336895927818291
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.7625,
+            0.6875,
+            0.9125,
+            0.825,
+            0.75
+          ],
+          "mean_acc": 0.7875,
+          "std_acc": 0.08523863560616159
+        },
+        "gain": {
+          "seed_gains": [
+            -0.03750000000000009,
+            -0.03749999999999998,
+            0.07499999999999996,
+            0.09999999999999998,
+            -0.11250000000000004
+          ],
+          "mean_gain": -0.0025000000000000356,
+          "std_gain": 0.08812278366007284
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "teukbyeol",
+              "pred": "byeollo",
+              "count": 73
+            },
+            {
+              "gt": "teukbyeol",
+              "pred": "jalhada",
+              "count": 4
+            },
+            {
+              "gt": "byeollo",
+              "pred": "byeongyeonghada",
+              "count": 3
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "teukbyeol",
+              "pred": "byeollo",
+              "count": 39
+            },
+            {
+              "gt": "byeollo",
+              "pred": "teukbyeol",
+              "count": 14
+            },
+            {
+              "gt": "byeollo",
+              "pred": "jalhada",
+              "count": 13
+            }
+          ]
+        },
+        "per_action": {
+          "teukbyeol": {
+            "vision_only_mean": 0.61,
+            "feature_redesigned_mean": 0.73,
+            "gain": 0.12
+          },
+          "byeollo": {
+            "vision_only_mean": 0.9700000000000001,
+            "feature_redesigned_mean": 0.8450000000000001,
+            "gain": -0.125
+          }
+        }
+      },
+      {
+        "group_key": "cross_hand_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "mannada",
+          "byeongyeonghada"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.875,
+            0.8125,
+            0.8875,
+            0.8875,
+            0.925
+          ],
+          "mean_acc": 0.8775000000000001,
+          "std_acc": 0.04088856808449032
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.8625,
+            0.8625,
+            0.75,
+            0.875,
+            0.875
+          ],
+          "mean_acc": 0.845,
+          "std_acc": 0.0534731240905186
+        },
+        "gain": {
+          "seed_gains": [
+            -0.012499999999999956,
+            0.050000000000000044,
+            -0.13749999999999996,
+            -0.012499999999999956,
+            -0.050000000000000044
+          ],
+          "mean_gain": -0.03249999999999997,
+          "std_gain": 0.06880679472261443
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "byeongyeonghada",
+              "pred": "mannada",
+              "count": 49
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "byeongyeonghada",
+              "pred": "mannada",
+              "count": 62
+            }
+          ]
+        },
+        "per_action": {
+          "mannada": {
+            "vision_only_mean": 1.0,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.0
+          },
+          "byeongyeonghada": {
+            "vision_only_mean": 0.755,
+            "feature_redesigned_mean": 0.6900000000000001,
+            "gain": -0.06499999999999995
+          }
+        }
+      }
+    ],
+    "in": [
+      {
+        "group_key": "instant_handshape_difference",
+        "display_name_ko": "?? ??? ???",
+        "actions": [
+          "banggeum",
+          "billida"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.525,
+            0.6,
+            0.375,
+            0.525,
+            0.475
+          ],
+          "mean_acc": 0.5,
+          "std_acc": 0.08291561975888499
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            1.0,
+            0.9,
+            1.0,
+            1.0,
+            0.975
+          ],
+          "mean_acc": 0.975,
+          "std_acc": 0.043301270189221926
+        },
+        "gain": {
+          "seed_gains": [
+            0.475,
+            0.30000000000000004,
+            0.625,
+            0.475,
+            0.5
+          ],
+          "mean_gain": 0.475,
+          "std_gain": 0.11592023119369628
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "billida",
+              "pred": "banggeum",
+              "count": 52
+            },
+            {
+              "gt": "banggeum",
+              "pred": "eoje",
+              "count": 13
+            },
+            {
+              "gt": "banggeum",
+              "pred": "billida",
+              "count": 10
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "banggeum",
+              "pred": "billida",
+              "count": 4
+            },
+            {
+              "gt": "banggeum",
+              "pred": "eoje",
+              "count": 1
+            }
+          ]
+        },
+        "per_action": {
+          "banggeum": {
+            "vision_only_mean": 0.6799999999999999,
+            "feature_redesigned_mean": 0.95,
+            "gain": 0.27
+          },
+          "billida": {
+            "vision_only_mean": 0.32,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.6799999999999999
+          }
+        }
+      },
+      {
+        "group_key": "direction_difference",
+        "display_name_ko": "?? ???",
+        "actions": [
+          "more",
+          "naeil",
+          "eoje"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.7333333333333333,
+            0.6833333333333333,
+            0.75,
+            0.6833333333333333,
+            0.8166666666666667
+          ],
+          "mean_acc": 0.7333333333333332,
+          "std_acc": 0.05527707983925666
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.9833333333333333,
+            1.0,
+            0.9833333333333333,
+            0.9833333333333333,
+            1.0
+          ],
+          "mean_acc": 0.99,
+          "std_acc": 0.009128709291752798
+        },
+        "gain": {
+          "seed_gains": [
+            0.25,
+            0.31666666666666665,
+            0.23333333333333328,
+            0.29999999999999993,
+            0.18333333333333335
+          ],
+          "mean_gain": 0.25666666666666665,
+          "std_gain": 0.05348935511960402
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "naeil",
+              "pred": "more",
+              "count": 61
+            },
+            {
+              "gt": "more",
+              "pred": "naeil",
+              "count": 8
+            },
+            {
+              "gt": "naeil",
+              "pred": "oraenman",
+              "count": 6
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "naeil",
+              "pred": "eoje",
+              "count": 2
+            },
+            {
+              "gt": "more",
+              "pred": "naeil",
+              "count": 1
+            }
+          ]
+        },
+        "per_action": {
+          "more": {
+            "vision_only_mean": 0.9,
+            "feature_redesigned_mean": 0.99,
+            "gain": 0.08999999999999997
+          },
+          "naeil": {
+            "vision_only_mean": 0.3,
+            "feature_redesigned_mean": 0.9800000000000001,
+            "gain": 0.6800000000000002
+          },
+          "eoje": {
+            "vision_only_mean": 1.0,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.0
+          }
+        }
+      },
+      {
+        "group_key": "bend_path_difference",
+        "display_name_ko": "??, ?? ???",
+        "actions": [
+          "jamkkan",
+          "oraenman",
+          "gakkapda"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.8666666666666667,
+            0.8333333333333334,
+            0.8166666666666667,
+            0.7666666666666667,
+            0.6833333333333333
+          ],
+          "mean_acc": 0.7933333333333333,
+          "std_acc": 0.07129749878735812
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.8833333333333333,
+            0.8833333333333333,
+            0.8333333333333334,
+            0.9,
+            0.8166666666666667
+          ],
+          "mean_acc": 0.8633333333333333,
+          "std_acc": 0.03613247231446466
+        },
+        "gain": {
+          "seed_gains": [
+            0.016666666666666607,
+            0.04999999999999993,
+            0.01666666666666672,
+            0.1333333333333333,
+            0.1333333333333333
+          ],
+          "mean_gain": 0.06999999999999998,
+          "std_gain": 0.05939509893735153
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "oraenman",
+              "pred": "mannada",
+              "count": 22
+            },
+            {
+              "gt": "jamkkan",
+              "pred": "oraenman",
+              "count": 20
+            },
+            {
+              "gt": "jamkkan",
+              "pred": "mannada",
+              "count": 6
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "jamkkan",
+              "pred": "oraenman",
+              "count": 31
+            },
+            {
+              "gt": "oraenman",
+              "pred": "jamkkan",
+              "count": 4
+            },
+            {
+              "gt": "jamkkan",
+              "pred": "gakkapda",
+              "count": 2
+            }
+          ]
+        },
+        "per_action": {
+          "jamkkan": {
+            "vision_only_mean": 0.7200000000000001,
+            "feature_redesigned_mean": 0.67,
+            "gain": -0.050000000000000044
+          },
+          "oraenman": {
+            "vision_only_mean": 0.71,
+            "feature_redesigned_mean": 0.9400000000000001,
+            "gain": 0.2300000000000001
+          },
+          "gakkapda": {
+            "vision_only_mean": 0.95,
+            "feature_redesigned_mean": 0.9800000000000001,
+            "gain": 0.030000000000000138
+          }
+        }
+      },
+      {
+        "group_key": "handshape_difference",
+        "display_name_ko": "??? ???",
+        "actions": [
+          "gandanhada",
+          "sada",
+          "gamsahamnida",
+          "joesonghada"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.9,
+            0.9125,
+            0.8375,
+            0.8625,
+            0.85
+          ],
+          "mean_acc": 0.8724999999999999,
+          "std_acc": 0.032355447763861955
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.9375,
+            0.9375,
+            0.7875,
+            0.925,
+            0.9
+          ],
+          "mean_acc": 0.8975000000000002,
+          "std_acc": 0.0633689592781829
+        },
+        "gain": {
+          "seed_gains": [
+            0.03749999999999998,
+            0.025000000000000022,
+            -0.050000000000000044,
+            0.0625,
+            0.050000000000000044
+          ],
+          "mean_gain": 0.025,
+          "std_gain": 0.04419417382415924
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "sada",
+              "pred": "gamsahamnida",
+              "count": 12
+            },
+            {
+              "gt": "sada",
+              "pred": "teukbyeol",
+              "count": 8
+            },
+            {
+              "gt": "gandanhada",
+              "pred": "gamsahamnida",
+              "count": 8
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "sada",
+              "pred": "gamsahamnida",
+              "count": 16
+            },
+            {
+              "gt": "sada",
+              "pred": "joesonghada",
+              "count": 10
+            },
+            {
+              "gt": "sada",
+              "pred": "teukbyeol",
+              "count": 5
+            }
+          ]
+        },
+        "per_action": {
+          "gandanhada": {
+            "vision_only_mean": 0.9199999999999999,
+            "feature_redesigned_mean": 0.99,
+            "gain": 0.07000000000000006
+          },
+          "sada": {
+            "vision_only_mean": 0.75,
+            "feature_redesigned_mean": 0.65,
+            "gain": -0.09999999999999998
+          },
+          "gamsahamnida": {
+            "vision_only_mean": 0.9,
+            "feature_redesigned_mean": 0.97,
+            "gain": 0.06999999999999995
+          },
+          "joesonghada": {
+            "vision_only_mean": 0.9200000000000002,
+            "feature_redesigned_mean": 0.9800000000000001,
+            "gain": 0.05999999999999994
+          }
+        }
+      },
+      {
+        "group_key": "cross_hand_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "mannada",
+          "byeongyeonghada"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.925,
+            0.925,
+            0.95,
+            0.925,
+            0.975
+          ],
+          "mean_acc": 0.9399999999999998,
+          "std_acc": 0.022360679774997862
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.925,
+            0.925,
+            0.9,
+            0.975,
+            0.975
+          ],
+          "mean_acc": 0.9400000000000001,
+          "std_acc": 0.03354101966249681
+        },
+        "gain": {
+          "seed_gains": [
+            0.0,
+            0.0,
+            -0.04999999999999993,
+            0.04999999999999993,
+            0.0
+          ],
+          "mean_gain": 0.0,
+          "std_gain": 0.03535533905932733
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "byeongyeonghada",
+              "pred": "mannada",
+              "count": 12
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "byeongyeonghada",
+              "pred": "mannada",
+              "count": 12
+            }
+          ]
+        },
+        "per_action": {
+          "mannada": {
+            "vision_only_mean": 1.0,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.0
+          },
+          "byeongyeonghada": {
+            "vision_only_mean": 0.8800000000000001,
+            "feature_redesigned_mean": 0.8800000000000001,
+            "gain": 0.0
+          }
+        }
+      },
+      {
+        "group_key": "additional_motion_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "jalhada",
+          "annyeonghaseyo"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.975,
+            0.75,
+            0.85,
+            0.875,
+            0.9
+          ],
+          "mean_acc": 0.8700000000000001,
+          "std_acc": 0.08177713616898062
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.975,
+            0.875,
+            0.9,
+            0.875,
+            0.625
+          ],
+          "mean_acc": 0.85,
+          "std_acc": 0.1322875655532295
+        },
+        "gain": {
+          "seed_gains": [
+            0.0,
+            0.125,
+            0.050000000000000044,
+            0.0,
+            -0.275
+          ],
+          "mean_gain": -0.019999999999999997,
+          "std_gain": 0.1514513123086096
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "jalhada",
+              "pred": "teukbyeol",
+              "count": 6
+            },
+            {
+              "gt": "annyeonghaseyo",
+              "pred": "jalhada",
+              "count": 5
+            },
+            {
+              "gt": "annyeonghaseyo",
+              "pred": "byeollo",
+              "count": 5
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "jalhada",
+              "pred": "teukbyeol",
+              "count": 24
+            },
+            {
+              "gt": "jalhada",
+              "pred": "byeollo",
+              "count": 4
+            },
+            {
+              "gt": "annyeonghaseyo",
+              "pred": "byeollo",
+              "count": 2
+            }
+          ]
+        },
+        "per_action": {
+          "jalhada": {
+            "vision_only_mean": 0.9099999999999999,
+            "feature_redesigned_mean": 0.72,
+            "gain": -0.18999999999999995
+          },
+          "annyeonghaseyo": {
+            "vision_only_mean": 0.8300000000000001,
+            "feature_redesigned_mean": 0.9800000000000001,
+            "gain": 0.15000000000000002
+          }
+        }
+      },
+      {
+        "group_key": "wrist_angle_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "teukbyeol",
+          "byeollo"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.925,
+            0.825,
+            1.0,
+            0.85,
+            0.975
+          ],
+          "mean_acc": 0.915,
+          "std_acc": 0.07623975340988454
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.875,
+            0.9,
+            1.0,
+            1.0,
+            0.675
+          ],
+          "mean_acc": 0.89,
+          "std_acc": 0.13299436078270385
+        },
+        "gain": {
+          "seed_gains": [
+            -0.050000000000000044,
+            0.07500000000000007,
+            0.0,
+            0.15000000000000002,
+            -0.29999999999999993
+          ],
+          "mean_gain": -0.024999999999999977,
+          "std_gain": 0.1713913650100261
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "teukbyeol",
+              "pred": "byeollo",
+              "count": 13
+            },
+            {
+              "gt": "teukbyeol",
+              "pred": "jalhada",
+              "count": 4
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "byeollo",
+              "pred": "teukbyeol",
+              "count": 11
+            },
+            {
+              "gt": "byeollo",
+              "pred": "jalhada",
+              "count": 8
+            },
+            {
+              "gt": "teukbyeol",
+              "pred": "jalhada",
+              "count": 3
+            }
+          ]
+        },
+        "per_action": {
+          "teukbyeol": {
+            "vision_only_mean": 0.8300000000000001,
+            "feature_redesigned_mean": 0.97,
+            "gain": 0.1399999999999999
+          },
+          "byeollo": {
+            "vision_only_mean": 1.0,
+            "feature_redesigned_mean": 0.8099999999999999,
+            "gain": -0.19000000000000006
+          }
+        }
+      }
+    ],
+    "out": [
+      {
+        "group_key": "instant_handshape_difference",
+        "display_name_ko": "?? ??? ???",
+        "actions": [
+          "banggeum",
+          "billida"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.6,
+            0.45,
+            0.5,
+            0.35,
+            0.625
+          ],
+          "mean_acc": 0.505,
+          "std_acc": 0.11236102527122116
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.925,
+            0.95,
+            0.925,
+            1.0,
+            0.975
+          ],
+          "mean_acc": 0.9549999999999998,
+          "std_acc": 0.03259601202601322
+        },
+        "gain": {
+          "seed_gains": [
+            0.32500000000000007,
+            0.49999999999999994,
+            0.42500000000000004,
+            0.65,
+            0.35
+          ],
+          "mean_gain": 0.45,
+          "std_gain": 0.13110110602126893
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "billida",
+              "pred": "banggeum",
+              "count": 67
+            },
+            {
+              "gt": "banggeum",
+              "pred": "billida",
+              "count": 29
+            },
+            {
+              "gt": "billida",
+              "pred": "annyeonghaseyo",
+              "count": 2
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "billida",
+              "pred": "banggeum",
+              "count": 6
+            },
+            {
+              "gt": "banggeum",
+              "pred": "billida",
+              "count": 2
+            },
+            {
+              "gt": "banggeum",
+              "pred": "teukbyeol",
+              "count": 1
+            }
+          ]
+        },
+        "per_action": {
+          "banggeum": {
+            "vision_only_mean": 0.71,
+            "feature_redesigned_mean": 0.97,
+            "gain": 0.26
+          },
+          "billida": {
+            "vision_only_mean": 0.3,
+            "feature_redesigned_mean": 0.9400000000000001,
+            "gain": 0.6400000000000001
+          }
+        }
+      },
+      {
+        "group_key": "direction_difference",
+        "display_name_ko": "?? ???",
+        "actions": [
+          "more",
+          "naeil",
+          "eoje"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.7,
+            0.6666666666666666,
+            0.7333333333333333,
+            0.6666666666666666,
+            0.7666666666666667
+          ],
+          "mean_acc": 0.7066666666666667,
+          "std_acc": 0.04346134936801769
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "mean_acc": 1.0,
+          "std_acc": 0.0
+        },
+        "gain": {
+          "seed_gains": [
+            0.30000000000000004,
+            0.33333333333333337,
+            0.2666666666666667,
+            0.33333333333333337,
+            0.23333333333333328
+          ],
+          "mean_gain": 0.29333333333333333,
+          "std_gain": 0.04346134936801769
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "naeil",
+              "pred": "more",
+              "count": 78
+            },
+            {
+              "gt": "more",
+              "pred": "eoje",
+              "count": 6
+            },
+            {
+              "gt": "naeil",
+              "pred": "oraenman",
+              "count": 2
+            }
+          ],
+          "feature_redesigned_top_confusions": []
+        },
+        "per_action": {
+          "more": {
+            "vision_only_mean": 0.93,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.06999999999999995
+          },
+          "naeil": {
+            "vision_only_mean": 0.19,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.81
+          },
+          "eoje": {
+            "vision_only_mean": 1.0,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.0
+          }
+        }
+      },
+      {
+        "group_key": "additional_motion_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "jalhada",
+          "annyeonghaseyo"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.4,
+            0.3,
+            0.45,
+            0.5,
+            0.55
+          ],
+          "mean_acc": 0.44000000000000006,
+          "std_acc": 0.09617692030835674
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.75,
+            0.725,
+            0.625,
+            0.675,
+            0.6
+          ],
+          "mean_acc": 0.675,
+          "std_acc": 0.06373774391990981
+        },
+        "gain": {
+          "seed_gains": [
+            0.35,
+            0.425,
+            0.175,
+            0.17500000000000004,
+            0.04999999999999993
+          ],
+          "mean_gain": 0.23499999999999996,
+          "std_gain": 0.1506237033139207
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "jalhada",
+              "pred": "byeollo",
+              "count": 66
+            },
+            {
+              "gt": "annyeonghaseyo",
+              "pred": "oraenman",
+              "count": 20
+            },
+            {
+              "gt": "jalhada",
+              "pred": "teukbyeol",
+              "count": 7
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "jalhada",
+              "pred": "byeollo",
+              "count": 43
+            },
+            {
+              "gt": "jalhada",
+              "pred": "teukbyeol",
+              "count": 9
+            },
+            {
+              "gt": "annyeonghaseyo",
+              "pred": "mannada",
+              "count": 6
+            }
+          ]
+        },
+        "per_action": {
+          "jalhada": {
+            "vision_only_mean": 0.25,
+            "feature_redesigned_mean": 0.4600000000000001,
+            "gain": 0.21000000000000008
+          },
+          "annyeonghaseyo": {
+            "vision_only_mean": 0.6300000000000001,
+            "feature_redesigned_mean": 0.89,
+            "gain": 0.2599999999999999
+          }
+        }
+      },
+      {
+        "group_key": "bend_path_difference",
+        "display_name_ko": "??, ?? ???",
+        "actions": [
+          "jamkkan",
+          "oraenman",
+          "gakkapda"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.4166666666666667,
+            0.4166666666666667,
+            0.3333333333333333,
+            0.5166666666666667,
+            0.2
+          ],
+          "mean_acc": 0.3766666666666667,
+          "std_acc": 0.11820415484331431
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.6166666666666667,
+            0.5666666666666667,
+            0.6166666666666667,
+            0.5833333333333334,
+            0.5166666666666667
+          ],
+          "mean_acc": 0.58,
+          "std_acc": 0.041499665326629104
+        },
+        "gain": {
+          "seed_gains": [
+            0.2,
+            0.14999999999999997,
+            0.2833333333333334,
+            0.06666666666666665,
+            0.3166666666666667
+          ],
+          "mean_gain": 0.2033333333333333,
+          "std_gain": 0.10096754153907309
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "gakkapda",
+              "pred": "jamkkan",
+              "count": 56
+            },
+            {
+              "gt": "jamkkan",
+              "pred": "oraenman",
+              "count": 54
+            },
+            {
+              "gt": "oraenman",
+              "pred": "mannada",
+              "count": 34
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "jamkkan",
+              "pred": "oraenman",
+              "count": 74
+            },
+            {
+              "gt": "gakkapda",
+              "pred": "jamkkan",
+              "count": 21
+            },
+            {
+              "gt": "gakkapda",
+              "pred": "oraenman",
+              "count": 10
+            }
+          ]
+        },
+        "per_action": {
+          "jamkkan": {
+            "vision_only_mean": 0.22000000000000003,
+            "feature_redesigned_mean": 0.15999999999999998,
+            "gain": -0.06000000000000005
+          },
+          "oraenman": {
+            "vision_only_mean": 0.5700000000000001,
+            "feature_redesigned_mean": 0.9,
+            "gain": 0.32999999999999996
+          },
+          "gakkapda": {
+            "vision_only_mean": 0.33999999999999997,
+            "feature_redesigned_mean": 0.6799999999999999,
+            "gain": 0.33999999999999997
+          }
+        }
+      },
+      {
+        "group_key": "handshape_difference",
+        "display_name_ko": "??? ???",
+        "actions": [
+          "gandanhada",
+          "sada",
+          "gamsahamnida",
+          "joesonghada"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.6875,
+            0.625,
+            0.6875,
+            0.6625,
+            0.725
+          ],
+          "mean_acc": 0.6775,
+          "std_acc": 0.03686970300938156
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.85,
+            0.675,
+            0.825,
+            0.8625,
+            0.8875
+          ],
+          "mean_acc": 0.82,
+          "std_acc": 0.08413159335231918
+        },
+        "gain": {
+          "seed_gains": [
+            0.16249999999999998,
+            0.050000000000000044,
+            0.13749999999999996,
+            0.20000000000000007,
+            0.16249999999999998
+          ],
+          "mean_gain": 0.14250000000000002,
+          "std_gain": 0.056319401630344046
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "gandanhada",
+              "pred": "joesonghada",
+              "count": 30
+            },
+            {
+              "gt": "gamsahamnida",
+              "pred": "sada",
+              "count": 28
+            },
+            {
+              "gt": "joesonghada",
+              "pred": "sada",
+              "count": 16
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "joesonghada",
+              "pred": "sada",
+              "count": 20
+            },
+            {
+              "gt": "sada",
+              "pred": "joesonghada",
+              "count": 11
+            },
+            {
+              "gt": "sada",
+              "pred": "gamsahamnida",
+              "count": 10
+            }
+          ]
+        },
+        "per_action": {
+          "gandanhada": {
+            "vision_only_mean": 0.44000000000000006,
+            "feature_redesigned_mean": 0.82,
+            "gain": 0.3799999999999999
+          },
+          "sada": {
+            "vision_only_mean": 0.86,
+            "feature_redesigned_mean": 0.7899999999999999,
+            "gain": -0.07000000000000006
+          },
+          "gamsahamnida": {
+            "vision_only_mean": 0.7,
+            "feature_redesigned_mean": 0.9099999999999999,
+            "gain": 0.20999999999999996
+          },
+          "joesonghada": {
+            "vision_only_mean": 0.71,
+            "feature_redesigned_mean": 0.76,
+            "gain": 0.050000000000000044
+          }
+        }
+      },
+      {
+        "group_key": "wrist_angle_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "teukbyeol",
+          "byeollo"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.675,
+            0.625,
+            0.675,
+            0.6,
+            0.75
+          ],
+          "mean_acc": 0.665,
+          "std_acc": 0.0575543221661067
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.65,
+            0.475,
+            0.825,
+            0.65,
+            0.825
+          ],
+          "mean_acc": 0.6849999999999999,
+          "std_acc": 0.1464155046434632
+        },
+        "gain": {
+          "seed_gains": [
+            -0.025000000000000022,
+            -0.15000000000000002,
+            0.1499999999999999,
+            0.050000000000000044,
+            0.07499999999999996
+          ],
+          "mean_gain": 0.019999999999999973,
+          "std_gain": 0.11374313166077324
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "teukbyeol",
+              "pred": "byeollo",
+              "count": 60
+            },
+            {
+              "gt": "byeollo",
+              "pred": "byeongyeonghada",
+              "count": 3
+            },
+            {
+              "gt": "byeollo",
+              "pred": "joesonghada",
+              "count": 2
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "teukbyeol",
+              "pred": "byeollo",
+              "count": 39
+            },
+            {
+              "gt": "teukbyeol",
+              "pred": "jalhada",
+              "count": 8
+            },
+            {
+              "gt": "byeollo",
+              "pred": "jalhada",
+              "count": 5
+            }
+          ]
+        },
+        "per_action": {
+          "teukbyeol": {
+            "vision_only_mean": 0.39,
+            "feature_redesigned_mean": 0.49000000000000005,
+            "gain": 0.10000000000000003
+          },
+          "byeollo": {
+            "vision_only_mean": 0.9400000000000001,
+            "feature_redesigned_mean": 0.8799999999999999,
+            "gain": -0.060000000000000164
+          }
+        }
+      },
+      {
+        "group_key": "cross_hand_difference",
+        "display_name_ko": "???? ???",
+        "actions": [
+          "mannada",
+          "byeongyeonghada"
+        ],
+        "vision_only": {
+          "seed_accs": [
+            0.825,
+            0.7,
+            0.825,
+            0.85,
+            0.875
+          ],
+          "mean_acc": 0.8149999999999998,
+          "std_acc": 0.0675462804305315
+        },
+        "feature_redesigned": {
+          "seed_accs": [
+            0.8,
+            0.8,
+            0.6,
+            0.775,
+            0.775
+          ],
+          "mean_acc": 0.75,
+          "std_acc": 0.08477912478906588
+        },
+        "gain": {
+          "seed_gains": [
+            -0.02499999999999991,
+            0.10000000000000009,
+            -0.22499999999999998,
+            -0.07499999999999996,
+            -0.09999999999999998
+          ],
+          "mean_gain": -0.06499999999999995,
+          "std_gain": 0.11805718953117599
+        },
+        "confusion_notes": {
+          "vision_only_top_confusions": [
+            {
+              "gt": "byeongyeonghada",
+              "pred": "mannada",
+              "count": 37
+            }
+          ],
+          "feature_redesigned_top_confusions": [
+            {
+              "gt": "byeongyeonghada",
+              "pred": "mannada",
+              "count": 50
+            }
+          ]
+        },
+        "per_action": {
+          "mannada": {
+            "vision_only_mean": 1.0,
+            "feature_redesigned_mean": 1.0,
+            "gain": 0.0
+          },
+          "byeongyeonghada": {
+            "vision_only_mean": 0.6300000000000001,
+            "feature_redesigned_mean": 0.5,
+            "gain": -0.13000000000000012
+          }
+        }
+      }
+    ]
+  },
+  "top_group_gains": {
+    "all": [
+      {
+        "group_key": "instant_handshape_difference",
+        "display_name_ko": "?? ??? ???",
+        "mean_gain": 0.4625
+      },
+      {
+        "group_key": "direction_difference",
+        "display_name_ko": "?? ???",
+        "mean_gain": 0.275
+      },
+      {
+        "group_key": "bend_path_difference",
+        "display_name_ko": "??, ?? ???",
+        "mean_gain": 0.13666666666666666
+      },
+      {
+        "group_key": "additional_motion_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": 0.10750000000000001
+      },
+      {
+        "group_key": "handshape_difference",
+        "display_name_ko": "??? ???",
+        "mean_gain": 0.08375000000000006
+      },
+      {
+        "group_key": "wrist_angle_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": -0.0025000000000000356
+      },
+      {
+        "group_key": "cross_hand_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": -0.03249999999999997
+      }
+    ],
+    "in": [
+      {
+        "group_key": "instant_handshape_difference",
+        "display_name_ko": "?? ??? ???",
+        "mean_gain": 0.475
+      },
+      {
+        "group_key": "direction_difference",
+        "display_name_ko": "?? ???",
+        "mean_gain": 0.25666666666666665
+      },
+      {
+        "group_key": "bend_path_difference",
+        "display_name_ko": "??, ?? ???",
+        "mean_gain": 0.06999999999999998
+      },
+      {
+        "group_key": "handshape_difference",
+        "display_name_ko": "??? ???",
+        "mean_gain": 0.025
+      },
+      {
+        "group_key": "cross_hand_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": 0.0
+      },
+      {
+        "group_key": "additional_motion_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": -0.019999999999999997
+      },
+      {
+        "group_key": "wrist_angle_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": -0.024999999999999977
+      }
+    ],
+    "out": [
+      {
+        "group_key": "instant_handshape_difference",
+        "display_name_ko": "?? ??? ???",
+        "mean_gain": 0.45
+      },
+      {
+        "group_key": "direction_difference",
+        "display_name_ko": "?? ???",
+        "mean_gain": 0.29333333333333333
+      },
+      {
+        "group_key": "additional_motion_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": 0.23499999999999996
+      },
+      {
+        "group_key": "bend_path_difference",
+        "display_name_ko": "??, ?? ???",
+        "mean_gain": 0.2033333333333333
+      },
+      {
+        "group_key": "handshape_difference",
+        "display_name_ko": "??? ???",
+        "mean_gain": 0.14250000000000002
+      },
+      {
+        "group_key": "wrist_angle_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": 0.019999999999999973
+      },
+      {
+        "group_key": "cross_hand_difference",
+        "display_name_ko": "???? ???",
+        "mean_gain": -0.06499999999999995
+      }
+    ]
+  }
+}

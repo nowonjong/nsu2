@@ -1,0 +1,173 @@
+# Vision-only vs Feature Redesigned Group Analysis
+
+- Dataset: final practical 10-shot sets (`in_1`, `in_2`, `out_1`, `out_2`)
+- Seeds: `42`, `43`, `44`, `45`, `46`
+- Main comparison: `Vision-only` vs `Feature redesigned fusion`
+- Metric: group-level practical accuracy, averaged across seeds
+
+## ?? ??? ???
+
+| ?? | ?? | Vision-only | Feature redesigned | Gain |
+|---|---|---:|---:|---:|
+| ?? ??? ??? | banggeum, billida | 0.5025 +- 0.0609 | 0.9650 +- 0.0271 | 0.4625 +- 0.0760 |
+| ?? ??? | more, naeil, eoje | 0.7200 +- 0.0492 | 0.9950 +- 0.0046 | 0.2750 +- 0.0482 |
+| ??, ?? ??? | jamkkan, oraenman, gakkapda | 0.5850 +- 0.0847 | 0.7217 +- 0.0326 | 0.1367 +- 0.0536 |
+| ???? ??? | jalhada, annyeonghaseyo | 0.6550 +- 0.0774 | 0.7625 +- 0.0923 | 0.1075 +- 0.1427 |
+| ??? ??? | gandanhada, sada, gamsahamnida, joesonghada | 0.7750 +- 0.0147 | 0.8588 +- 0.0479 | 0.0838 +- 0.0411 |
+| ???? ??? | teukbyeol, byeollo | 0.7900 +- 0.0634 | 0.7875 +- 0.0852 | -0.0025 +- 0.0881 |
+| ???? ??? | mannada, byeongyeonghada | 0.8775 +- 0.0409 | 0.8450 +- 0.0535 | -0.0325 +- 0.0688 |
+
+### ?? ?? ??
+
+- `?? ??? ???`: 0.4625p ?? (0.5025 -> 0.9650)
+- `?? ???`: 0.2750p ?? (0.7200 -> 0.9950)
+- `??, ?? ???`: 0.1367p ?? (0.5850 -> 0.7217)
+- `???? ???`: ???? ????? ?? (0.7900 -> 0.7875, +-0.0025)
+- `???? ???`: ???? ????? ?? (0.8775 -> 0.8450, +-0.0325)
+
+### ?? ??? ?? ??
+
+- `?? ??? ???` vision-only: billida?banggeum(119), banggeum?billida(39), banggeum?eoje(13)
+- `?? ??? ???` feature redesigned: billida?banggeum(6), banggeum?billida(6), banggeum?teukbyeol(1)
+- `?? ???` vision-only: naeil?more(139), more?naeil(9), naeil?oraenman(8)
+- `?? ???` feature redesigned: naeil?eoje(2), more?naeil(1)
+- `??, ?? ???` vision-only: jamkkan?oraenman(74), gakkapda?jamkkan(58), oraenman?mannada(56)
+- `??, ?? ???` feature redesigned: jamkkan?oraenman(105), gakkapda?jamkkan(22), gakkapda?oraenman(11)
+- `???? ???` vision-only: jalhada?byeollo(68), annyeonghaseyo?oraenman(21), jalhada?teukbyeol(13)
+- `???? ???` feature redesigned: jalhada?byeollo(47), jalhada?teukbyeol(33), annyeonghaseyo?mannada(6)
+- `??? ???` vision-only: gamsahamnida?sada(34), gandanhada?joesonghada(30), gandanhada?gamsahamnida(20)
+- `??? ???` feature redesigned: sada?gamsahamnida(26), sada?joesonghada(21), joesonghada?sada(20)
+- `???? ???` vision-only: teukbyeol?byeollo(73), teukbyeol?jalhada(4), byeollo?byeongyeonghada(3)
+- `???? ???` feature redesigned: teukbyeol?byeollo(39), byeollo?teukbyeol(14), byeollo?jalhada(13)
+- `???? ???` vision-only: byeongyeonghada?mannada(49)
+- `???? ???` feature redesigned: byeongyeonghada?mannada(62)
+
+## In ??? ???
+
+| ?? | ?? | Vision-only | Feature redesigned | Gain |
+|---|---|---:|---:|---:|
+| ?? ??? ??? | banggeum, billida | 0.5000 +- 0.0829 | 0.9750 +- 0.0433 | 0.4750 +- 0.1159 |
+| ?? ??? | more, naeil, eoje | 0.7333 +- 0.0553 | 0.9900 +- 0.0091 | 0.2567 +- 0.0535 |
+| ??, ?? ??? | jamkkan, oraenman, gakkapda | 0.7933 +- 0.0713 | 0.8633 +- 0.0361 | 0.0700 +- 0.0594 |
+| ??? ??? | gandanhada, sada, gamsahamnida, joesonghada | 0.8725 +- 0.0324 | 0.8975 +- 0.0634 | 0.0250 +- 0.0442 |
+| ???? ??? | mannada, byeongyeonghada | 0.9400 +- 0.0224 | 0.9400 +- 0.0335 | 0.0000 +- 0.0354 |
+| ???? ??? | jalhada, annyeonghaseyo | 0.8700 +- 0.0818 | 0.8500 +- 0.1323 | -0.0200 +- 0.1515 |
+| ???? ??? | teukbyeol, byeollo | 0.9150 +- 0.0762 | 0.8900 +- 0.1330 | -0.0250 +- 0.1714 |
+
+### In ?? ??
+
+- `?? ??? ???`: 0.4750p ?? (0.5000 -> 0.9750)
+- `?? ???`: 0.2567p ?? (0.7333 -> 0.9900)
+- `??, ?? ???`: 0.0700p ?? (0.7933 -> 0.8633)
+- `???? ???`: ???? ????? ?? (0.8700 -> 0.8500, +-0.0200)
+- `???? ???`: ???? ????? ?? (0.9150 -> 0.8900, +-0.0250)
+
+### In ??? ?? ??
+
+- `?? ??? ???` vision-only: billida?banggeum(52), banggeum?eoje(13), banggeum?billida(10)
+- `?? ??? ???` feature redesigned: banggeum?billida(4), banggeum?eoje(1)
+- `?? ???` vision-only: naeil?more(61), more?naeil(8), naeil?oraenman(6)
+- `?? ???` feature redesigned: naeil?eoje(2), more?naeil(1)
+- `??, ?? ???` vision-only: oraenman?mannada(22), jamkkan?oraenman(20), jamkkan?mannada(6)
+- `??, ?? ???` feature redesigned: jamkkan?oraenman(31), oraenman?jamkkan(4), jamkkan?gakkapda(2)
+- `??? ???` vision-only: sada?gamsahamnida(12), sada?teukbyeol(8), gandanhada?gamsahamnida(8)
+- `??? ???` feature redesigned: sada?gamsahamnida(16), sada?joesonghada(10), sada?teukbyeol(5)
+- `???? ???` vision-only: byeongyeonghada?mannada(12)
+- `???? ???` feature redesigned: byeongyeonghada?mannada(12)
+- `???? ???` vision-only: jalhada?teukbyeol(6), annyeonghaseyo?jalhada(5), annyeonghaseyo?byeollo(5)
+- `???? ???` feature redesigned: jalhada?teukbyeol(24), jalhada?byeollo(4), annyeonghaseyo?byeollo(2)
+- `???? ???` vision-only: teukbyeol?byeollo(13), teukbyeol?jalhada(4)
+- `???? ???` feature redesigned: byeollo?teukbyeol(11), byeollo?jalhada(8), teukbyeol?jalhada(3)
+
+## Out ??? ???
+
+| ?? | ?? | Vision-only | Feature redesigned | Gain |
+|---|---|---:|---:|---:|
+| ?? ??? ??? | banggeum, billida | 0.5050 +- 0.1124 | 0.9550 +- 0.0326 | 0.4500 +- 0.1311 |
+| ?? ??? | more, naeil, eoje | 0.7067 +- 0.0435 | 1.0000 +- 0.0000 | 0.2933 +- 0.0435 |
+| ???? ??? | jalhada, annyeonghaseyo | 0.4400 +- 0.0962 | 0.6750 +- 0.0637 | 0.2350 +- 0.1506 |
+| ??, ?? ??? | jamkkan, oraenman, gakkapda | 0.3767 +- 0.1182 | 0.5800 +- 0.0415 | 0.2033 +- 0.1010 |
+| ??? ??? | gandanhada, sada, gamsahamnida, joesonghada | 0.6775 +- 0.0369 | 0.8200 +- 0.0841 | 0.1425 +- 0.0563 |
+| ???? ??? | teukbyeol, byeollo | 0.6650 +- 0.0576 | 0.6850 +- 0.1464 | 0.0200 +- 0.1137 |
+| ???? ??? | mannada, byeongyeonghada | 0.8150 +- 0.0675 | 0.7500 +- 0.0848 | -0.0650 +- 0.1181 |
+
+### Out ?? ??
+
+- `?? ??? ???`: 0.4500p ?? (0.5050 -> 0.9550)
+- `?? ???`: 0.2933p ?? (0.7067 -> 1.0000)
+- `???? ???`: 0.2350p ?? (0.4400 -> 0.6750)
+- `???? ???`: ???? ????? ?? (0.6650 -> 0.6850, +0.0200)
+- `???? ???`: ???? ????? ?? (0.8150 -> 0.7500, +-0.0650)
+
+### Out ??? ?? ??
+
+- `?? ??? ???` vision-only: billida?banggeum(67), banggeum?billida(29), billida?annyeonghaseyo(2)
+- `?? ??? ???` feature redesigned: billida?banggeum(6), banggeum?billida(2), banggeum?teukbyeol(1)
+- `?? ???` vision-only: naeil?more(78), more?eoje(6), naeil?oraenman(2)
+- `?? ???` feature redesigned: ??
+- `???? ???` vision-only: jalhada?byeollo(66), annyeonghaseyo?oraenman(20), jalhada?teukbyeol(7)
+- `???? ???` feature redesigned: jalhada?byeollo(43), jalhada?teukbyeol(9), annyeonghaseyo?mannada(6)
+- `??, ?? ???` vision-only: gakkapda?jamkkan(56), jamkkan?oraenman(54), oraenman?mannada(34)
+- `??, ?? ???` feature redesigned: jamkkan?oraenman(74), gakkapda?jamkkan(21), gakkapda?oraenman(10)
+- `??? ???` vision-only: gandanhada?joesonghada(30), gamsahamnida?sada(28), joesonghada?sada(16)
+- `??? ???` feature redesigned: joesonghada?sada(20), sada?joesonghada(11), sada?gamsahamnida(10)
+- `???? ???` vision-only: teukbyeol?byeollo(60), byeollo?byeongyeonghada(3), byeollo?joesonghada(2)
+- `???? ???` feature redesigned: teukbyeol?byeollo(39), teukbyeol?jalhada(8), byeollo?jalhada(5)
+- `???? ???` vision-only: byeongyeonghada?mannada(37)
+- `???? ???` feature redesigned: byeongyeonghada?mannada(50)
+
+## ??? ?? ?? ??
+
+### ?? ??? ???
+
+| ?? | Vision-only | Feature redesigned | Gain |
+|---|---:|---:|---:|
+| banggeum | 0.6950 | 0.9600 | 0.2650 |
+| billida | 0.3100 | 0.9700 | 0.6600 |
+
+### ?? ???
+
+| ?? | Vision-only | Feature redesigned | Gain |
+|---|---:|---:|---:|
+| more | 0.9150 | 0.9950 | 0.0800 |
+| naeil | 0.2450 | 0.9900 | 0.7450 |
+| eoje | 1.0000 | 1.0000 | 0.0000 |
+
+### ??, ?? ???
+
+| ?? | Vision-only | Feature redesigned | Gain |
+|---|---:|---:|---:|
+| jamkkan | 0.4700 | 0.4150 | -0.0550 |
+| oraenman | 0.6400 | 0.9200 | 0.2800 |
+| gakkapda | 0.6450 | 0.8300 | 0.1850 |
+
+### ???? ???
+
+| ?? | Vision-only | Feature redesigned | Gain |
+|---|---:|---:|---:|
+| jalhada | 0.5800 | 0.5900 | 0.0100 |
+| annyeonghaseyo | 0.7300 | 0.9350 | 0.2050 |
+
+### ??? ???
+
+| ?? | Vision-only | Feature redesigned | Gain |
+|---|---:|---:|---:|
+| gandanhada | 0.6800 | 0.9050 | 0.2250 |
+| sada | 0.8050 | 0.7200 | -0.0850 |
+| gamsahamnida | 0.8000 | 0.9400 | 0.1400 |
+| joesonghada | 0.8150 | 0.8700 | 0.0550 |
+
+### ???? ???
+
+| ?? | Vision-only | Feature redesigned | Gain |
+|---|---:|---:|---:|
+| teukbyeol | 0.6100 | 0.7300 | 0.1200 |
+| byeollo | 0.9700 | 0.8450 | -0.1250 |
+
+### ???? ???
+
+| ?? | Vision-only | Feature redesigned | Gain |
+|---|---:|---:|---:|
+| mannada | 1.0000 | 1.0000 | 0.0000 |
+| byeongyeonghada | 0.7550 | 0.6900 | -0.0650 |
+

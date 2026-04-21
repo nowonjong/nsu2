@@ -1,0 +1,90 @@
+===== Samples per class =====
+more            : 40
+naeil           : 40
+eoje            : 40
+teukbyeol       : 40
+byeollo         : 40
+jamkkan         : 40
+oraenman        : 40
+gakkapda        : 40
+jalhada         : 40
+annyeonghaseyo  : 40
+mannada         : 40
+byeongyeonghada : 40
+banggeum        : 40
+billida         : 40
+gandanhada      : 40
+sada            : 40
+gamsahamnida    : 40
+joesonghada     : 40
+
+===== Trainable classes =====
+more, naeil, eoje, teukbyeol, byeollo, jamkkan, oraenman, gakkapda, jalhada, annyeonghaseyo, mannada, byeongyeonghada, banggeum, billida, gandanhada, sada, gamsahamnida, joesonghada
+
+===== Split result =====
+Train: (542, 60, 126), (542,)
+Val  : (88, 60, 126), (88,)
+Test : (90, 60, 126), (90,)
+
+===== Split metadata =====
+Strategy         : group_session_stratified
+Warning          : Group/session split used to reduce leakage across temporally related samples. Legacy samples without session metadata fall back to coarse index blocks. Incomplete session groups are forced into train and excluded from val/test.
+Group count      : 9
+Session groups   : 9
+Legacy groups    : 0
+Min/class used   : 5
+Split index file : C:\SignProject\experiments\fusion_design_ablation\2026-04-20_final_practical10_seed42_46\seed44\01_glove_vision_only\split_indices.npz
+Sample source file: C:\SignProject\experiments\fusion_design_ablation\2026-04-20_final_practical10_seed42_46\seed44\01_glove_vision_only\sample_sources.json
+Train count      : 542
+Val count        : 88
+Test count       : 90
+Train groups     : 7
+Val groups       : 1
+Test groups      : 1
+
+===== Final metrics =====
+TRAIN Loss        : 0.1410
+TRAIN Accuracy    : 0.9668
+TRAIN Macro F1    : 0.9667
+TRAIN Weighted F1 : 0.9666
+
+VAL Loss          : 0.4202
+VAL Accuracy      : 0.8864
+VAL Macro F1      : 0.8680
+VAL Weighted F1   : 0.8662
+
+TEST Loss         : 0.3004
+TEST Accuracy     : 0.9333
+TEST Macro F1     : 0.9320
+TEST Weighted F1  : 0.9320
+
+Mean latency(ms)  : 23.97
+Std latency(ms)   : 2.40
+Params            : 185,298
+Model size(MB)    : 2.17
+
+===== TEST Classification Report =====
+                 precision    recall  f1-score   support
+
+           more     0.8333    1.0000    0.9091         5
+          naeil     1.0000    0.8000    0.8889         5
+           eoje     1.0000    1.0000    1.0000         5
+      teukbyeol     0.8333    1.0000    0.9091         5
+        byeollo     1.0000    0.8000    0.8889         5
+        jamkkan     1.0000    0.6000    0.7500         5
+       oraenman     0.7143    1.0000    0.8333         5
+       gakkapda     1.0000    1.0000    1.0000         5
+        jalhada     1.0000    1.0000    1.0000         5
+ annyeonghaseyo     1.0000    1.0000    1.0000         5
+        mannada     1.0000    1.0000    1.0000         5
+byeongyeonghada     1.0000    1.0000    1.0000         5
+       banggeum     0.8333    1.0000    0.9091         5
+        billida     1.0000    0.8000    0.8889         5
+     gandanhada     1.0000    1.0000    1.0000         5
+           sada     1.0000    1.0000    1.0000         5
+   gamsahamnida     0.8333    1.0000    0.9091         5
+    joesonghada     1.0000    0.8000    0.8889         5
+
+       accuracy                         0.9333        90
+      macro avg     0.9471    0.9333    0.9320        90
+   weighted avg     0.9471    0.9333    0.9320        90

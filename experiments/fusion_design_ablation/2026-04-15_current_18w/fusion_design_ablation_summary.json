@@ -1,0 +1,256 @@
+{
+  "experiment": "fusion_design_ablation_current_18w",
+  "base_dir": "C:\\SignProject\\experiments\\fusion_design_ablation\\2026-04-15_current_18w",
+  "training_data": "dataset_fusion_hold_v4_flags",
+  "random_seed": 42,
+  "datasets": [
+    "practical_in",
+    "practical_in_2",
+    "practical_out",
+    "practical_out_2"
+  ],
+  "models": [
+    {
+      "model_id": "01_glove_vision_only",
+      "display_name": "Glove vision-only",
+      "description": "Vision-only baseline using glove-collected visual landmarks only.",
+      "config": {
+        "input_format": "vision_only_lstm",
+        "model_type": "lstm",
+        "model_variant": null,
+        "sensor_mode": null,
+        "sensor_raw_dim": null,
+        "use_flex_posture": null,
+        "flex_posture_dim": null
+      },
+      "offline": {
+        "test_loss": 0.4486,
+        "test_accuracy": 0.9333,
+        "test_macro_f1": 0.9147
+      },
+      "practical": {
+        "practical_in": {
+          "accuracy": 0.8194444444444444,
+          "macro_f1": 0.8073192239858906,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.027777777777777776,
+          "low_margin_rate_lt_0_20": 0.06944444444444445
+        },
+        "practical_in_2": {
+          "accuracy": 0.9444444444444444,
+          "macro_f1": 0.9421516754850088,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.0,
+          "low_margin_rate_lt_0_20": 0.013888888888888888
+        },
+        "practical_out": {
+          "accuracy": 0.5972222222222222,
+          "macro_f1": 0.5395080228413562,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.05555555555555555,
+          "low_margin_rate_lt_0_20": 0.09722222222222222
+        },
+        "practical_out_2": {
+          "accuracy": 0.5833333333333334,
+          "macro_f1": 0.48704197037530367,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.041666666666666664,
+          "low_margin_rate_lt_0_20": 0.06944444444444445
+        }
+      },
+      "summary": {
+        "practical_in_avg_accuracy": 0.8819444444444444,
+        "practical_out_avg_accuracy": 0.5902777777777778,
+        "practical_avg_accuracy": 0.7361111111111112,
+        "practical_in_avg_macro_f1": 0.8747354497354497,
+        "practical_out_avg_macro_f1": 0.51327499660833,
+        "practical_avg_macro_f1": 0.6940052231718898,
+        "offline_to_practical_avg_drop": 0.19718888888888886,
+        "offline_to_practical_out_drop": 0.34302222222222223
+      }
+    },
+    {
+      "model_id": "02_naive_raw_fusion",
+      "display_name": "Naive raw fusion",
+      "description": "Vision + all 26 raw sensor channels, no flex posture summary.",
+      "config": {
+        "input_format": "dual_input_no_flex_lstm",
+        "model_type": "dual_input_no_flex_lstm",
+        "model_variant": "input_only",
+        "sensor_mode": "all",
+        "sensor_raw_dim": 26,
+        "use_flex_posture": false,
+        "flex_posture_dim": 0
+      },
+      "offline": {
+        "test_loss": 0.275,
+        "test_accuracy": 0.9,
+        "test_macro_f1": 0.8796
+      },
+      "practical": {
+        "practical_in": {
+          "accuracy": 0.8611111111111112,
+          "macro_f1": 0.8509700176366843,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.09722222222222222,
+          "low_margin_rate_lt_0_20": 0.125
+        },
+        "practical_in_2": {
+          "accuracy": 0.9027777777777778,
+          "macro_f1": 0.8838183421516754,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.013888888888888888,
+          "low_margin_rate_lt_0_20": 0.013888888888888888
+        },
+        "practical_out": {
+          "accuracy": 0.6388888888888888,
+          "macro_f1": 0.6077450327450328,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.06944444444444445,
+          "low_margin_rate_lt_0_20": 0.18055555555555555
+        },
+        "practical_out_2": {
+          "accuracy": 0.7916666666666666,
+          "macro_f1": 0.7707120040453374,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.05555555555555555,
+          "low_margin_rate_lt_0_20": 0.08333333333333333
+        }
+      },
+      "summary": {
+        "practical_in_avg_accuracy": 0.8819444444444444,
+        "practical_out_avg_accuracy": 0.7152777777777777,
+        "practical_avg_accuracy": 0.7986111111111112,
+        "practical_in_avg_macro_f1": 0.8673941798941799,
+        "practical_out_avg_macro_f1": 0.6892285183951851,
+        "practical_avg_macro_f1": 0.7783113491446825,
+        "offline_to_practical_avg_drop": 0.10138888888888886,
+        "offline_to_practical_out_drop": 0.18472222222222234
+      }
+    },
+    {
+      "model_id": "03_feature_redesigned_simple_fusion",
+      "display_name": "Feature redesigned simple fusion",
+      "description": "Vision + IMU/flags sequence + flex posture summary, simple concat fusion.",
+      "config": {
+        "input_format": "dual_input_lstm",
+        "model_type": "dual_input_lstm",
+        "model_variant": "input_only",
+        "sensor_mode": "imu_flags",
+        "sensor_raw_dim": 18,
+        "use_flex_posture": true,
+        "flex_posture_dim": 44
+      },
+      "offline": {
+        "test_loss": 0.0478,
+        "test_accuracy": 0.9778,
+        "test_macro_f1": 0.9769
+      },
+      "practical": {
+        "practical_in": {
+          "accuracy": 0.9444444444444444,
+          "macro_f1": 0.9374058040724706,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.0,
+          "low_margin_rate_lt_0_20": 0.0
+        },
+        "practical_in_2": {
+          "accuracy": 0.9861111111111112,
+          "macro_f1": 0.9858906525573192,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.0,
+          "low_margin_rate_lt_0_20": 0.0
+        },
+        "practical_out": {
+          "accuracy": 0.875,
+          "macro_f1": 0.8382605049271716,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.0,
+          "low_margin_rate_lt_0_20": 0.0
+        },
+        "practical_out_2": {
+          "accuracy": 0.8194444444444444,
+          "macro_f1": 0.7964615631282298,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.013888888888888888,
+          "low_margin_rate_lt_0_20": 0.027777777777777776
+        }
+      },
+      "summary": {
+        "practical_in_avg_accuracy": 0.9652777777777778,
+        "practical_out_avg_accuracy": 0.8472222222222222,
+        "practical_avg_accuracy": 0.90625,
+        "practical_in_avg_macro_f1": 0.9616482283148949,
+        "practical_out_avg_macro_f1": 0.8173610340277007,
+        "practical_avg_macro_f1": 0.8895046311712979,
+        "offline_to_practical_avg_drop": 0.07155,
+        "offline_to_practical_out_drop": 0.1305777777777778
+      }
+    },
+    {
+      "model_id": "04_stable_hybrid",
+      "display_name": "Stable hybrid",
+      "description": "Vision-guided sensor gate + IMU/flags sequence + flex posture summary.",
+      "config": {
+        "input_format": "vision_guided_sensor_gate_flex_lstm",
+        "model_type": "vision_guided_sensor_gate_flex_lstm",
+        "model_variant": "stable_hybrid",
+        "sensor_mode": "imu_flags",
+        "sensor_raw_dim": 18,
+        "use_flex_posture": true,
+        "flex_posture_dim": 44
+      },
+      "offline": {
+        "test_loss": 0.2291,
+        "test_accuracy": 0.9333,
+        "test_macro_f1": 0.9147
+      },
+      "practical": {
+        "practical_in": {
+          "accuracy": 0.8888888888888888,
+          "macro_f1": 0.8699294532627866,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.013888888888888888,
+          "low_margin_rate_lt_0_20": 0.027777777777777776
+        },
+        "practical_in_2": {
+          "accuracy": 0.9444444444444444,
+          "macro_f1": 0.9437830687830687,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.0,
+          "low_margin_rate_lt_0_20": 0.013888888888888888
+        },
+        "practical_out": {
+          "accuracy": 0.8333333333333334,
+          "macro_f1": 0.824074074074074,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.027777777777777776,
+          "low_margin_rate_lt_0_20": 0.05555555555555555
+        },
+        "practical_out_2": {
+          "accuracy": 0.8333333333333334,
+          "macro_f1": 0.8075557158890493,
+          "sample_count": 72,
+          "low_margin_rate_lt_0_10": 0.027777777777777776,
+          "low_margin_rate_lt_0_20": 0.041666666666666664
+        }
+      },
+      "summary": {
+        "practical_in_avg_accuracy": 0.9166666666666666,
+        "practical_out_avg_accuracy": 0.8333333333333334,
+        "practical_avg_accuracy": 0.875,
+        "practical_in_avg_macro_f1": 0.9068562610229276,
+        "practical_out_avg_macro_f1": 0.8158148949815616,
+        "practical_avg_macro_f1": 0.8613355780022447,
+        "offline_to_practical_avg_drop": 0.05830000000000002,
+        "offline_to_practical_out_drop": 0.09996666666666665
+      }
+    }
+  ],
+  "interpretation": [
+    "Naive raw fusion improves over vision-only in Practical average, but still has a large Out-user drop.",
+    "Feature redesigned simple fusion produces the strongest Practical average in this run.",
+    "Stable hybrid remains a meaningful candidate, but this ablation suggests the main gain may come more from sensor role redesign than from the gate itself for the current seed/data.",
+    "Do not claim flex raw is always harmful; claim that raw sensor dumping is not sufficient and sensor-role redesign is empirically better supported."
+  ]
+}

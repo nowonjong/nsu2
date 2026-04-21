@@ -1,0 +1,105 @@
+SignProject update summary after FINAL_SUMMARY_FOR_NSU2_ONE_2026-04-13
+Date: 2026-04-21
+
+1. Model-selection conclusion changed
+- On 2026-04-13, stable_hybrid was still treated as the safest final practical candidate.
+- After additional ablation and multi-seed checks, the current main final model is now Feature Redesigned Simple Fusion.
+- stable_hybrid remains as a candidate/comparison model, not the main final structure.
+
+2. New fusion-design ablation work was added
+- New ablation summary:
+  - experiments/fusion_design_ablation/2026-04-15_current_18w_multiseed/fusion_design_ablation_multiseed_summary.md
+- Compared models:
+  - naive raw fusion
+  - feature redesigned simple fusion
+  - stable hybrid
+- Main conclusion:
+  - feature redesigned simple fusion achieved the best Practical average and Practical macro F1 across seeds.
+  - stable hybrid was not consistently better and was more seed-sensitive on Practical-Out.
+- This changed the main thesis flow to:
+  - vision-only -> naive raw fusion -> feature redesigned fusion
+
+3. Practical dataset was expanded from 4-shot to 10-shot
+- Previous official practical sets were 18 words x 4 repetitions.
+- Additional 6 repetitions per word were recorded for all four sets:
+  - practical_in_add6
+  - practical_in_2_add6
+  - practical_out_add6
+  - practical_out_2_add6
+- Merged final 10-shot datasets were created:
+  - experiments/live_eval_dataset/final_practical_in_10
+  - experiments/live_eval_dataset/final_practical_in_2_10
+  - experiments/live_eval_dataset/final_practical_out_10
+  - experiments/live_eval_dataset/final_practical_out_2_10
+- Important policy:
+  - original4 and add6 are preserved separately in each manifest.
+  - add6 can be excluded later if needed.
+- Dataset summary file:
+  - experiments/live_eval_dataset/final_practical_10_dataset_summary.md
+
+4. Final 10-shot multi-seed evaluation was added
+- New final summary:
+  - experiments/fusion_design_ablation/2026-04-20_final_practical10_seed42_46/final_practical10_seed42_46_summary.md
+- Seeds:
+  - 42, 43, 44, 45, 46
+- Models:
+  - glove vision-only
+  - naive raw fusion
+  - feature redesigned simple fusion
+  - stable hybrid
+- Final mean Practical results:
+  - vision-only: 0.7036
+  - naive raw fusion: 0.8167
+  - feature redesigned simple fusion: 0.8503
+  - stable hybrid: 0.8317
+- Main conclusion:
+  - feature redesigned simple fusion is the strongest current practical model.
+  - naive raw fusion is also meaningfully better than vision-only.
+  - stable hybrid is still competitive, but not the best final choice.
+
+5. Group analysis was updated to final practical 10-shot + 5-seed average
+- New files:
+  - experiments/fusion_design_ablation/2026-04-20_final_practical10_seed42_46/vision_vs_feature_group_analysis_final10.md
+  - experiments/fusion_design_ablation/2026-04-20_final_practical10_seed42_46/vision_vs_feature_group_analysis_final10.json
+- Main comparison:
+  - vision-only vs feature redesigned fusion
+- Main message:
+  - the biggest gains appear in instant-handshape and direction-difference groups.
+  - gains are also clear in bend/path and additional-motion groups.
+  - wrist-angle and cross-hand groups improved less, and some sub-classes remain difficult.
+
+6. New practical comparison figures were added
+- Plot files:
+  - experiments/fusion_design_ablation/2026-04-20_final_practical10_seed42_46/plots/fig_3_1_in_vs_out_practical.png
+  - experiments/fusion_design_ablation/2026-04-20_final_practical10_seed42_46/plots/fig_3_2_group_accuracy_comparison.png
+  - experiments/fusion_design_ablation/2026-04-20_final_practical10_seed42_46/plots/fig_3_2_group_gain.png
+- Intended reporting structure:
+  - 3.1 In vs Out practical comparison
+  - 3.2 similar-sign group comparison
+
+7. Final model explanation changed
+- The final model is now described as Feature Redesigned Fusion.
+- Its key idea is not simply using all raw sensor channels equally.
+- Current explanation:
+  - vision branch: temporal vision sequence
+  - IMU + frame flags: temporal sensor sequence
+  - flex sensors: posture-summary features instead of raw temporal flex sequence
+- This means flex is used as summarized posture information, while IMU remains a time-varying motion/orientation feature.
+
+8. Root-level scripts updated/added
+- evaluate_live_eval_dataset.py
+  - updated so it can read the newer final practical dataset manifest format.
+- run_final_practical10_multiseed.py
+  - added to automate final 10-shot multi-seed evaluation.
+- old_backup_flex_related_results.csv
+  - added as a backup/reference file from older flex-related results.
+
+9. Practical reporting message is now sharper than the 2026-04-13 version
+- Before:
+  - offline vs practical, with stable_hybrid as the safer practical baseline candidate.
+- Now:
+  - vision-only still degrades heavily in practical use.
+  - even naive raw fusion improves practical robustness.
+  - feature redesigned fusion is the strongest current final model.
+  - the main thesis message is no longer just fusion vs vision-only.
+  - it is now also about why sensor-role-aware redesign outperforms raw sensor concatenation.

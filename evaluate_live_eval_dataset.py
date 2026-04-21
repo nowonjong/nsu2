@@ -19,6 +19,38 @@ def load_json(path):
         return json.load(f)
 
 
+def resolve_sample_path(item, dataset_dir: Path, key_names):
+    for key in key_names:
+        value = item.get(key)
+        if not value:
+            continue
+        p = Path(value)
+        if p.exists():
+            return p
+        candidate = dataset_dir / value
+        if candidate.exists():
+            return candidate
+        candidate = dataset_dir / "captures" / value
+        if candidate.exists():
+            return candidate
+    raise FileNotFoundError(f"sample path not found in manifest item: keys={key_names}, item={item}")
+
+
+def load_manifest_items(manifest_path: Path):
+    manifest = load_json(manifest_path)
+    if isinstance(manifest, list):
+        return manifest
+    if isinstance(manifest, dict) and isinstance(manifest.get("samples"), list):
+        dataset_name = manifest.get("dataset", manifest_path.parent.name)
+        items = []
+        for sample in manifest["samples"]:
+            row = dict(sample)
+            row.setdefault("source_model_name", dataset_name)
+            items.append(row)
+        return items
+    raise ValueError(f"Unsupported manifest format: {manifest_path}")
+
+
 def find_labels_path(model_dir: Path) -> Path:
     for name in ["labels.json", "class_names.json"]:
         p = model_dir / name
@@ -125,7 +157,7 @@ def main():
     model_dir = Path(args.model_dir)
     dataset_dir = Path(args.dataset_dir)
     manifest_path = dataset_dir / "manifest.json"
-    manifest = load_json(manifest_path)
+    manifest = load_manifest_items(manifest_path)
 
     config = load_json(model_dir / "config.json")
     labels = load_json(find_labels_path(model_dir))
@@ -138,7 +170,8 @@ def main():
         gt_label = item["gt_label"]
         if gt_label not in label_to_idx:
             continue
-        arr = np.load(item["target_npy"] if Path(item["target_npy"]).exists() else item["source_npy"]).astype(np.float32)
+        npy_path = resolve_sample_path(item, dataset_dir, ["target_npy", "copied_npy", "source_npy"])
+        arr = np.load(npy_path).astype(np.float32)
         if arr.shape[0] != SEQ_LEN:
             continue
         X.append(arr)
@@ -173,8 +206,8 @@ def main():
             "correct": bool(true_idx == pred_idx),
             "margin": float(margin),
             "pred_conf": float(prob[pred_idx]),
-            "source_model_name": item["source_model_name"],
-            "source_json": item["source_json"],
+            "source_model_name": item.get("source_model_name", item.get("source_set", dataset_dir.name)),
+            "source_json": str(resolve_sample_path(item, dataset_dir, ["target_json", "copied_json", "source_json"])),
         })
 
     out = {

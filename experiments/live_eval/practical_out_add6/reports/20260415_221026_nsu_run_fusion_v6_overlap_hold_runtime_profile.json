@@ -1,0 +1,110 @@
+{
+  "script": "nsu_run_fusion_v6_overlap_hold",
+  "started_at": "2026-04-15T21:40:11",
+  "ended_at": "2026-04-15T22:10:26",
+  "target_fps": 25.0,
+  "min_stable_fps": 20.0,
+  "achieved_fps_from_loop_mean": 21.450211133383398,
+  "runtime_status": "WARNING",
+  "runtime_reason": "Average FPS is acceptable, but p95 loop time 72.03ms exceeds 50.00ms.",
+  "counters": {},
+  "stats": {
+    "camera_read": {
+      "count": 20000,
+      "mean_ms": 0.2206901565543376,
+      "median_ms": 0.15190010890364647,
+      "p95_ms": 0.32640515128150577,
+      "min_ms": 0.08329981938004494,
+      "max_ms": 26.19050000794232
+    },
+    "classify_preprocess": {
+      "count": 111,
+      "mean_ms": 148.68370090141423,
+      "median_ms": 1.9840998575091362,
+      "p95_ms": 638.2432000245899,
+      "min_ms": 1.1511000338941813,
+      "max_ms": 1017.9892000742257
+    },
+    "classify_total": {
+      "count": 111,
+      "mean_ms": 166.14879998126747,
+      "median_ms": 27.392500080168247,
+      "p95_ms": 656.3856999855489,
+      "min_ms": 11.105099925771356,
+      "max_ms": 1028.2448998186737
+    },
+    "cv2_waitkey": {
+      "count": 20000,
+      "mean_ms": 2.4378051712410524,
+      "median_ms": 2.2101501235738397,
+      "p95_ms": 2.8915998991578817,
+      "min_ms": 0.08830009028315544,
+      "max_ms": 25.320699904114008
+    },
+    "fps_cap_sleep": {
+      "count": 20000,
+      "mean_ms": 7.852345664847642,
+      "median_ms": 9.99835001770407,
+      "p95_ms": 14.767900060396638,
+      "min_ms": 0.0,
+      "max_ms": 19.00120005942881
+    },
+    "frame_preprocess": {
+      "count": 20000,
+      "mean_ms": 0.46785570005886257,
+      "median_ms": 0.38989982567727566,
+      "p95_ms": 0.8461000397801399,
+      "min_ms": 0.2808000426739454,
+      "max_ms": 70.90599997900426
+    },
+    "loop_total": {
+      "count": 20000,
+      "mean_ms": 46.61958774119849,
+      "median_ms": 41.07234987895936,
+      "p95_ms": 72.0320199499838,
+      "min_ms": 38.97510003298521,
+      "max_ms": 1078.3162000589073
+    },
+    "mediapipe_process": {
+      "count": 20000,
+      "mean_ms": 16.47090126450639,
+      "median_ms": 11.634949943982065,
+      "p95_ms": 36.83174999896436,
+      "min_ms": 5.380099872127175,
+      "max_ms": 86.99099998921156
+    },
+    "model_inference": {
+      "count": 111,
+      "mean_ms": 17.28947478271014,
+      "median_ms": 14.6053999196738,
+      "p95_ms": 25.971150025725365,
+      "min_ms": 9.013799950480461,
+      "max_ms": 27.499200077727437
+    },
+    "render_and_imshow": {
+      "count": 20000,
+      "mean_ms": 17.391205934633035,
+      "median_ms": 14.388899900950491,
+      "p95_ms": 31.83040010044351,
+      "min_ms": 10.664599947631359,
+      "max_ms": 312.1601000893861
+    },
+    "sensor_align": {
+      "count": 20000,
+      "mean_ms": 0.07433131927391515,
+      "median_ms": 0.06470014341175556,
+      "p95_ms": 0.1230000052601099,
+      "min_ms": 0.02119992859661579,
+      "max_ms": 2.9331000987440348
+    }
+  },
+  "extra": {
+    "model_path": "C:\\SignProject\\experiments\\glove_fusion\\2026-04-07_stable_hybrid_18w_clean_v1\\fusion_lstm_best.keras",
+    "debug_capture_dir": "C:\\SignProject\\experiments\\live_eval\\practical_out_add6\\captures",
+    "serial_port": "COM9",
+    "serial_baud": 115200,
+    "camera_width": 640,
+    "camera_height": 480,
+    "min_stable_fps": 20.0
+  }
+}
