@@ -1,0 +1,22 @@
+﻿LSTM 미니멀 구조 그림 메모
+작성일: 2026-04-22
+저장 위치: C:\SignProject\Paper
+
+1. 목적
+- 기존 상세 설명형 LSTM 그림보다 텍스트를 줄이고, 흐름 중심으로 이해할 수 있는 논문용 미니멀 개념도를 별도로 제작하였다.
+
+2. 그림 파일
+- figures\fig_lstm_structure_minimal.png
+- figures\fig_lstm_structure_minimal.svg
+
+3. 특징
+- 이전 셀 상태 C_{t-1}, 현재 입력 x_t, 세 가지 게이트(f_t, i_t, o_t), 다음 은닉 상태 h_t의 관계를 중심으로 단순화
+- 텍스트 설명을 최소화하고 흐름과 기호 중심으로 배치
+- 2.3 LSTM 절의 수식 설명과 함께 배치하기 적합함
+
+4. 캡션 초안
+- 그림 X. LSTM 셀의 정보 흐름 개념도
+
+5. 사용 추천
+- 논문 본문에는 미니멀 그림(fig_lstm_structure_minimal)을 우선 사용
+- 상세 구조 설명이 더 필요할 경우 기존 그림(fig_lstm_structure)을 보조 그림으로 사용 가능

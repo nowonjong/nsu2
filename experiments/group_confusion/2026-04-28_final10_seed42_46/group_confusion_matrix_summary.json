@@ -1,0 +1,449 @@
+{
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "datasets": [
+    "in_1",
+    "in_2",
+    "out_1",
+    "out_2"
+  ],
+  "groups": [
+    {
+      "key": "direction_difference",
+      "label": "Direction",
+      "actions": [
+        "more",
+        "naeil",
+        "eoje"
+      ]
+    },
+    {
+      "key": "wrist_angle_difference",
+      "label": "Wrist angle",
+      "actions": [
+        "teukbyeol",
+        "byeollo"
+      ]
+    },
+    {
+      "key": "bend_path_difference",
+      "label": "Bend/path",
+      "actions": [
+        "jamkkan",
+        "oraenman",
+        "gakkapda"
+      ]
+    },
+    {
+      "key": "additional_motion_difference",
+      "label": "Additional motion",
+      "actions": [
+        "jalhada",
+        "annyeonghaseyo"
+      ]
+    },
+    {
+      "key": "cross_hand_difference",
+      "label": "Cross-hand",
+      "actions": [
+        "mannada",
+        "byeongyeonghada"
+      ]
+    },
+    {
+      "key": "instant_handshape_difference",
+      "label": "Instant handshape",
+      "actions": [
+        "banggeum",
+        "billida"
+      ]
+    },
+    {
+      "key": "handshape_difference",
+      "label": "Handshape",
+      "actions": [
+        "gandanhada",
+        "sada",
+        "gamsahamnida",
+        "joesonghada"
+      ]
+    }
+  ],
+  "results": {
+    "vision_only": {
+      "model_label": "Vision-only",
+      "count_matrix": [
+        [
+          589,
+          0,
+          11,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          389,
+          0,
+          4,
+          3,
+          0,
+          4
+        ],
+        [
+          0,
+          3,
+          503,
+          0,
+          92,
+          2,
+          0
+        ],
+        [
+          4,
+          88,
+          27,
+          267,
+          7,
+          0,
+          7
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          400,
+          0,
+          0
+        ],
+        [
+          30,
+          0,
+          3,
+          8,
+          0,
+          359,
+          0
+        ],
+        [
+          0,
+          14,
+          0,
+          3,
+          8,
+          0,
+          775
+        ]
+      ],
+      "row_normalized": [
+        [
+          0.9816666666666667,
+          0.0,
+          0.018333333333333333,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.9725,
+          0.0,
+          0.01,
+          0.0075,
+          0.0,
+          0.01
+        ],
+        [
+          0.0,
+          0.005,
+          0.8383333333333334,
+          0.0,
+          0.15333333333333332,
+          0.0033333333333333335,
+          0.0
+        ],
+        [
+          0.01,
+          0.22,
+          0.0675,
+          0.6675,
+          0.0175,
+          0.0,
+          0.0175
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.075,
+          0.0,
+          0.0075,
+          0.02,
+          0.0,
+          0.8975,
+          0.0
+        ],
+        [
+          0.0,
+          0.0175,
+          0.0,
+          0.00375,
+          0.01,
+          0.0,
+          0.96875
+        ]
+      ],
+      "top_cross_group_confusions": [
+        {
+          "actual_group": "Bend/path",
+          "predicted_group": "Cross-hand",
+          "count": 92,
+          "row_rate": 0.15333333333333332
+        },
+        {
+          "actual_group": "Additional motion",
+          "predicted_group": "Wrist angle",
+          "count": 88,
+          "row_rate": 0.22
+        },
+        {
+          "actual_group": "Instant handshape",
+          "predicted_group": "Direction",
+          "count": 30,
+          "row_rate": 0.075
+        },
+        {
+          "actual_group": "Additional motion",
+          "predicted_group": "Bend/path",
+          "count": 27,
+          "row_rate": 0.0675
+        },
+        {
+          "actual_group": "Handshape",
+          "predicted_group": "Wrist angle",
+          "count": 14,
+          "row_rate": 0.0175
+        },
+        {
+          "actual_group": "Direction",
+          "predicted_group": "Bend/path",
+          "count": 11,
+          "row_rate": 0.018333333333333333
+        },
+        {
+          "actual_group": "Instant handshape",
+          "predicted_group": "Additional motion",
+          "count": 8,
+          "row_rate": 0.02
+        },
+        {
+          "actual_group": "Handshape",
+          "predicted_group": "Cross-hand",
+          "count": 8,
+          "row_rate": 0.01
+        }
+      ]
+    },
+    "feature_redesigned": {
+      "model_label": "Feature Redesigned Fusion",
+      "count_matrix": [
+        [
+          600,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          368,
+          0,
+          24,
+          1,
+          0,
+          7
+        ],
+        [
+          1,
+          1,
+          582,
+          1,
+          15,
+          0,
+          0
+        ],
+        [
+          0,
+          85,
+          2,
+          305,
+          6,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          400,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          398,
+          0
+        ],
+        [
+          0,
+          11,
+          0,
+          1,
+          2,
+          0,
+          786
+        ]
+      ],
+      "row_normalized": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.92,
+          0.0,
+          0.06,
+          0.0025,
+          0.0,
+          0.0175
+        ],
+        [
+          0.0016666666666666668,
+          0.0016666666666666668,
+          0.97,
+          0.0016666666666666668,
+          0.025,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.2125,
+          0.005,
+          0.7625,
+          0.015,
+          0.0,
+          0.005
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0025,
+          0.0025,
+          0.0,
+          0.0,
+          0.0,
+          0.995,
+          0.0
+        ],
+        [
+          0.0,
+          0.01375,
+          0.0,
+          0.00125,
+          0.0025,
+          0.0,
+          0.9825
+        ]
+      ],
+      "top_cross_group_confusions": [
+        {
+          "actual_group": "Additional motion",
+          "predicted_group": "Wrist angle",
+          "count": 85,
+          "row_rate": 0.2125
+        },
+        {
+          "actual_group": "Wrist angle",
+          "predicted_group": "Additional motion",
+          "count": 24,
+          "row_rate": 0.06
+        },
+        {
+          "actual_group": "Bend/path",
+          "predicted_group": "Cross-hand",
+          "count": 15,
+          "row_rate": 0.025
+        },
+        {
+          "actual_group": "Handshape",
+          "predicted_group": "Wrist angle",
+          "count": 11,
+          "row_rate": 0.01375
+        },
+        {
+          "actual_group": "Wrist angle",
+          "predicted_group": "Handshape",
+          "count": 7,
+          "row_rate": 0.0175
+        },
+        {
+          "actual_group": "Additional motion",
+          "predicted_group": "Cross-hand",
+          "count": 6,
+          "row_rate": 0.015
+        },
+        {
+          "actual_group": "Additional motion",
+          "predicted_group": "Bend/path",
+          "count": 2,
+          "row_rate": 0.005
+        },
+        {
+          "actual_group": "Additional motion",
+          "predicted_group": "Handshape",
+          "count": 2,
+          "row_rate": 0.005
+        }
+      ]
+    }
+  },
+  "figures": [
+    "C:\\SignProject\\Paper\\figures\\fig_3_group_confusion_matrix.png",
+    "C:\\SignProject\\Paper\\figures\\fig_3_group_confusion_matrix.svg"
+  ]
+}

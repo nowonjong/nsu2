@@ -114,6 +114,9 @@ TARGET_FPS = env_float("NSU_RUN_TARGET_FPS", 25.0)
 MIN_STABLE_FPS = env_float("NSU_RUN_MIN_STABLE_FPS", 20.0)
 PROFILE_ENABLED = env_flag("NSU_RUN_PROFILE", True)
 PROFILE_DIR = os.getenv("NSU_RUN_PROFILE_DIR", r"experiments\runtime_profile")
+DASHBOARD_WIDTH = env_int("NSU_RUN_DASHBOARD_WIDTH", 1180)
+DASHBOARD_HEIGHT = env_int("NSU_RUN_DASHBOARD_HEIGHT", 700)
+PLOT_HISTORY_LEN = env_int("NSU_RUN_PLOT_HISTORY", 120)
 
 # =========================
 # 표시명 사전
@@ -645,6 +648,83 @@ def draw_text_box(img, top_left, bottom_right, fill_color=(255, 255, 255), alpha
     cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
 
 
+def draw_panel_card(img, x1, y1, x2, y2, title="", accent=(90, 130, 210)):
+    draw_text_box(img, (x1, y1), (x2, y2), fill_color=(248, 250, 252), alpha=0.92)
+    cv2.rectangle(img, (x1, y1), (x2, y2), (214, 220, 228), 1)
+    cv2.rectangle(img, (x1, y1), (x2, y1 + 6), accent, -1)
+    if title:
+        draw_text_unicode(img, title, (x1 + 14, y1 + 14), font_size=24, text_color=(28, 32, 38))
+
+
+def draw_progress_bar(img, x1, y1, width, height, value, fg_color, bg_color=(210, 214, 220), label=""):
+    value = max(0.0, min(1.0, float(value)))
+    cv2.rectangle(img, (x1, y1), (x1 + width, y1 + height), bg_color, -1)
+    cv2.rectangle(img, (x1, y1), (x1 + int(width * value), y1 + height), fg_color, -1)
+    cv2.rectangle(img, (x1, y1), (x1 + width, y1 + height), (160, 165, 170), 1)
+    if label:
+        draw_text_unicode(img, label, (x1, y1 - 24), font_size=20, text_color=(45, 45, 45))
+
+
+def draw_led(img, center, radius, color, active=True):
+    c = tuple(int(v) for v in color)
+    if active:
+        cv2.circle(img, center, radius + 5, tuple(min(255, int(v * 0.35 + 120)) for v in c), -1, lineType=cv2.LINE_AA)
+        cv2.circle(img, center, radius, c, -1, lineType=cv2.LINE_AA)
+    else:
+        cv2.circle(img, center, radius, (145, 145, 145), -1, lineType=cv2.LINE_AA)
+
+
+def draw_line_chart(img, x1, y1, x2, y2, series_map, y_min=None, y_max=None):
+    cv2.rectangle(img, (x1, y1), (x2, y2), (232, 236, 240), -1)
+    cv2.rectangle(img, (x1, y1), (x2, y2), (205, 210, 216), 1)
+
+    width = max(1, x2 - x1 - 12)
+    height = max(1, y2 - y1 - 12)
+    chart_x1 = x1 + 6
+    chart_y1 = y1 + 6
+    chart_x2 = chart_x1 + width
+    chart_y2 = chart_y1 + height
+
+    all_vals = []
+    for values, _color in series_map.values():
+        all_vals.extend(list(values))
+    if not all_vals:
+        return
+
+    if y_min is None:
+        y_min = float(min(all_vals))
+    if y_max is None:
+        y_max = float(max(all_vals))
+    if abs(y_max - y_min) < 1e-6:
+        y_max = y_min + 1.0
+
+    for ratio in [0.25, 0.5, 0.75]:
+        yy = int(chart_y2 - ratio * height)
+        cv2.line(img, (chart_x1, yy), (chart_x2, yy), (220, 224, 228), 1)
+
+    for values, color in series_map.values():
+        vals = list(values)
+        if len(vals) < 2:
+            continue
+        pts = []
+        for i, val in enumerate(vals):
+            px = chart_x1 + int((i / max(1, len(vals) - 1)) * width)
+            py = chart_y2 - int(((float(val) - y_min) / (y_max - y_min)) * height)
+            pts.append((px, py))
+        cv2.polylines(img, [np.array(pts, dtype=np.int32)], False, color, 2, lineType=cv2.LINE_AA)
+
+    draw_text_unicode(img, f"{y_max:.2f}", (x2 - 70, y1 + 2), font_size=16, text_color=(90, 90, 90))
+    draw_text_unicode(img, f"{y_min:.2f}", (x2 - 70, y2 - 24), font_size=16, text_color=(90, 90, 90))
+
+
+def fit_frame_to_box(frame, box_w, box_h):
+    h, w = frame.shape[:2]
+    scale = min(box_w / max(1, w), box_h / max(1, h))
+    new_w = max(1, int(w * scale))
+    new_h = max(1, int(h * scale))
+    return cv2.resize(frame, (new_w, new_h))
+
+
 def standardize_modalities(seq):
     seq = np.asarray(seq, dtype=np.float32)
     seq_vision = seq[:, :VISION_DIM].astype(np.float32)
@@ -806,6 +886,14 @@ def classify_sequence_once(seq_array):
     result['margin'] = margin
     result['label'] = top1_label
     result['conf'] = top1_conf
+    top_k = min(3, len(ACTIONS))
+    result['top_candidates'] = [
+        {
+            'label': ACTIONS[int(idx)],
+            'conf': float(y_prob[int(idx)]),
+        }
+        for idx in sorted_idx[-top_k:][::-1]
+    ]
     runtime_profiler.add_duration("classify_total", classify_start)
 
     return result
@@ -857,6 +945,163 @@ def draw_debug_panel(img, lines):
     for i, line in enumerate(lines):
         cv2.putText(img, line, (x1 + 12, y1 + 24 + i * line_h),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.53, (255, 255, 255), 1)
+
+
+def render_dashboard(
+    camera_img,
+    fps_smooth,
+    mode,
+    sequence_len,
+    current_pred_label,
+    current_pred_conf,
+    stable_label,
+    stable_conf,
+    gt_kor,
+    long_motion_score,
+    short_motion_score,
+    last_margin,
+    sensor_vec,
+    sensor_packet_count,
+    last_sensor_time_ms,
+    last_sensor_host_delta_ms,
+    left_seen,
+    right_seen,
+    overlap_now,
+    frame_ambiguous,
+    top_candidates,
+    flex_left_hist,
+    flex_right_hist,
+    imu_left_hist,
+    imu_right_hist,
+):
+    dashboard = np.full((DASHBOARD_HEIGHT, DASHBOARD_WIDTH, 3), (240, 243, 247), dtype=np.uint8)
+    pad = 18
+    sidebar_w = min(420, max(380, int(DASHBOARD_WIDTH * 0.35)))
+    camera_w = DASHBOARD_WIDTH - pad * 3 - sidebar_w
+    camera_h = DASHBOARD_HEIGHT - pad * 2
+    cam_x1, cam_y1 = pad, pad
+    cam_x2, cam_y2 = cam_x1 + camera_w, cam_y1 + camera_h
+    side_x1, side_y1 = cam_x2 + pad, pad
+    side_x2, side_y2 = DASHBOARD_WIDTH - pad, DASHBOARD_HEIGHT - pad
+
+    cv2.rectangle(dashboard, (cam_x1, cam_y1), (cam_x2, cam_y2), (16, 20, 26), -1)
+    fitted = fit_frame_to_box(camera_img, camera_w, camera_h)
+    fh, fw = fitted.shape[:2]
+    off_x = cam_x1 + (camera_w - fw) // 2
+    off_y = cam_y1 + (camera_h - fh) // 2
+    dashboard[off_y:off_y + fh, off_x:off_x + fw] = fitted
+    cv2.rectangle(dashboard, (off_x, off_y), (off_x + fw, off_y + fh), (255, 255, 255), 1)
+
+    # Minimal Korean overlay on camera
+    stable_kor = KOR_MAP.get(stable_label, stable_label)
+    is_correct = (stable_kor == gt_kor) and stable_label != 'none' and gt_kor != "미지정"
+    result_color = (0, 150, 50) if is_correct else (200, 50, 50) if stable_label != 'none' else (40, 40, 40)
+    draw_text_box(dashboard, (off_x + 12, off_y + 12), (off_x + 360, off_y + 84), fill_color=(255, 255, 255), alpha=0.82)
+    draw_text_unicode(dashboard, f"목표 단어 (GT): {gt_kor}", (off_x + 20, off_y + 18), font_size=19, text_color=(90, 90, 90))
+    draw_text_unicode(dashboard, f"현재 번역: {stable_kor}", (off_x + 20, off_y + 44), font_size=28, text_color=result_color)
+
+    # sidebar base
+    cv2.rectangle(dashboard, (side_x1, side_y1), (side_x2, side_y2), (249, 250, 252), -1)
+    cv2.rectangle(dashboard, (side_x1, side_y1), (side_x2, side_y2), (208, 214, 222), 1)
+    cv2.rectangle(dashboard, (side_x1, side_y1), (side_x2, side_y1 + 8), (40, 40, 40), -1)
+
+    def put(line, y, x_offset=14, scale=0.6, color=(30, 34, 40), thick=1):
+        cv2.putText(dashboard, line, (side_x1 + x_offset, y), cv2.FONT_HERSHEY_SIMPLEX, scale, color, thick, cv2.LINE_AA)
+
+    mode_txt = {"WAIT": "WAITING", "COUNTDOWN": "READY...", "RECORDING": "ANALYZING"}.get(mode, mode)
+    mode_color = (60, 190, 90) if mode == "WAIT" else (0, 140, 255) if mode == "RECORDING" else (225, 150, 60)
+    draw_led(dashboard, (side_x1 + 30, side_y1 + 45), 10, mode_color, active=True)
+    put(mode_txt, side_y1 + 52, x_offset=50, scale=0.78, thick=2, color=mode_color)
+    put(f"FPS: {fps_smooth:.1f}", side_y1 + 50, x_offset=sidebar_w - 110, scale=0.58, color=(100, 100, 100))
+
+    put("SIGN DASHBOARD", side_y1 + 30, scale=0.72, thick=2)
+    # System status
+    status_y = side_y1 + 92
+    put("SYSTEM STATUS", status_y, scale=0.55, thick=2)
+    draw_led(dashboard, (side_x1 + 25, status_y + 25), 6, (60, 190, 90), active=left_seen)
+    put("VIS_L", status_y + 30, x_offset=38, scale=0.45, color=(70, 70, 70))
+    draw_led(dashboard, (side_x1 + 105, status_y + 25), 6, (60, 190, 90), active=right_seen)
+    put("VIS_R", status_y + 30, x_offset=118, scale=0.45, color=(70, 70, 70))
+    draw_led(dashboard, (side_x1 + 185, status_y + 25), 6, (60, 190, 90), active=(sensor_packet_count > 0))
+    put("GLOVE", status_y + 30, x_offset=198, scale=0.45, color=(70, 70, 70))
+    if overlap_now:
+        draw_led(dashboard, (side_x1 + 280, status_y + 25), 6, (0, 165, 255), active=True)
+        put("OVERLAP", status_y + 30, x_offset=293, scale=0.45, color=(0, 120, 200))
+
+    if overlap_now:
+        status_msg = "VISION LIMITED  |  OVERLAP DETECTED"
+        status_msg_color = (0, 120, 200)
+    elif not (left_seen and right_seen):
+        status_msg = "VISION TRACKING PARTIAL"
+        status_msg_color = (120, 120, 120)
+    elif sensor_packet_count <= 0:
+        status_msg = "GLOVE STREAM CHECK"
+        status_msg_color = (180, 80, 80)
+    else:
+        status_msg = "VISION + GLOVE ACTIVE"
+        status_msg_color = (60, 140, 90)
+    put(status_msg, status_y + 58, x_offset=14, scale=0.46, color=status_msg_color, thick=2)
+
+    result_y = status_y + 88
+    put("FINAL RESULT", result_y, scale=0.55, thick=2)
+    result_box_y1 = result_y + 10
+    result_box_y2 = result_box_y1 + 52
+    cv2.rectangle(dashboard, (side_x1 + 14, result_box_y1), (side_x2 - 14, result_box_y2), (255, 255, 255), -1)
+    cv2.rectangle(dashboard, (side_x1 + 14, result_box_y1), (side_x2 - 14, result_box_y2), (220, 224, 230), 1)
+    result_text_color = result_color if stable_label != 'none' else (70, 74, 82)
+    draw_text_unicode(dashboard, stable_kor, (side_x1 + 24, result_box_y1 + 10), font_size=28, text_color=result_text_color)
+
+    # Final confidence only
+    conf_y = result_y + 86
+    put("AI CONFIDENCE", conf_y, scale=0.55, thick=2)
+    if stable_conf >= 0.70:
+        bar_color = (60, 190, 90)
+    elif stable_conf >= 0.40:
+        bar_color = (0, 165, 255)
+    else:
+        bar_color = (60, 60, 220)
+    put(f"{stable_conf * 100:.1f}%", conf_y + 25, x_offset=sidebar_w - 70, scale=0.60, thick=2, color=bar_color)
+    draw_progress_bar(dashboard, side_x1 + 14, conf_y + 12, sidebar_w - 90, 16, stable_conf, bar_color)
+
+    # Top-3 with emphasized top1
+    cand_y = conf_y + 64
+    put("TOP PREDICTIONS", cand_y, scale=0.55, thick=2)
+    for idx, cand in enumerate(top_candidates[:3]):
+        c_label = cand.get('label', '-')
+        c_kor = KOR_MAP.get(c_label, c_label)
+        c_conf = cand.get('conf', 0.0)
+        if idx == 0 and c_conf > 0.40:
+            draw_text_unicode(dashboard, f"1. {c_kor}", (side_x1 + 14, cand_y + 15), font_size=24, text_color=(0, 0, 0))
+            put(f"{c_conf:.2f}", cand_y + 35, x_offset=sidebar_w - 60, scale=0.60, thick=2, color=(0, 0, 0))
+        else:
+            draw_text_unicode(dashboard, f"{idx + 1}. {c_kor}", (side_x1 + 14, cand_y + 20 + idx * 30), font_size=18, text_color=(100, 100, 100))
+            put(f"{c_conf:.2f}", cand_y + 35 + idx * 30, x_offset=sidebar_w - 60, scale=0.50, color=(100, 100, 100))
+
+    # Main sensor graph
+    sens_y = cand_y + 126
+    put("LIVE SENSOR STREAM (FLEX)", sens_y, scale=0.55, thick=2)
+    left_flex = float(np.mean(sensor_vec[0:4]))
+    right_flex = float(np.mean(sensor_vec[4:8]))
+    put(f"L: {left_flex:.2f} | R: {right_flex:.2f}", sens_y, x_offset=sidebar_w - 130, scale=0.45, color=(120, 120, 120))
+    draw_line_chart(
+        dashboard,
+        side_x1 + 14,
+        sens_y + 15,
+        side_x2 - 14,
+        sens_y + 195,
+        {
+            "flex_l": (flex_left_hist, (193, 113, 56)),
+            "flex_r": (flex_right_hist, (89, 89, 211)),
+        },
+    )
+
+    # Bottom lightweight footer
+    seq_y = sens_y + 226
+    put(f"BUFFER: {sequence_len}/{SEQ_LEN}", seq_y, scale=0.45, color=(100, 100, 100))
+    draw_progress_bar(dashboard, side_x1 + 14, seq_y + 10, sidebar_w - 28, 6, sequence_len / max(1, SEQ_LEN), (100, 100, 100))
+    put("KEYS  S/B/N/G/Q", seq_y + 38, scale=0.48, color=(70, 74, 82), thick=2)
+
+    return dashboard
 
 def reset_runtime_state():
     sequence.clear()
@@ -1033,6 +1278,7 @@ stable_label = 'none'
 stable_conf = 0.0
 current_pred_label = ''
 current_pred_conf = 0.0
+current_top_candidates = []
 long_motion_score = 0.0
 short_motion_score = 0.0
 last_margin = 0.0
@@ -1044,6 +1290,10 @@ sensor_packet_count = 0
 zero_any_frame_indices = []
 zero_both_frame_indices = []
 zero_reason_counts = {}
+flex_left_history = deque(maxlen=PLOT_HISTORY_LEN)
+flex_right_history = deque(maxlen=PLOT_HISTORY_LEN)
+imu_left_history = deque(maxlen=PLOT_HISTORY_LEN)
+imu_right_history = deque(maxlen=PLOT_HISTORY_LEN)
 
 fps_prev_time = time.time()
 fps_smooth = 0.0
@@ -1107,7 +1357,8 @@ def save_debug_capture(seq_array, result, frame_count, sensor_time_ms, sensor_ho
 
 def reset_recording_buffers():
     global left_missing_count, right_missing_count, no_hand_run
-    global current_pred_label, current_pred_conf, long_motion_score, short_motion_score, last_margin
+    global current_pred_label, current_pred_conf, current_top_candidates
+    global long_motion_score, short_motion_score, last_margin
     global prev_left_center, prev_right_center
     global post_overlap_hold_count, overlap_freeze_count
     global left_recent_motion_px, right_recent_motion_px
@@ -1142,19 +1393,21 @@ def reset_recording_buffers():
 
     current_pred_label = ''
     current_pred_conf = 0.0
+    current_top_candidates = []
     long_motion_score = 0.0
     short_motion_score = 0.0
     last_margin = 0.0
 
 
 def reset_all_state():
-    global mode, countdown_start_time, stable_label, stable_conf
+    global mode, countdown_start_time, stable_label, stable_conf, current_top_candidates
 
     reset_recording_buffers()
     mode = "WAIT"
     countdown_start_time = None
     stable_label = 'none'
     stable_conf = 0.0
+    current_top_candidates = []
 
 
 # =========================
@@ -1188,6 +1441,10 @@ try:
         runtime_profiler.add_duration("sensor_align", sensor_align_start)
         last_sensor_time_ms = sensor_time_ms
         last_sensor_host_delta_ms = frame_host_time_ms - sensor_host_time_ms
+        flex_left_history.append(float(np.mean(sensor_vec[0:4])))
+        flex_right_history.append(float(np.mean(sensor_vec[4:8])))
+        imu_left_history.append(float(np.linalg.norm(sensor_vec[8:17])))
+        imu_right_history.append(float(np.linalg.norm(sensor_vec[17:26])))
 
         left_data = np.zeros(63, dtype=np.float32)
         right_data = np.zeros(63, dtype=np.float32)
@@ -1387,6 +1644,7 @@ try:
                 current_pred_conf = result['raw_conf']
                 stable_label = result['label']
                 stable_conf = result['conf']
+                current_top_candidates = result.get('top_candidates', [])
                 long_motion_score = result['long_motion']
                 last_margin = result['margin']
 
@@ -1423,79 +1681,54 @@ try:
         fps_smooth = 0.9 * fps_smooth + 0.1 * instant_fps if fps_smooth > 0 else instant_fps
 
         render_start = time.perf_counter()
-        h, w, _ = display_img.shape
-        draw_text_box(display_img, (0, 0), (w, 138), fill_color=(255, 255, 255), alpha=0.58)
-
-        mode_kor = {"WAIT": "대기", "COUNTDOWN": "카운트다운", "RECORDING": "녹화중"}.get(mode, mode)
-        top1_kor = KOR_MAP.get(current_pred_label, current_pred_label) if current_pred_label else ""
-        stable_kor = KOR_MAP.get(stable_label, stable_label)
         gt_label = get_current_gt_label()
         gt_kor = KOR_MAP.get(gt_label, gt_label) if gt_label else "미지정"
-
-        draw_text_unicode(display_img, f"FPS: {fps_smooth:.1f}", (10, 12), font_size=28, text_color=(0, 0, 0))
-        draw_text_unicode(display_img, f"상태: {mode_kor}", (165, 12), font_size=28, text_color=(0, 0, 0))
-        draw_text_unicode(display_img, f"시퀀스: {len(sequence)}/{SEQ_LEN}", (380, 12), font_size=28, text_color=(0, 0, 0))
-        draw_text_unicode(display_img, f"동작량: {long_motion_score:.3f}", (10, 48), font_size=24, text_color=(20, 20, 20))
-        draw_text_unicode(display_img, f"GT: {gt_kor}", (10, 82), font_size=24, text_color=(120, 60, 0))
-
-        if current_pred_label != '':
-            draw_text_unicode(
-                display_img,
-                f"예측 1순위: {top1_kor} ({current_pred_conf:.2f})",
-                (230, 48),
-                font_size=24,
-                text_color=(0, 120, 160)
-            )
-
-        result_color = (0, 120, 0) if stable_label != 'none' else (90, 90, 90)
-        draw_text_unicode(
-            display_img,
-            f"결과: {stable_kor}",
-            (260, 82),
-            font_size=30,
-            text_color=result_color
-        )
-
-        if mode == "WAIT":
-            draw_text_unicode(
-                display_img,
-                "S 시작 | B 이전 GT | N 다음 GT | G GT해제 | Q 종료",
-                (10, 112),
-                font_size=22,
-                text_color=(25, 25, 25)
-            )
-        elif mode == "COUNTDOWN":
+        if mode == "COUNTDOWN":
             remain = max(0.0, TRIGGER_DELAY_SEC - (time.time() - countdown_start_time))
             remain_int = int(np.ceil(remain))
-            draw_text_unicode(display_img, "준비 자세를 유지하세요", (10, 112), font_size=26, text_color=(0, 120, 160))
-            cv2.putText(display_img, str(remain_int), (w // 2 - 30, h // 2), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 255, 255), 6)
+            cv2.putText(display_img, str(remain_int), (display_img.shape[1] // 2 - 30, display_img.shape[0] // 2),
+                        cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 255, 255), 6)
         elif mode == "RECORDING":
-            draw_text_unicode(
-                display_img,
-                f"녹화 중... {len(sequence)}/{SEQ_LEN}",
-                (10, 112),
-                font_size=26,
-                text_color=(0, 120, 160)
-            )
-
-        progress = int((len(sequence) / SEQ_LEN) * w) if mode == "RECORDING" else 0
-        cv2.rectangle(display_img, (0, h - 8), (progress, h), (0, 255, 0), -1)
+            prog_w = int((len(sequence) / SEQ_LEN) * display_img.shape[1])
+            cv2.rectangle(display_img, (0, display_img.shape[0] - 10), (prog_w, display_img.shape[0]), (0, 255, 0), -1)
 
         debug_lines = [
-            f"Hands seen: L={left_seen} R={right_seen}",
-            f"Flex mean: L={float(np.mean(sensor_vec[0:4])):.3f} R={float(np.mean(sensor_vec[4:8])):.3f}",
-            f"Short motion={short_motion_score:.4f} long motion={long_motion_score:.4f}",
-            f"Sensor packets={sensor_packet_count} ts={last_sensor_time_ms}",
-            f"Sensor align delta={last_sensor_host_delta_ms:.1f}ms",
-            f"Raw={current_pred_label} conf={current_pred_conf:.3f} margin={last_margin:.3f}",
-            f"Zero any={len(zero_any_frame_indices)}/{len(sequence)} first={zero_any_frame_indices[0] if zero_any_frame_indices else '-'}",
-            f"Zero both={len(zero_both_frame_indices)}/{len(sequence)} first={zero_both_frame_indices[0] if zero_both_frame_indices else '-'}",
-            f"Reason ov={zero_reason_counts.get('overlap', 0)} amb={zero_reason_counts.get('ambiguous_slot', 0)}",
-            f"Reason ml={zero_reason_counts.get('missing_left', 0)} mr={zero_reason_counts.get('missing_right', 0)} bm={zero_reason_counts.get('both_missing', 0)}",
+            f"Hands L={left_seen} R={right_seen}  overlap={overlap_now}",
+            f"Raw={current_pred_label} conf={current_pred_conf:.3f} stable={stable_label} conf={stable_conf:.3f}",
+            f"Margin={last_margin:.3f}  motion={long_motion_score:.3f} / {short_motion_score:.3f}",
+            f"Sensor delta={last_sensor_host_delta_ms:.1f}ms  pkt={sensor_packet_count}",
         ]
         draw_debug_panel(display_img, debug_lines)
 
-        cv2.imshow('Fusion Real-time Sign Recognition v5', display_img)
+        dashboard_img = render_dashboard(
+            camera_img=display_img,
+            fps_smooth=fps_smooth,
+            mode=mode,
+            sequence_len=len(sequence),
+            current_pred_label=current_pred_label,
+            current_pred_conf=current_pred_conf,
+            stable_label=stable_label,
+            stable_conf=stable_conf,
+            gt_kor=gt_kor,
+            long_motion_score=long_motion_score,
+            short_motion_score=short_motion_score,
+            last_margin=last_margin,
+            sensor_vec=sensor_vec,
+            sensor_packet_count=sensor_packet_count,
+            last_sensor_time_ms=last_sensor_time_ms,
+            last_sensor_host_delta_ms=last_sensor_host_delta_ms,
+            left_seen=left_seen,
+            right_seen=right_seen,
+            overlap_now=overlap_now,
+            frame_ambiguous=frame_ambiguous,
+            top_candidates=current_top_candidates,
+            flex_left_hist=flex_left_history,
+            flex_right_hist=flex_right_history,
+            imu_left_hist=imu_left_history,
+            imu_right_hist=imu_right_history,
+        )
+
+        cv2.imshow('Fusion Real-time Sign Recognition v5', dashboard_img)
         runtime_profiler.add_duration("render_and_imshow", render_start)
 
         waitkey_start = time.perf_counter()

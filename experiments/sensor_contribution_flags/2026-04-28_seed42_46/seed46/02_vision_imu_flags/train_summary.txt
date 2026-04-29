@@ -1,0 +1,96 @@
+===== Samples per class =====
+more       : 40
+naeil      : 40
+eoje       : 40
+teukbyeol  : 40
+byeollo    : 40
+jamkkan    : 40
+oraenman   : 40
+gakkapda   : 40
+jalhada    : 40
+annyeonghaseyo : 40
+mannada    : 40
+byeongyeonghada : 40
+banggeum   : 40
+billida    : 40
+gandanhada : 40
+sada       : 40
+gamsahamnida : 40
+joesonghada : 40
+
+===== Trainable classes =====
+more, naeil, eoje, teukbyeol, byeollo, jamkkan, oraenman, gakkapda, jalhada, annyeonghaseyo, mannada, byeongyeonghada, banggeum, billida, gandanhada, sada, gamsahamnida, joesonghada
+
+===== Split result =====
+Train: (542, 60, 158), (542,)
+Val  : (88, 60, 158), (88,)
+Test : (90, 60, 158), (90,)
+
+===== Split metadata =====
+Strategy         : group_session_stratified
+Warning          : Group/session split used to reduce leakage across temporally related samples. Legacy samples without session metadata fall back to coarse index blocks. Incomplete session groups are forced into train and excluded from val/test.
+Group count      : 9
+Session groups   : 9
+Legacy groups    : 0
+Min/class used   : 5
+Split index file : C:\SignProject\experiments\sensor_contribution_flags\2026-04-28_seed42_46\seed46\02_vision_imu_flags\split_indices.npz
+Sample source file: C:\SignProject\experiments\sensor_contribution_flags\2026-04-28_seed42_46\seed46\02_vision_imu_flags\sample_sources.json
+Train count      : 542
+Val count        : 88
+Test count       : 90
+Train groups     : 7
+Val groups       : 1
+Test groups      : 1
+
+===== Modal Split =====
+Vision Train: (542, 60, 126)
+Sensor Train: (542, 60, 24)
+Flex Train  : (542, 0)
+Vision Val  : (88, 60, 126)
+Sensor Val  : (88, 60, 24)
+Flex Val    : (88, 0)
+Vision Test : (90, 60, 126)
+Sensor Test : (90, 60, 24)
+Flex Test   : (90, 0)
+
+===== Final metrics =====
+TRAIN Loss        : 0.1400
+TRAIN Accuracy    : 0.9723
+TRAIN Macro F1    : 0.9725
+TRAIN Weighted F1 : 0.9724
+
+VAL Loss          : 0.1696
+VAL Accuracy      : 0.9773
+VAL Macro F1      : 0.9769
+VAL Weighted F1   : 0.9763
+
+TEST Loss         : 0.1254
+TEST Accuracy     : 0.9778
+TEST Macro F1     : 0.9784
+TEST Weighted F1  : 0.9784
+
+===== TEST Classification Report =====
+                 precision    recall  f1-score   support
+
+           more     1.0000    1.0000    1.0000         5
+          naeil     1.0000    1.0000    1.0000         5
+           eoje     1.0000    1.0000    1.0000         5
+      teukbyeol     0.7143    1.0000    0.8333         5
+        byeollo     1.0000    0.8000    0.8889         5
+        jamkkan     1.0000    1.0000    1.0000         5
+       oraenman     1.0000    1.0000    1.0000         5
+       gakkapda     1.0000    1.0000    1.0000         5
+        jalhada     1.0000    0.8000    0.8889         5
+ annyeonghaseyo     1.0000    1.0000    1.0000         5
+        mannada     1.0000    1.0000    1.0000         5
+byeongyeonghada     1.0000    1.0000    1.0000         5
+       banggeum     1.0000    1.0000    1.0000         5
+        billida     1.0000    1.0000    1.0000         5
+     gandanhada     1.0000    1.0000    1.0000         5
+           sada     1.0000    1.0000    1.0000         5
+   gamsahamnida     1.0000    1.0000    1.0000         5
+    joesonghada     1.0000    1.0000    1.0000         5
+
+       accuracy                         0.9778        90
+      macro avg     0.9841    0.9778    0.9784        90
+   weighted avg     0.9841    0.9778    0.9784        90

@@ -1,0 +1,478 @@
+﻿SignProject latest handoff and progress summary
+Date: 2026-04-27
+Workspace: C:\SignProject
+
+이 문서는 C:\SignProject 루트의 기존 txt/md 정리 파일과 최신 experiments 결과 요약을 읽고, 2026-04-27 기준으로 현재 진행상황과 추가된 내용을 다시 정리한 파일이다.
+다음 채팅, 다른 노트북, 또는 다른 AI에게 넘길 때 이 파일을 먼저 읽으면 된다.
+
+============================================================
+1. 현재 프로젝트의 최종 방향
+============================================================
+
+연구 목표는 단순히 "센서를 붙이면 정확도가 오른다"가 아니다.
+현재 가장 방어 가능한 연구 목표는 다음과 같다.
+
+- 비슷한 수어 동작은 MediaPipe 기반 vision-only 모델에서 혼동이 발생한다.
+- 스마트 장갑의 Flex 및 IMU 센서 정보는 비전이 놓치는 손가락 굽힘, 손목 회전, 동작 방향 정보를 보완할 수 있다.
+- 따라서 비슷한 수어 동작 그룹에서 비전 특징과 센서 특징을 융합했을 때 practical 환경의 인식률이 얼마나 개선되는지 확인한다.
+
+교수님 비교 프레임은 여전히 다음 3축이다.
+
+1. bare hand + vision
+2. glove + vision
+3. glove + fusion
+
+다만 현재 논문/실험의 중심은 glove 조건에서 vision-only와 fusion을 비교하고, 최종적으로 Feature Redesigned Fusion이 practical 환경에서 더 강하다는 것을 보이는 방향으로 정리되고 있다.
+
+============================================================
+2. 중요한 모델 결론 변경
+============================================================
+
+이전 2026-04-13 요약에서는 stable hybrid가 가장 안전한 최종 후보처럼 정리되어 있었다.
+하지만 2026-04-15 이후 추가 ablation과 2026-04-20 final practical10 multi-seed 평가를 거치면서 결론이 바뀌었다.
+
+현재 최종 모델 구조로 설명해야 하는 것은 다음이다.
+
+- Feature Redesigned Simple Fusion
+
+stable hybrid의 현재 위치:
+
+- 과거에 유망했던 후보 모델
+- 비교 실험에 포함되는 candidate/baseline
+- 최종 확정 모델이라고 쓰면 안 됨
+
+현재 논문에서 가장 깔끔한 모델 발전 흐름은 다음이다.
+
+1. Vision-only
+2. Naive raw fusion
+3. Feature Redesigned Fusion
+4. Stable hybrid는 추가 후보로 비교했으나 practical 평균에서는 Feature Redesigned Fusion보다 낮았음
+
+핵심 메시지:
+
+- 센서 raw값을 단순히 붙이는 것만으로도 vision-only보다 practical 성능이 좋아졌다.
+- 그러나 센서의 물리적 의미에 맞게 특징 구조를 재설계한 Feature Redesigned Fusion이 가장 좋은 practical 평균과 macro F1을 보였다.
+- 따라서 최종 모델 설명은 stable hybrid 중심이 아니라 Feature Redesigned Fusion 중심으로 가야 한다.
+
+============================================================
+3. 최종 practical 10회 데이터셋
+============================================================
+
+위치:
+C:\SignProject\experiments\live_eval_dataset
+
+최종 practical 데이터셋은 원래 4회 촬영분(original4)에 추가 6회(add6)를 붙여 만든 10회 세트이다.
+원본 폴더는 삭제하지 않았고, add6 샘플도 manifest에서 따로 구분 가능하다.
+나중에 add6를 제외해야 하면 manifest의 subset=original4만 사용하거나 기존 practical 원본 폴더로 돌아갈 수 있다.
+
+최종 세트:
+
+- final_practical_in_10
+- final_practical_in_2_10
+- final_practical_out_10
+- final_practical_out_2_10
+
+각 세트 구성:
+
+- 18 words x 10 samples = 180 samples
+
+전체 구성:
+
+- 4 sets x 180 samples = 720 practical captures
+
+데이터셋 요약 파일:
+
+- C:\SignProject\experiments\live_eval_dataset\final_practical_10_dataset_summary.md
+- C:\SignProject\experiments\live_eval_dataset\final_practical_10_dataset_summary.json
+
+주의사항:
+
+- final_practical_in_10에 original4 샘플 하나가 sensor warning으로 기록되어 있다.
+- 파일: original4__20260410_151628_734810_gamsahamnida.npy
+- 내용: flex_abs=0.0, imu_abs는 존재
+- 현재는 평가 이력 투명성을 위해 유지했다.
+
+============================================================
+4. 최종 10-shot multi-seed 모델 비교 결과
+============================================================
+
+위치:
+C:\SignProject\experiments\fusion_design_ablation\2026-04-20_final_practical10_seed42_46
+
+평가 조건:
+
+- Seeds: 42, 43, 44, 45, 46
+- Practical datasets: final 10-shot sets
+- 각 practical set: 18 words x 10 samples
+- 비교 모델:
+  1. Glove vision-only
+  2. Naive raw fusion
+  3. Feature redesigned simple fusion
+  4. Stable hybrid
+
+요약 파일:
+
+- final_practical10_seed42_46_summary.md
+- final_practical10_seed42_46_summary.tsv
+- final_practical10_seed42_46_summary.json
+
+평균 결과:
+
+| Model | Offline Acc | In Avg | Out Avg | Practical Avg | Practical F1 Avg | Drop |
+|---|---:|---:|---:|---:|---:|---:|
+| Glove vision-only | 0.9190 +- 0.0515 | 0.8067 +- 0.0197 | 0.6006 +- 0.0312 | 0.7036 +- 0.0213 | 0.6675 +- 0.0278 | 0.2154 +- 0.0521 |
+| Naive raw fusion | 0.9484 +- 0.0340 | 0.8989 +- 0.0242 | 0.7344 +- 0.0527 | 0.8167 +- 0.0306 | 0.8017 +- 0.0358 | 0.1317 +- 0.0361 |
+| Feature redesigned simple fusion | 0.9596 +- 0.0186 | 0.9144 +- 0.0335 | 0.7861 +- 0.0278 | 0.8503 +- 0.0211 | 0.8362 +- 0.0239 | 0.1093 +- 0.0355 |
+| Stable hybrid | 0.9618 +- 0.0218 | 0.9094 +- 0.0449 | 0.7539 +- 0.0502 | 0.8317 +- 0.0449 | 0.8188 +- 0.0509 | 0.1301 +- 0.0315 |
+
+해석:
+
+- Offline Acc만 보면 모든 모델이 높고, stable hybrid도 매우 좋다.
+- 그러나 practical 평균에서는 Feature Redesigned Simple Fusion이 가장 좋다.
+- vision-only는 practical, 특히 Out 조건에서 크게 무너진다.
+- fusion 계열은 모두 vision-only보다 practical에서 좋다.
+- 그중 Feature Redesigned Simple Fusion이 practical avg와 practical F1 모두 가장 좋다.
+
+논문에서 사용할 결론:
+
+- 최종 모델은 Feature Redesigned Fusion으로 정리한다.
+- stable hybrid는 비교 후보로 언급한다.
+- 모델 선정 이유는 offline 최고점이 아니라 practical 평균 및 practical F1 기준이다.
+
+============================================================
+5. 유사 수어 그룹별 분석 결과
+============================================================
+
+위치:
+C:\SignProject\experiments\fusion_design_ablation\2026-04-20_final_practical10_seed42_46
+
+파일:
+
+- vision_vs_feature_group_analysis_final10.md
+- vision_vs_feature_group_analysis_final10.json
+
+그림:
+
+- plots\fig_3_1_in_vs_out_practical.png
+- plots\fig_3_2_group_accuracy_comparison.png
+- plots\fig_3_2_group_gain.png
+
+비교:
+
+- Vision-only vs Feature Redesigned Fusion
+- final practical 10-shot sets 기준
+- seed 42~46 평균
+
+전체 그룹별 주요 개선폭:
+
+- 순간 손모양 차이형: 0.5025 -> 0.9650, gain +0.4625
+- 방향 차이형: 0.7200 -> 0.9950, gain +0.2750
+- 굽힘/경로 차이형: 0.5850 -> 0.7217, gain +0.1367
+- 추가동작 차이형: 0.6550 -> 0.7625, gain +0.1075
+- 손모양 차이형: 0.7750 -> 0.8588, gain +0.0838
+- 손목각도 차이형: 0.7900 -> 0.7875, gain -0.0025
+- 양손교차 차이형: 0.8775 -> 0.8450, gain -0.0325
+
+해석:
+
+- 센서 융합은 모든 그룹에서 무조건 좋아진 것은 아니다.
+- 가장 큰 개선은 순간 손모양 차이형과 방향 차이형에서 나타났다.
+- 굽힘/경로, 추가동작, 손모양 차이형에서도 개선이 있다.
+- 손목각도 차이형과 양손교차 차이형은 개선이 작거나 오히려 하락했다.
+- 이 점을 숨기기보다, 센서가 특히 효과적인 그룹과 한계가 있는 그룹을 구분해서 고찰하는 것이 좋다.
+
+논문 메시지:
+
+- 본 연구의 목적은 비슷한 수어 그룹에서 센서 융합이 도움이 되는지 확인하는 것이다.
+- 최종 결과는 센서 융합의 효과가 그룹별로 다르게 나타남을 보여준다.
+- 특히 손모양 순간 변화, 방향 차이, 굽힘/경로 차이처럼 vision-only가 혼동하기 쉬운 그룹에서 효과가 컸다.
+
+============================================================
+6. Feature Redesigned Fusion의 실제 입력 구조
+============================================================
+
+코드 기준:
+
+- nsu_train.py
+- final model config:
+  C:\SignProject\experiments\fusion_design_ablation\2026-04-20_final_practical10_seed42_46\seed42\03_feature_redesigned_simple_fusion\config.json
+
+주요 차원:
+
+- Vision feature: 126 dimensions
+- IMU feature: 18 dimensions
+- State flag feature: 6 dimensions
+- Temporal sequence feature per frame: 150 dimensions
+  - 126 + 18 + 6 = 150
+- Sequence length: 60 frames
+- Temporal input shape: 60 x 150
+- Flex posture summary feature: 44 dimensions
+
+즉, 최종 입력을 단순히 194차원 시계열이라고 쓰면 부정확하다.
+정확한 설명은 다음이다.
+
+- 60프레임 시계열 입력: vision 126 + IMU 18 + state flags 6 = 150차원
+- 별도 보조 입력: Flex posture summary 44차원
+
+Feature Redesigned Fusion의 핵심:
+
+- Vision은 손 위치, 형태, 이동 경로를 담당한다.
+- IMU는 손의 움직임과 회전 변화를 시간축 정보로 제공한다.
+- 상태 플래그는 손 검출 여부, 이전 랜드마크 유지 여부, 손 겹침 여부 등 vision 특징의 신뢰도 상태를 알려준다.
+- Flex는 raw 시계열 전체를 그대로 넣지 않고, 하나의 수어 동작 구간에서 나타난 손가락 굽힘 상태를 요약한 posture feature로 사용한다.
+
+Flex posture summary 구성:
+
+- Flex sensor count: 8
+- Baseline frames: first 5 frames
+- Relative flex sequence: 각 프레임 flex 값에서 초기 baseline 평균을 뺀 값
+- Summary components:
+  1. mean relative flex: 8 dims
+  2. std relative flex: 8 dims
+  3. range relative flex: 8 dims
+  4. end relative flex: 8 dims
+  5. peak absolute relative flex: 8 dims
+  6. left-right pair difference based on end relative flex: 4 dims
+- Total: 8 + 8 + 8 + 8 + 8 + 4 = 44 dims
+
+논문에서 조심할 점:
+
+- Flex posture summary는 손가락 굽힘의 시간 순서를 완전히 보존하지 않는다.
+- 대신 60프레임 동안의 굽힘 정도, 변화폭, 최종 자세, 최대 변화량, 좌우 차이를 요약한다.
+- 동작의 시간적 흐름은 vision과 IMU 시계열이 담당하고, flex는 자세/굽힘 상태를 보조하는 구조라고 설명하는 것이 가장 정확하다.
+
+============================================================
+7. 논문 작성 진행상황
+============================================================
+
+현재 사용자는 논문 본론과 실험 장을 작성하는 단계로 넘어왔다.
+
+완료 또는 진행한 논문 구성 논의:
+
+1. 서론
+- 연구 배경, 동향, 목적, 간단한 시스템 소개 방향을 잡았다.
+- 목적은 비슷한 수어 동작에서 융합 특징이 인식률을 향상시키는지 확인하는 것.
+
+2. 본론 전체 구조
+- 2.1 하드웨어 구성
+- 2.2 MediaPipe Hands
+- 2.3 LSTM
+- 2.4 비슷한 수어 동작의 분류
+- 2.5 데이터 수집
+- 2.6 데이터 융합 및 학습
+
+3. 시스템 구성도
+- Paper 폴더를 만들고 논문용 그림은 Paper에 넣는 방향으로 결정했다.
+- fig_system_overview.png / fig_system_overview.svg는 Paper에 보존해야 한다.
+- LSTM 그림은 직접 그리려다 논문용으로 부적합하다고 판단되어 삭제했고, 외부에서 준비한 깔끔한 LSTM cell 그림을 쓰는 방향으로 논의했다.
+
+4. 2.3 LSTM
+- LSTM을 사용하는 이유를 정리했다.
+- 수어는 정적 이미지가 아니라 60프레임 동안 손 위치, 방향, 손가락 굽힘, 이동 경로가 변하는 시계열 데이터라는 점에서 LSTM 필요성을 설명한다.
+- RNN의 장기 의존성 한계와 LSTM의 cell state / hidden state / input gate / forget gate / output gate를 설명한다.
+- LSTM 수식과 softmax/cross-entropy까지 이어갈 수 있다.
+
+5. 2.6 데이터 융합 및 학습
+- 현재 가장 중요한 작성 파트이다.
+- 데이터와 특징이라는 용어를 구분해서 쓰기로 했다.
+- 수집된 값 자체는 데이터, 모델 입력으로 정리/가공된 값은 입력 특징이라고 쓰는 것이 좋다.
+- "융합 데이터"보다는 "융합 특징" 또는 "융합 입력 특징"이 더 정확하다.
+- Feature Redesigned Fusion 설명에서 Flex posture summary 수식을 넣는 것이 좋다고 판단했다.
+
+현재 논문 작성에서 추천하는 표현:
+
+- 데이터: 카메라와 센서로부터 수집된 원시 또는 저장 값
+- 특징: 모델 입력으로 사용하기 위해 정규화, 추출, 요약된 값
+- 융합: 서로 다른 특징을 모델 입력 구조 안에서 결합하는 과정
+- Feature Redesigned Fusion: 센서별 물리적 의미에 맞게 입력 특징 구조를 재설계한 융합 방식
+
+============================================================
+8. 3장 실험 및 고찰에 사용할 데이터 목록
+============================================================
+
+3장에 바로 넣을 수 있는 실험 데이터는 다음이다.
+
+1. 최종 practical 10회 데이터셋 설명
+- 위치: experiments\live_eval_dataset
+- 파일: final_practical_10_dataset_summary.md
+- 내용: In/In-2/Out/Out-2, 18 words x 10 samples, 총 720 captures
+
+2. 모델 구조 비교 실험
+- 위치: experiments\fusion_design_ablation\2026-04-20_final_practical10_seed42_46
+- 파일: final_practical10_seed42_46_summary.md
+- 비교 모델: vision-only, naive raw fusion, feature redesigned fusion, stable hybrid
+- 결론: Feature Redesigned Fusion이 practical 평균 기준 최종 선택 모델
+
+3. In vs Out practical 비교
+- 그림: plots\fig_3_1_in_vs_out_practical.png
+- 메시지: 학습 데이터 수집 참여자와 미참여자 조건에서 vision-only와 fusion의 차이를 비교
+
+4. 유사 수어 그룹별 성능 비교
+- 파일: vision_vs_feature_group_analysis_final10.md
+- 그림:
+  - fig_3_2_group_accuracy_comparison.png
+  - fig_3_2_group_gain.png
+- 메시지: 센서 융합 효과가 어느 유사 수어 그룹에서 큰지 분석
+
+5. Runtime/FPS/Latency 프로파일
+- 위치: experiments\runtime_profile
+- 파일: 20260421_*_runtime_profile.json
+- 현재는 보조 자료이다.
+- 실시간성 방어가 필요할 때 사용한다.
+
+6. UI/UX 정리
+- 파일: UI_UX_SUMMARY_2026-04-21.txt
+- 현재는 실험 메인보다 발표용 보조 방향으로 정리한다.
+
+추천 3장 구성:
+
+3.1 실험 데이터 및 평가 방법
+- final practical 10-shot 데이터셋 설명
+- In/Out 조건 설명
+- offline과 practical의 차이 설명
+
+3.2 데이터 융합 방법에 따른 성능 비교
+- vision-only, naive raw fusion, Feature Redesigned Fusion, stable hybrid 비교
+- Feature Redesigned Fusion 선택 근거 제시
+
+3.3 Vision-only와 Feature Redesigned Fusion의 Practical 성능 비교
+- In vs Out 비교
+- practical 환경에서 vision-only가 얼마나 떨어지고 fusion이 얼마나 방어하는지 설명
+
+3.4 유사 수어 그룹별 성능 분석
+- 7개 그룹별 gain 분석
+- 개선이 큰 그룹과 제한적인 그룹을 모두 고찰
+
+3.5 고찰
+- Offline 수치와 practical 수치의 차이
+- 센서 융합의 장점과 한계
+- 사용자 차이, 동작 속도, 센서 착용 상태, MediaPipe 검출 안정성 등 한계 설명
+
+============================================================
+9. UI / UX 현재 상태
+============================================================
+
+UI는 잠시 제쳐두기로 했다.
+
+요약 파일:
+
+- UI_UX_SUMMARY_2026-04-21.txt
+
+정리된 결론:
+
+- 발표용 UI는 있으면 좋다.
+- 그러나 지금 핵심은 논문 실험 결과와 본론 설명이다.
+- OpenCV 기반 dashboard는 시도했고, 처음에는 FPS가 3.4까지 떨어져서 너무 무거웠다.
+- 이후 경량화해서 약 20 FPS 이상으로 회복했다.
+- UI는 나중에 발표 직전에 다시 잡는다.
+
+발표용 UI 방향:
+
+- 개발자 디버그 값은 숨긴다.
+- FINAL RESULT, AI CONFIDENCE, TOP-3, SENSOR GRAPH, STATUS LED 중심으로 간다.
+- "Sensor Compensating"처럼 모델 내부에서 직접 검증되지 않은 과장 문구는 피한다.
+- 대신 "VISION + GLOVE ACTIVE", "OVERLAP DETECTED"처럼 사실 기반 문구를 쓴다.
+
+============================================================
+10. FPS / Latency 현황
+============================================================
+
+관련 파일:
+
+- FPS_LATENCY_PROTOCOL.md
+- runtime_profile_utils.py
+- summarize_runtime_profiles.py
+- experiments\runtime_profile\*.json
+
+현재 결론:
+
+- 공식 practical 평가는 s키 기반 60프레임 캡처 방식으로 유지한다.
+- continuous 실시간 모드는 공식 정확도 지표가 아니라 발표/시연용으로 분리하는 것이 좋다.
+- target FPS는 25, 최소 안정 기준은 20 FPS로 잡았다.
+- 단, 좋은 노트북에서 공식 FPS/Latency 측정은 다시 하는 것이 좋다.
+
+주의:
+
+- RECORDING 중에는 프레임 스킵을 하지 않는다.
+- 60프레임 시퀀스 자체가 모델 입력이므로, 공식 평가에서는 같은 FPS/해상도 조건을 유지해야 한다.
+
+============================================================
+11. GitHub / nsu2 one 브랜치
+============================================================
+
+이전 작업에서 GitHub nowonjong/nsu2의 one 브랜치에 여러 번 업데이트했다.
+최근에는 실험 결과, practical analysis, Paper 관련 파일, 요약 파일 등을 올리는 흐름으로 진행했다.
+
+다만 이 문서를 만든 시점에서 실제 GitHub push 여부를 다시 확인한 것은 아니다.
+GitHub 업데이트가 필요하면 다음 순서로 확인한다.
+
+1. git status
+2. git diff --stat
+3. 필요한 파일만 add
+4. commit
+5. push origin one
+
+주의:
+
+- myenv는 절대 업로드하지 않는다.
+- 실험 결과와 논문용 요약/그림 파일은 올려도 된다.
+
+============================================================
+12. 앞으로 바로 해야 할 일
+============================================================
+
+현재 가장 중요한 작업은 새 실험을 더 늘리는 것이 아니라, 이미 얻은 실험 결과를 논문 구조 안에 설득력 있게 배치하는 것이다.
+
+우선순위:
+
+1. 2.6 데이터 융합 및 학습 작성 완료
+- 입력 특징 구성
+- Feature Redesigned Fusion
+- Flex posture summary 수식
+- LSTM 학습, softmax, cross-entropy, 평가 지표
+
+2. 3장 실험 및 고찰 작성 시작
+- final practical 10-shot 데이터셋 설명
+- 모델 구조 비교 결과
+- In/Out practical 비교
+- 그룹별 성능 비교
+
+3. 표/그림 배치
+- final_practical10_seed42_46_summary.md의 표를 논문용으로 재가공
+- fig_3_1_in_vs_out_practical.png 사용
+- fig_3_2_group_accuracy_comparison.png 사용
+- fig_3_2_group_gain.png 사용
+
+4. 고찰 작성
+- 모든 그룹에서 fusion이 좋아진 것은 아니라는 점을 정직하게 설명
+- 그러나 연구 목적상 중요한 그룹에서 큰 개선이 있었다는 점을 강조
+- practical 환경에서 vision-only가 약하고 fusion이 더 robust하다는 점을 설명
+
+5. 여유가 있으면 FPS/Latency와 UI는 보조 자료로 정리
+
+============================================================
+13. 절대 헷갈리면 안 되는 표현
+============================================================
+
+잘못된 표현:
+
+- stable hybrid가 최종 모델이다.
+- Flex raw 시계열을 그대로 최종 모델에 넣었다.
+- 최종 입력은 194차원 시계열이다.
+- 모든 유사 수어 그룹에서 fusion이 크게 개선되었다.
+- 센서가 언제 보정했는지 모델 내부에서 직접 알 수 있다.
+
+정확한 표현:
+
+- 현재 최종 모델은 Feature Redesigned Fusion이다.
+- stable hybrid는 비교 후보 모델이다.
+- 최종 모델은 60 x 150 시계열 입력과 44차원 Flex posture summary 보조 입력을 사용한다.
+- 센서 융합은 특히 순간 손모양 차이형, 방향 차이형, 굽힘/경로 차이형에서 큰 개선을 보였다.
+- 일부 그룹에서는 개선이 작거나 하락했으며, 이는 한계로 고찰한다.
+- 센서 개입 여부를 직접 추적한다기보다, vision-only와 fusion의 결과 차이로 센서 특징의 기여를 분석한다.
+
+============================================================
+14. 한 줄 요약
+============================================================
+
+2026-04-27 기준 SignProject는 데이터 수집과 모델 구조 탐색의 핵심 단계는 거의 끝났고, 최종 논문 스토리는 "Vision-only의 practical 취약성 -> sensor fusion의 개선 -> Feature Redesigned Fusion의 최종 선택 -> 유사 수어 그룹별 개선/한계 분석"으로 정리하는 단계에 들어왔다.

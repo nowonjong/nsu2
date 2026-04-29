@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1000" viewBox="0 0 1800 1000">
+  <rect width="1800" height="1000" fill="#fafcff"/>
+  <text x="60" y="70" font-size="40" font-family="Malgun Gothic, sans-serif" font-weight="700" fill="#22252b">실시간 수어 인식 및 번역 시스템의 전체 구성도</text>
+  <rect x="60" y="90" width="1680" height="6" rx="3" fill="#4775d6"/>
+  <rect x="80" y="150" width="420" height="210" rx="18" fill="#e5eeff" stroke="#4775d6" stroke-width="3"/>
+  <rect x="80" y="150" width="420" height="48" rx="18" fill="#4775d6"/>
+  <text x="98" y="182" font-size="28" font-family="Malgun Gothic, sans-serif" font-weight="700" fill="#ffffff">입력 1. 비전 데이터</text>
+  <text x="98" y="238" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">웹캠 영상 입력</text>
+  <text x="98" y="272" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">양손 수어 동작 촬영</text>
+  <text x="98" y="306" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">실시간 프레임 획득</text>
+
+  <rect x="80" y="430" width="420" height="290" rx="18" fill="#ecf9ef" stroke="#4a9c60" stroke-width="3"/>
+  <rect x="80" y="430" width="420" height="48" rx="18" fill="#4a9c60"/>
+  <text x="98" y="462" font-size="28" font-family="Malgun Gothic, sans-serif" font-weight="700" fill="#ffffff">입력 2. 스마트 장갑 데이터</text>
+  <text x="98" y="518" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">좌/우 손 Flex 센서</text>
+  <text x="98" y="552" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">좌/우 손 IMU 센서</text>
+  <text x="98" y="586" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">Arduino Mega 기반 센서 수집</text>
+  <text x="98" y="620" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">시리얼 통신으로 PC 전송</text>
+
+  <rect x="620" y="150" width="440" height="210" rx="18" fill="#eef3ff" stroke="#20395f" stroke-width="3"/>
+  <rect x="620" y="150" width="440" height="48" rx="18" fill="#20395f"/>
+  <text x="638" y="182" font-size="28" font-family="Malgun Gothic, sans-serif" font-weight="700" fill="#ffffff">비전 특징 추출</text>
+  <text x="638" y="238" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">MediaPipe Hands 적용</text>
+  <text x="638" y="272" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">손 랜드마크 추출</text>
+  <text x="638" y="306" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">좌/우 손 추적 및 슬롯 할당</text>
+  <text x="638" y="340" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">60프레임 시계열 구성</text>
+
+  <rect x="620" y="430" width="440" height="290" rx="18" fill="#fff5e9" stroke="#d68c47" stroke-width="3"/>
+  <rect x="620" y="430" width="440" height="48" rx="18" fill="#d68c47"/>
+  <text x="638" y="462" font-size="28" font-family="Malgun Gothic, sans-serif" font-weight="700" fill="#ffffff">센서 특징 구성</text>
+  <text x="638" y="518" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">IMU: temporal sequence 유지</text>
+  <text x="638" y="552" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">Flex: posture-summary feature 변환</text>
+  <text x="638" y="586" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">기준 프레임 대비 변화량 계산</text>
+  <text x="638" y="620" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">비전 프레임과 시간축 정렬</text>
+
+  <rect x="1180" y="240" width="420" height="280" rx="18" fill="#f4efff" stroke="#715cb0" stroke-width="3"/>
+  <rect x="1180" y="240" width="420" height="48" rx="18" fill="#715cb0"/>
+  <text x="1198" y="270" font-size="22" font-family="Malgun Gothic, sans-serif" font-weight="700" fill="#ffffff">Feature Redesigned Fusion 기반 LSTM</text>
+  <text x="1198" y="328" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">vision sequence</text>
+  <text x="1198" y="362" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">IMU / flag sequence</text>
+  <text x="1198" y="396" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">flex posture feature</text>
+  <text x="1198" y="430" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">멀티모달 융합 및 시계열 학습</text>
+
+  <rect x="1180" y="600" width="420" height="220" rx="18" fill="#f1f4f8" stroke="#5a626c" stroke-width="3"/>
+  <rect x="1180" y="600" width="420" height="48" rx="18" fill="#5a626c"/>
+  <text x="1198" y="632" font-size="28" font-family="Malgun Gothic, sans-serif" font-weight="700" fill="#ffffff">출력</text>
+  <text x="1198" y="688" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">단어별 신뢰도 산출</text>
+  <text x="1198" y="722" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">최고 신뢰도 단어 선택</text>
+  <text x="1198" y="756" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#22252b">실시간 수어 번역 결과 표시</text>
+
+  <line x1="500" y1="255" x2="620" y2="255" stroke="#20395f" stroke-width="6"/>
+  <polygon points="620,255 604,246 604,264" fill="#20395f"/>
+  <line x1="500" y1="575" x2="620" y2="575" stroke="#20395f" stroke-width="6"/>
+  <polygon points="620,575 604,566 604,584" fill="#20395f"/>
+  <line x1="1060" y1="255" x2="1180" y2="340" stroke="#20395f" stroke-width="6"/>
+  <polygon points="1180,340 1164,332 1170,347" fill="#20395f"/>
+  <line x1="1060" y1="575" x2="1180" y2="420" stroke="#20395f" stroke-width="6"/>
+  <polygon points="1180,420 1166,431 1181,438" fill="#20395f"/>
+  <line x1="1390" y1="520" x2="1390" y2="600" stroke="#20395f" stroke-width="6"/>
+  <polygon points="1390,600 1381,584 1399,584" fill="#20395f"/>
+
+  <rect x="80" y="865" width="1640" height="95" rx="16" fill="#fcfcfc" stroke="#aab4c2" stroke-width="2"/>
+  <text x="105" y="910" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#5a626c">그림 설명: 웹캠 비전 데이터와 장갑 센서 데이터를 동시에 수집한 뒤, MediaPipe Hands와 센서 특징 재구성을 거쳐</text>
+  <text x="105" y="944" font-size="22" font-family="Malgun Gothic, sans-serif" fill="#5a626c">Feature Redesigned Fusion 기반 LSTM 모델에 입력하여 최종 단어 신뢰도를 계산하고 실시간 번역 결과를 출력한다.</text>
+</svg>
