@@ -11,10 +11,14 @@ from collections import deque
 from PIL import Image, ImageDraw, ImageFont
 
 
-MODEL_PATH = "vision_results_18words_manual_test10_v1/best_lstm.keras"
-SCALER_PATH = "vision_results_18words_manual_test10_v1/vision_scaler.npz"
-CLASS_NAMES_PATH = "vision_results_18words_manual_test10_v1/class_names.json"
-CONFIG_PATH = "vision_results_18words_manual_test10_v1/config.json"
+DEFAULT_VISION_MODEL_DIR = os.getenv(
+    "NSU_VISION_MODEL_DIR",
+    os.path.join(os.path.dirname(__file__), "models", "final_run", "vision_only_seed43"),
+)
+MODEL_PATH = os.path.join(DEFAULT_VISION_MODEL_DIR, "best_lstm.keras")
+SCALER_PATH = os.path.join(DEFAULT_VISION_MODEL_DIR, "vision_scaler.npz")
+CLASS_NAMES_PATH = os.path.join(DEFAULT_VISION_MODEL_DIR, "class_names.json")
+CONFIG_PATH = os.path.join(DEFAULT_VISION_MODEL_DIR, "config.json")
 
 SEQ_LEN = 60
 FEATURE_DIM = 126
